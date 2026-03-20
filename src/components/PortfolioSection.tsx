@@ -45,16 +45,18 @@ const PortfolioSection = () => {
             {portfolioProjects.map((project) => (
               <div
                 key={project.id}
-                className="min-w-0 flex-[0_0_92%] px-3 sm:flex-[0_0_88%] md:flex-[0_0_72%] lg:flex-[0_0_62%]"
+                className="min-w-0 flex-[0_0_88%] px-3 sm:flex-[0_0_76%] md:flex-[0_0_58%] lg:flex-[0_0_50%] xl:flex-[0_0_44%]"
               >
                 <article className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
-                    <img
-                      src={project.image}
-                      alt={project.imageAlt}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
+                  <div className="flex justify-center bg-muted/60 px-4 pb-1 pt-5">
+                    <div className="relative aspect-[16/10] w-full max-w-sm overflow-hidden rounded-lg bg-muted sm:max-w-md md:max-w-lg">
+                      <img
+                        src={project.image}
+                        alt={project.imageAlt}
+                        className="h-full w-full object-cover"
+                        loading="lazy"
+                      />
+                    </div>
                   </div>
                   <div className="border-t border-border p-6 md:p-8">
                     <div className="mb-3 flex flex-wrap gap-2">
