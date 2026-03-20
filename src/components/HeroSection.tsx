@@ -9,9 +9,19 @@ const HeroSection = () => {
       <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.95] reveal reveal-delay-1 max-w-4xl">
         We build what's <span className="text-accent">next.</span>
       </h1>
-      <p className="mt-8 text-lg md:text-xl text-muted-foreground max-w-xl reveal reveal-delay-2 leading-relaxed">
-        Three engineers. Full-stack, Web3, and AI. We ship fast, build smart, and don't cut corners.
-      </p>
+      <div className="mt-8 space-y-4 text-lg md:text-xl text-muted-foreground max-w-2xl reveal reveal-delay-2 leading-relaxed">
+        <p>
+          RadCrew is a lean development agency for serious products: end-to-end web and APIs, on-chain
+          systems on <span className="text-foreground/90">EVM and Solana</span>, and AI-powered features
+          from prototypes to production.
+        </p>
+        <p>
+          Our crew is three senior engineers—a lead who owns architecture and delivery, a Web3/AI
+          specialist deep in smart contracts and chains, and a full-stack/AI engineer who ties
+          interfaces, backends, and models together. We partner with teams who want velocity without
+          sacrificing quality.
+        </p>
+      </div>
       <div className="mt-12 reveal reveal-delay-3">
         <a
           href="#team"
