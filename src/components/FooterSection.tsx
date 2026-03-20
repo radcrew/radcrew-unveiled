@@ -1,7 +1,10 @@
 const FooterSection = () => {
   return (
-    <footer id="footer" className="py-16 md:py-24 section-padding border-t border-border">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-12">
+    <footer
+      id="footer"
+      className="flex min-h-screen min-h-dvh flex-col justify-center border-t border-border section-padding py-10 sm:py-12 md:py-14 lg:py-16"
+    >
+      <div className="mx-auto flex w-full max-w-6xl flex-col justify-between gap-12 md:flex-row md:items-center">
         <div>
           <p className="text-xl font-bold mb-2">
             Rad<span className="text-accent">Crew</span>

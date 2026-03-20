@@ -28,17 +28,22 @@ const ServicesSection = () => {
   return (
     <section
       id="services"
-      className="border-y border-border bg-muted/40 py-24 md:py-32 section-padding"
+      className="flex min-h-screen min-h-dvh flex-col justify-center border-y border-border bg-muted/40 section-padding py-10 sm:py-12 md:py-14 lg:py-16"
       ref={ref}
     >
-      <div className="mx-auto max-w-6xl">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">What we do</p>
-        <h2 className="mb-4 max-w-2xl text-3xl font-bold md:text-4xl">Capabilities across stack, chain, and model.</h2>
-        <p className="mb-16 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-          One crew covers the surfaces users see, the systems behind them, and the on-chain and AI layers when your roadmap goes there.
-        </p>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 md:gap-12 lg:gap-14">
+        <header className="shrink-0 space-y-3 md:space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent">What we do</p>
+          <h2 className="max-w-2xl text-3xl font-bold md:text-4xl lg:max-w-3xl">
+            Capabilities across stack, chain, and model.
+          </h2>
+          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg lg:max-w-3xl">
+            One crew covers the surfaces users see, the systems behind them, and the on-chain and AI layers when your
+            roadmap goes there.
+          </p>
+        </header>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
           {pillars.map(({ icon: Icon, title, description }) => (
             <article
               key={title}

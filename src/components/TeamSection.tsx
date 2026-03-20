@@ -7,11 +7,18 @@ const TeamSection = () => {
   const ref = useScrollReveal();
 
   return (
-    <section id="team" className="py-24 md:py-32 section-padding max-w-6xl mx-auto" ref={ref}>
-      <p className="text-accent font-semibold text-sm uppercase tracking-widest mb-3">The Crew</p>
-      <h2 className="text-3xl md:text-4xl font-bold mb-16">Three minds, one mission.</h2>
+    <section
+      id="team"
+      className="flex min-h-screen min-h-dvh flex-col justify-center section-padding py-10 sm:py-12 md:py-14 lg:py-16"
+      ref={ref}
+    >
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 md:gap-12 lg:gap-14">
+        <header className="shrink-0 space-y-3 md:space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent">The Crew</p>
+          <h2 className="text-3xl font-bold md:text-4xl">Three minds, one mission.</h2>
+        </header>
 
-      <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
         {teamMembers.map((member, i) => (
           <Link
             key={member.id}
@@ -30,6 +37,7 @@ const TeamSection = () => {
             </div>
           </Link>
         ))}
+        </div>
       </div>
     </section>
   );

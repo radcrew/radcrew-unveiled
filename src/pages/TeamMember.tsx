@@ -8,7 +8,7 @@ const TeamMember = () => {
 
   if (!member) {
     return (
-      <div className="min-h-screen flex items-center justify-center flex-col gap-4">
+      <div className="flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4 section-padding">
         <p className="text-muted-foreground">Member not found.</p>
         <Link to="/" className="text-accent text-sm font-medium hover:underline">← Back home</Link>
       </div>
@@ -16,15 +16,16 @@ const TeamMember = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-16 section-padding max-w-3xl mx-auto">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12"
-      >
-        <ArrowLeft size={16} /> Back to home
-      </Link>
+    <div className="flex min-h-screen min-h-dvh flex-col justify-center section-padding py-10 sm:py-12 md:py-14 lg:py-16">
+      <div className="mx-auto w-full max-w-3xl pt-16">
+        <Link
+          to="/"
+          className="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft size={16} /> Back to home
+        </Link>
 
-      <div className="reveal">
+        <div className="reveal">
         <div className="w-20 h-20 rounded-full bg-accent/10 text-accent flex items-center justify-center text-2xl font-bold mb-8">
           {member.initials}
         </div>
@@ -36,28 +37,29 @@ const TeamMember = () => {
           "{member.quote}"
         </blockquote>
 
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-3">About</h2>
-            <p className="text-foreground leading-relaxed">{member.bio}</p>
-          </div>
+          <div className="space-y-8">
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">About</h2>
+              <p className="leading-relaxed text-foreground">{member.bio}</p>
+            </div>
 
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-3">Experience</h2>
-            <p className="text-foreground">{member.experience}</p>
-          </div>
+            <div>
+              <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-muted-foreground">Experience</h2>
+              <p className="text-foreground">{member.experience}</p>
+            </div>
 
-          <div>
-            <h2 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-4">Skills</h2>
-            <div className="flex flex-wrap gap-2">
-              {member.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="px-3 py-1.5 text-xs font-medium rounded-full bg-secondary text-secondary-foreground"
-                >
-                  {skill}
-                </span>
-              ))}
+            <div>
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">Skills</h2>
+              <div className="flex flex-wrap gap-2">
+                {member.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
