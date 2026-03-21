@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { teamMembers } from "@/lib/team-data";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 const TeamMember = () => {
   const { memberId } = useParams();
@@ -32,7 +32,22 @@ const TeamMember = () => {
         </div>
 
         <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-2">{member.name}</h1>
-        <p className="text-accent font-medium mb-8">{member.role}</p>
+        <div className="mb-8 space-y-4">
+          <p className="text-accent font-medium">{member.role}</p>
+          {member.website && (
+            <p>
+              <a
+                href={member.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-accent hover:underline"
+              >
+                Profile & work
+                <ExternalLink className="h-4 w-4 opacity-70" aria-hidden />
+              </a>
+            </p>
+          )}
+        </div>
 
         <blockquote className="border-l-2 border-accent pl-6 text-muted-foreground italic text-lg mb-12 leading-relaxed">
           "{member.quote}"

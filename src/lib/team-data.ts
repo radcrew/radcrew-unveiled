@@ -8,6 +8,8 @@ export interface TeamMember {
   experience: string;
   quote: string;
   initials: string;
+  /** Personal portfolio / profile site (optional) */
+  website?: string;
 }
 
 export const teamMembers: TeamMember[] = [
@@ -23,15 +25,16 @@ export const teamMembers: TeamMember[] = [
     initials: "AM",
   },
   {
-    id: "kai-nakamura",
-    name: "Kai Nakamura",
+    id: "eric-cui",
+    name: "Eric Cui",
     role: "Web3 / Blockchain / AI Developer",
     shortRole: "Web3 & AI",
-    bio: "Kai bridges the decentralized web with intelligent systems. He's built DeFi protocols, NFT platforms, and on-chain AI agents. His deep understanding of smart contracts, consensus mechanisms, and machine learning makes him the rare engineer who can work across both paradigms.",
+    bio: "Eric bridges decentralized protocols with intelligent systems. He’s shipped DeFi and NFT experiences, smart contract work, and AI-powered product surfaces—with a focus on Solidity, Ethereum and L2s, and pragmatic machine learning in production.",
     skills: ["Solidity & Smart Contracts", "DeFi Protocols", "Machine Learning", "Python", "Ethereum & L2s", "Zero-Knowledge Proofs"],
     experience: "8+ years",
     quote: "The future is on-chain and autonomous — I'm here to build it.",
-    initials: "KN",
+    initials: "EC",
+    website: "https://squirdev-website.vercel.app/",
   },
   {
     id: "sable-ortiz",
