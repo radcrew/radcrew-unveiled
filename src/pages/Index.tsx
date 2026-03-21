@@ -16,8 +16,11 @@ const Index = () => {
       <HowWeWorkSection />
       <PortfolioSection />
       <TeamSection />
-      <ContactSection />
-      <FooterSection />
+      {/* One viewport for contact CTA + footer together */}
+      <div className="flex min-h-screen min-h-dvh flex-col">
+        <ContactSection />
+        <FooterSection />
+      </div>
     </div>
   );
 };

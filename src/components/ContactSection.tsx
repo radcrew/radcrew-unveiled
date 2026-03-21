@@ -8,7 +8,7 @@ const ContactSection = () => {
   return (
     <section
       id="contact"
-      className="flex min-h-screen min-h-dvh flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-10 sm:py-12 md:py-14 lg:py-16"
+      className="flex min-h-0 flex-1 flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-8 sm:py-10 md:py-12"
       ref={ref}
     >
       <div className="content-max">
