@@ -11,7 +11,7 @@ const ContactSection = () => {
       className="flex min-h-screen min-h-dvh flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-10 sm:py-12 md:py-14 lg:py-16"
       ref={ref}
     >
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="content-max">
         <div className="rounded-2xl border border-border bg-card p-10 md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
           <div className="max-w-xl">
             <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">Start a project</p>

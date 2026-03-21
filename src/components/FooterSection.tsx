@@ -4,7 +4,7 @@ const FooterSection = () => {
       id="footer"
       className="flex min-h-screen min-h-dvh flex-col justify-center border-t border-border section-padding py-10 sm:py-12 md:py-14 lg:py-16"
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col justify-between gap-12 md:flex-row md:items-center">
+      <div className="content-max flex flex-col justify-between gap-12 md:flex-row md:items-center">
         <div>
           <p className="text-xl font-bold mb-2">
             Rad<span className="text-accent">Crew</span>

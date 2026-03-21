@@ -8,7 +8,7 @@ const TeamMember = () => {
 
   if (!member) {
     return (
-      <div className="flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4 section-padding">
+      <div className="content-max section-padding flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4">
         <p className="text-muted-foreground">Member not found.</p>
         <Link to="/" className="text-accent text-sm font-medium hover:underline">← Back home</Link>
       </div>
@@ -16,8 +16,9 @@ const TeamMember = () => {
   }
 
   return (
-    <div className="flex min-h-screen min-h-dvh flex-col justify-center section-padding py-10 sm:py-12 md:py-14 lg:py-16">
-      <div className="mx-auto w-full max-w-3xl pt-16">
+    <div className="flex min-h-screen min-h-dvh flex-col justify-center py-10 sm:py-12 md:py-14 lg:py-16">
+      <div className="content-max section-padding w-full">
+        <div className="mx-auto max-w-3xl pt-16">
         <Link
           to="/"
           className="mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -62,6 +63,7 @@ const TeamMember = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

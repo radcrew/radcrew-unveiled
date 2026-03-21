@@ -16,7 +16,7 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-background" />
       </div>
 
-      <div className="section-padding relative z-10 mx-auto flex w-full max-w-7xl xl:max-w-[90rem] 2xl:max-w-[100rem] flex-col justify-center pt-24 pb-16">
+      <div className="content-max section-padding relative z-10 flex flex-col justify-center pt-24 pb-16">
         <div className="reveal">
           <p className="text-accent font-semibold text-sm uppercase tracking-widest mb-4">Development Agency</p>
         </div>

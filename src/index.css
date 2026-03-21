@@ -66,6 +66,11 @@
 }
 
 @layer utilities {
+  /** Aligns with HeroSection: same max width at every breakpoint */
+  .content-max {
+    @apply mx-auto w-full max-w-7xl xl:max-w-[90rem] 2xl:max-w-[100rem];
+  }
+
   .section-padding {
     @apply px-6 md:px-12 lg:px-24;
   }

@@ -27,20 +27,18 @@ const PortfolioSection = () => {
   return (
     <section
       id="portfolio"
-      className="flex min-h-screen min-h-dvh flex-col justify-center border-y border-border bg-muted/40 py-10 sm:py-12 md:py-14 lg:py-16"
+      className="box-border flex h-screen h-dvh min-h-0 flex-col justify-center overflow-y-auto border-y border-border bg-muted/40 py-8 sm:py-10 md:py-12"
       ref={ref}
     >
-      <div className="flex w-full flex-col gap-8 md:gap-10 lg:gap-12">
-        <div className="section-padding mx-auto w-full max-w-6xl shrink-0">
-          <header className="space-y-3 md:space-y-4">
-            <p className="text-sm font-semibold uppercase tracking-widest text-accent">Portfolio</p>
-            <h2 className="text-3xl font-bold md:text-4xl">Past wins, shipped end to end.</h2>
-            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-              A snapshot of the kinds of problems we take from idea to production—swap in your own screenshots and
-              stories anytime.
-            </p>
-          </header>
-        </div>
+      <div className="content-max section-padding flex min-h-0 flex-1 flex-col justify-center gap-6 md:gap-8 lg:gap-10">
+        <header className="w-full shrink-0 space-y-3 md:space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-widest text-accent">Portfolio</p>
+          <h2 className="text-3xl font-bold md:text-4xl">Past wins, shipped end to end.</h2>
+          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            A snapshot of the kinds of problems we take from idea to production—swap in your own screenshots and stories
+            anytime.
+          </p>
+        </header>
 
         <div className="relative w-full min-h-0 shrink-0">
           <div className="overflow-hidden px-0" ref={emblaRef}>
@@ -48,9 +46,9 @@ const PortfolioSection = () => {
               {portfolioProjects.map((project) => (
                 <div
                   key={project.id}
-                  className="min-w-0 flex-[0_0_78%] px-2 sm:flex-[0_0_66%] sm:px-3 md:flex-[0_0_48%] lg:flex-[0_0_40%] xl:flex-[0_0_34%]"
+                  className="min-w-0 flex-[0_0_70%] px-1.5 sm:flex-[0_0_58%] sm:px-2 md:flex-[0_0_40%] md:px-2.5 lg:flex-[0_0_32%] xl:flex-[0_0_26%]"
                 >
-                  <article className="w-full overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                  <article className="mx-auto w-full max-w-[17rem] overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]">
                     {/* Full-bleed top: image only, stretched to fill (no padding) */}
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
                       <img
@@ -60,7 +58,7 @@ const PortfolioSection = () => {
                         loading="lazy"
                       />
                     </div>
-                    <div className="border-t border-border p-6 md:p-8">
+                    <div className="border-t border-border p-4 md:p-5">
                       <div className="mb-3 flex flex-wrap gap-2">
                         {project.tags.map((tag) => (
                           <span
@@ -71,7 +69,7 @@ const PortfolioSection = () => {
                           </span>
                         ))}
                       </div>
-                      <h3 className="mb-2 text-xl font-bold md:text-2xl">{project.title}</h3>
+                      <h3 className="mb-2 text-lg font-bold md:text-xl">{project.title}</h3>
                       <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
                         {project.achievement}
                       </p>
@@ -82,7 +80,7 @@ const PortfolioSection = () => {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col items-center gap-6">
+          <div className="mt-5 flex flex-col items-center gap-4 md:mt-6 md:gap-5">
             <div className="flex justify-center gap-3">
               <button
                 type="button"

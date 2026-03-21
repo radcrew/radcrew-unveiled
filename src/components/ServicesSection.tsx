@@ -31,7 +31,7 @@ const ServicesSection = () => {
       className="flex min-h-screen min-h-dvh flex-col justify-center border-y border-border bg-muted/40 section-padding py-10 sm:py-12 md:py-14 lg:py-16"
       ref={ref}
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 md:gap-12 lg:gap-14">
+      <div className="content-max flex flex-col gap-10 md:gap-12 lg:gap-14">
         <header className="shrink-0 space-y-3 md:space-y-4">
           <p className="text-sm font-semibold uppercase tracking-widest text-accent">What we do</p>
           <h2 className="max-w-2xl text-3xl font-bold md:text-4xl lg:max-w-3xl">

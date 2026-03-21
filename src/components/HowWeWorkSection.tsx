@@ -37,7 +37,7 @@ const HowWeWorkSection = () => {
       className="flex min-h-screen min-h-dvh flex-col justify-center section-padding py-10 sm:py-12 md:py-14 lg:py-16"
       ref={ref}
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 md:gap-12 lg:gap-14 xl:gap-16">
+      <div className="content-max flex flex-col gap-10 md:gap-12 lg:gap-14 xl:gap-16">
         <header className="shrink-0 space-y-3 md:space-y-4">
           <p className="text-sm font-semibold uppercase tracking-widest text-accent">How we work</p>
           <h2 className="max-w-2xl text-3xl font-bold md:text-4xl lg:max-w-3xl">

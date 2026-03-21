@@ -7,7 +7,7 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="max-w-6xl mx-auto section-padding flex items-center justify-between h-16">
+      <div className="content-max section-padding flex h-16 items-center justify-between">
         <Link to="/" className="text-xl font-bold tracking-tight">
           Rad<span className="text-accent">Crew</span>
         </Link>

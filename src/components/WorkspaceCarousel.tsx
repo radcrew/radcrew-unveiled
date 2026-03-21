@@ -22,7 +22,7 @@ const WorkspaceCarousel = () => {
 
   return (
     <section id="workspace" className="py-24 md:py-32" ref={ref}>
-      <div className="section-padding max-w-6xl mx-auto mb-10">
+      <div className="content-max section-padding mb-10">
         <p className="text-accent font-semibold text-sm uppercase tracking-widest mb-3">Where We Work</p>
         <h2 className="text-3xl md:text-4xl font-bold">Our workspace.</h2>
       </div>
