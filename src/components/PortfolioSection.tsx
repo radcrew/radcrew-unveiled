@@ -48,9 +48,9 @@ const PortfolioSection = () => {
                   key={project.id}
                   className="min-w-0 flex-[0_0_70%] px-1.5 sm:flex-[0_0_58%] sm:px-2 md:flex-[0_0_40%] md:px-2.5 lg:flex-[0_0_32%] xl:flex-[0_0_26%]"
                 >
-                  <article className="mx-auto w-full max-w-[17rem] overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]">
-                    {/* Full-bleed top: image only, stretched to fill (no padding) */}
-                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
+                  <article className="mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]">
+                    {/* Fixed-height image strip (same on every card) */}
+                    <div className="relative h-36 w-full shrink-0 overflow-hidden bg-muted sm:h-40">
                       <img
                         src={project.image}
                         alt={project.imageAlt}
@@ -58,8 +58,8 @@ const PortfolioSection = () => {
                         loading="lazy"
                       />
                     </div>
-                    <div className="border-t border-border p-4 md:p-5">
-                      <div className="mb-3 flex flex-wrap gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col border-t border-border p-4 md:p-5">
+                      <div className="mb-2 flex shrink-0 flex-wrap gap-2">
                         {project.tags.map((tag) => (
                           <span
                             key={tag}
@@ -69,8 +69,10 @@ const PortfolioSection = () => {
                           </span>
                         ))}
                       </div>
-                      <h3 className="mb-2 text-lg font-bold md:text-xl">{project.title}</h3>
-                      <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
+                      <h3 className="mb-2 shrink-0 text-lg font-bold leading-snug md:text-xl line-clamp-2">
+                        {project.title}
+                      </h3>
+                      <p className="min-h-0 flex-1 overflow-y-auto text-sm leading-relaxed text-muted-foreground md:text-base">
                         {project.achievement}
                       </p>
                     </div>
