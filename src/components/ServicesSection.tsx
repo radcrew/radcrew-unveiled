@@ -26,18 +26,12 @@ const ServicesSection = () => {
   const ref = useScrollReveal();
 
   return (
-    <section
-      id="services"
-      className="flex min-h-screen min-h-dvh flex-col justify-center border-y border-border bg-muted/40 section-padding py-10 sm:py-12 md:py-14 lg:py-16"
-      ref={ref}
-    >
-      <div className="content-max flex flex-col gap-10 md:gap-12 lg:gap-14">
-        <header className="shrink-0 space-y-3 md:space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">What we do</p>
-          <h2 className="max-w-2xl text-3xl font-bold md:text-4xl lg:max-w-3xl">
-            Capabilities across stack, chain, and model.
-          </h2>
-          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg lg:max-w-3xl">
+    <section id="services" className="services-shell" ref={ref}>
+      <div className="content-stack">
+        <header className="section-block">
+          <p className="kicker">What we do</p>
+          <h2 className="section-heading max-w-2xl lg:max-w-3xl">Capabilities across stack, chain, and model.</h2>
+          <p className="section-prose">
             One crew covers the surfaces users see, the systems behind them, and the on-chain and AI layers when your
             roadmap goes there.
           </p>
@@ -45,15 +39,12 @@ const ServicesSection = () => {
 
         <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
           {pillars.map(({ icon: Icon, title, description }) => (
-            <article
-              key={title}
-              className="rounded-lg border border-border bg-card p-8 transition-shadow duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5"
-            >
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent">
+            <article key={title} className="service-card">
+              <div className="service-icon-wrap">
                 <Icon className="h-7 w-7" strokeWidth={1.5} />
               </div>
               <h3 className="mb-3 text-xl font-bold">{title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+              <p className="muted-p">{description}</p>
             </article>
           ))}
         </div>

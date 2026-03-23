@@ -6,25 +6,19 @@ const ContactSection = () => {
   const email = "hello@radcrew.dev";
 
   return (
-    <section
-      id="contact"
-      className="flex min-h-0 flex-1 flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-8 sm:py-10 md:py-12"
-      ref={ref}
-    >
+    <section id="contact" className="contact-shell" ref={ref}>
       <div className="content-max">
-        <div className="rounded-2xl border border-border bg-card p-10 md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
+        <div className="contact-card">
           <div className="max-w-xl">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-accent">Start a project</p>
-            <h2 className="mb-4 text-3xl font-bold md:text-4xl">Tell us what you’re building.</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Full-stack, Web3, AI, or all three—we’ll reply with next steps, rough timelines, and how the crew would engage.
+            <p className="kicker mb-3">Start a project</p>
+            <h2 className="section-heading mb-4">Tell us what you’re building.</h2>
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              Full-stack, Web3, AI, or all three—we’ll reply with next steps, rough timelines, and how the crew would
+              engage.
             </p>
           </div>
           <div className="mt-10 flex flex-col gap-4 lg:mt-0 lg:shrink-0">
-            <a
-              href={`mailto:${email}`}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground transition-opacity hover:opacity-90 active:scale-[0.98]"
-            >
+            <a href={`mailto:${email}`} className="email-cta">
               <Mail className="h-5 w-5" />
               Email {email}
               <ArrowRight className="h-4 w-4 opacity-80" />

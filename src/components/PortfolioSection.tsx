@@ -11,7 +11,6 @@ const PortfolioSection = () => {
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
   const scrollTo = useCallback((i: number) => emblaApi?.scrollTo(i), [emblaApi]);
 
   useEffect(() => {
@@ -25,16 +24,12 @@ const PortfolioSection = () => {
   }, [emblaApi]);
 
   return (
-    <section
-      id="portfolio"
-      className="box-border flex h-screen h-dvh min-h-0 flex-col justify-center overflow-y-auto border-y border-border bg-muted/40 py-8 sm:py-10 md:py-12"
-      ref={ref}
-    >
-      <div className="content-max section-padding flex min-h-0 flex-1 flex-col justify-center gap-6 md:gap-8 lg:gap-10">
-        <header className="w-full shrink-0 space-y-3 md:space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-widest text-accent">Portfolio</p>
-          <h2 className="text-3xl font-bold md:text-4xl">Past wins, shipped end to end.</h2>
-          <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+    <section id="portfolio" className="portfolio-shell" ref={ref}>
+      <div className="portfolio-inner">
+        <header className="section-block w-full">
+          <p className="kicker">Portfolio</p>
+          <h2 className="section-heading">Past wins, shipped end to end.</h2>
+          <p className="section-prose-tight">
             A snapshot of the kinds of problems we take from idea to production—swap in your own screenshots and stories
             anytime.
           </p>
@@ -44,13 +39,9 @@ const PortfolioSection = () => {
           <div className="overflow-hidden px-0" ref={emblaRef}>
             <div className="flex">
               {portfolioProjects.map((project) => (
-                <div
-                  key={project.id}
-                  className="min-w-0 flex-[0_0_70%] px-1.5 sm:flex-[0_0_58%] sm:px-2 md:flex-[0_0_40%] md:px-2.5 lg:flex-[0_0_32%] xl:flex-[0_0_26%]"
-                >
-                  <article className="mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]">
-                    {/* Fixed-height image strip (same on every card) */}
-                    <div className="relative h-36 w-full shrink-0 overflow-hidden bg-muted sm:h-40">
+                <div key={project.id} className="portfolio-slide">
+                  <article className="portfolio-card">
+                    <div className="portfolio-img">
                       <img
                         src={project.image}
                         alt={project.imageAlt}
@@ -58,23 +49,16 @@ const PortfolioSection = () => {
                         loading="lazy"
                       />
                     </div>
-                    <div className="flex min-h-0 flex-1 flex-col border-t border-border p-4 md:p-5">
+                    <div className="portfolio-body">
                       <div className="mb-2 flex shrink-0 flex-wrap gap-2">
                         {project.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full border border-border bg-background px-3 py-0.5 text-xs font-medium text-muted-foreground"
-                          >
+                          <span key={tag} className="tag-pill">
                             {tag}
                           </span>
                         ))}
                       </div>
-                      <h3 className="mb-2 shrink-0 text-lg font-bold leading-snug md:text-xl line-clamp-2">
-                        {project.title}
-                      </h3>
-                      <p className="min-h-0 flex-1 overflow-y-auto text-sm leading-relaxed text-muted-foreground md:text-base">
-                        {project.achievement}
-                      </p>
+                      <h3 className="portfolio-title">{project.title}</h3>
+                      <p className="portfolio-desc">{project.achievement}</p>
                     </div>
                   </article>
                 </div>
@@ -84,20 +68,10 @@ const PortfolioSection = () => {
 
           <div className="mt-5 flex flex-col items-center gap-4 md:mt-6 md:gap-5">
             <div className="flex justify-center gap-3">
-              <button
-                type="button"
-                onClick={scrollPrev}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:bg-card active:scale-95"
-                aria-label="Previous project"
-              >
+              <button type="button" onClick={scrollPrev} className="carousel-btn" aria-label="Previous project">
                 <ChevronLeft size={18} />
               </button>
-              <button
-                type="button"
-                onClick={scrollNext}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:bg-card active:scale-95"
-                aria-label="Next project"
-              >
+              <button type="button" onClick={scrollNext} className="carousel-btn" aria-label="Next project">
                 <ChevronRight size={18} />
               </button>
             </div>

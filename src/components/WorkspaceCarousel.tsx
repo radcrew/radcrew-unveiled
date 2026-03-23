@@ -21,22 +21,22 @@ const WorkspaceCarousel = () => {
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <section id="workspace" className="py-24 md:py-32" ref={ref}>
+    <section id="workspace" className="workspace-shell" ref={ref}>
       <div className="content-max section-padding mb-10">
-        <p className="text-accent font-semibold text-sm uppercase tracking-widest mb-3">Where We Work</p>
-        <h2 className="text-3xl md:text-4xl font-bold">Our workspace.</h2>
+        <p className="kicker mb-3">Where We Work</p>
+        <h2 className="section-heading">Our workspace.</h2>
       </div>
 
       <div className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {slides.map((slide, i) => (
-              <div key={i} className="flex-[0_0_85%] md:flex-[0_0_70%] min-w-0 px-3">
+              <div key={i} className="workspace-slide">
                 <div className="overflow-hidden rounded-xl">
                   <img
                     src={slide.src}
                     alt={slide.alt}
-                    className="w-full h-[300px] md:h-[480px] object-cover"
+                    className="h-[300px] w-full object-cover md:h-[480px]"
                     loading="lazy"
                   />
                 </div>
@@ -45,19 +45,11 @@ const WorkspaceCarousel = () => {
           </div>
         </div>
 
-        <div className="flex justify-center gap-3 mt-8">
-          <button
-            onClick={scrollPrev}
-            className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-card transition-colors active:scale-95"
-            aria-label="Previous slide"
-          >
+        <div className="mt-8 flex justify-center gap-3">
+          <button type="button" onClick={scrollPrev} className="carousel-btn" aria-label="Previous slide">
             <ChevronLeft size={18} />
           </button>
-          <button
-            onClick={scrollNext}
-            className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-card transition-colors active:scale-95"
-            aria-label="Next slide"
-          >
+          <button type="button" onClick={scrollNext} className="carousel-btn" aria-label="Next slide">
             <ChevronRight size={18} />
           </button>
         </div>

@@ -65,6 +65,234 @@
   }
 }
 
+@layer components {
+  /* —— Layout —— */
+  .screen-fill {
+    @apply flex min-h-screen min-h-dvh flex-col justify-center;
+  }
+
+  .section-pad-y {
+    @apply py-10 sm:py-12 md:py-14 lg:py-16;
+  }
+
+  .content-stack {
+    @apply content-max flex flex-col gap-10 md:gap-12 lg:gap-14;
+  }
+
+  .content-stack-wide {
+    @apply content-max flex flex-col gap-10 md:gap-12 lg:gap-14 xl:gap-16;
+  }
+
+  /* —— Typography —— */
+  .section-block {
+    @apply shrink-0 space-y-3 md:space-y-4;
+  }
+
+  .kicker {
+    @apply text-sm font-semibold uppercase tracking-widest text-accent;
+  }
+
+  .section-heading {
+    @apply text-3xl font-bold md:text-4xl;
+  }
+
+  .section-prose {
+    @apply max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg lg:max-w-3xl;
+  }
+
+  .section-prose-tight {
+    @apply max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg;
+  }
+
+  .muted-p {
+    @apply text-sm leading-relaxed text-muted-foreground;
+  }
+
+  .muted-label {
+    @apply text-sm font-semibold uppercase tracking-widest text-muted-foreground;
+  }
+
+  .back-link {
+    @apply mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground;
+  }
+
+  .profile-external-link {
+    @apply inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-accent hover:underline;
+  }
+
+  .team-member-root {
+    @apply flex min-h-screen min-h-dvh flex-col justify-center py-10 sm:py-12 md:py-14 lg:py-16;
+  }
+
+  .team-member-not-found {
+    @apply content-max section-padding flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4;
+  }
+
+  .not-found-root {
+    @apply flex min-h-screen min-h-dvh flex-col items-center justify-center bg-muted section-padding py-10;
+  }
+
+  .workspace-shell {
+    @apply py-24 md:py-32;
+  }
+
+  .workspace-slide {
+    @apply min-w-0 flex-[0_0_85%] px-3 md:flex-[0_0_70%];
+  }
+
+  /* —— Sections (specific shells) —— */
+  .hero-root {
+    @apply relative flex min-h-screen min-h-dvh flex-col justify-center overflow-hidden;
+  }
+
+  .hero-bg {
+    @apply pointer-events-none absolute inset-0 -z-10 min-h-screen min-h-dvh;
+  }
+
+  .hero-bg-img {
+    @apply h-full min-h-screen min-h-dvh w-full object-fill;
+  }
+
+  /* Hero gradients use responsive stops — keep on the element (see HeroSection) */
+
+  .hero-inner {
+    @apply content-max section-padding relative z-10 flex flex-col justify-center pb-16 pt-24;
+  }
+
+  .hero-title {
+    @apply max-w-5xl text-5xl font-bold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl xl:max-w-6xl 2xl:max-w-7xl;
+  }
+
+  .hero-blurb {
+    @apply mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-muted-foreground md:text-xl xl:max-w-4xl 2xl:max-w-5xl;
+  }
+
+  .services-shell {
+    @apply screen-fill border-y border-border bg-muted/40 section-padding section-pad-y;
+  }
+
+  .how-shell {
+    @apply screen-fill section-padding section-pad-y;
+  }
+
+  .team-shell {
+    @apply screen-fill section-padding section-pad-y;
+  }
+
+  .portfolio-shell {
+    @apply box-border flex h-dvh h-screen min-h-0 flex-col justify-center overflow-y-auto border-y border-border bg-muted/40 py-8 sm:py-10 md:py-12;
+  }
+
+  .portfolio-inner {
+    @apply content-max section-padding flex min-h-0 flex-1 flex-col justify-center gap-6 md:gap-8 lg:gap-10;
+  }
+
+  .contact-footer-stack {
+    @apply flex min-h-screen min-h-dvh flex-col;
+  }
+
+  .contact-shell {
+    @apply flex min-h-0 flex-1 flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-8 sm:py-10 md:py-12;
+  }
+
+  .contact-card {
+    @apply rounded-2xl border border-border bg-card p-10 md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12;
+  }
+
+  .footer-shell {
+    @apply shrink-0 border-t border-border section-padding py-8 md:py-10;
+  }
+
+  .footer-row {
+    @apply content-max flex flex-col justify-between gap-8 md:flex-row md:items-center md:gap-12;
+  }
+
+  /* —— UI bits —— */
+  .nav-link {
+    @apply text-muted-foreground transition-colors hover:text-foreground;
+  }
+
+  .nav-shell {
+    @apply fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md;
+  }
+
+  .nav-inner {
+    @apply content-max section-padding flex h-16 items-center justify-between;
+  }
+
+  .accent-cta {
+    @apply inline-flex items-center gap-2 text-sm font-medium text-accent underline-offset-4 transition-all hover:underline;
+  }
+
+  .email-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground transition-opacity hover:opacity-90 active:scale-[0.98];
+  }
+
+  .carousel-btn {
+    @apply flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:bg-card active:scale-95;
+  }
+
+  .service-card {
+    @apply rounded-lg border border-border bg-card p-8 transition-shadow duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5;
+  }
+
+  .service-icon-wrap {
+    @apply mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent;
+  }
+
+  .team-grid {
+    @apply grid shrink-0 gap-6 md:grid-cols-3 md:gap-8;
+  }
+
+  .team-card {
+    @apply relative rounded-lg border border-border bg-card p-8 transition-all duration-300 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 active:scale-[0.98];
+  }
+
+  .team-avatar {
+    @apply mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-lg font-bold text-accent;
+  }
+
+  .tag-pill {
+    @apply rounded-full border border-border bg-background px-3 py-0.5 text-xs font-medium text-muted-foreground;
+  }
+
+  .how-step-grid {
+    @apply grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 lg:grid-cols-4 lg:gap-6 lg:gap-y-8 xl:gap-8;
+  }
+
+  .step-num {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-bold text-accent;
+  }
+
+  .step-icon {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-accent;
+  }
+
+  .portfolio-slide {
+    @apply min-w-0 flex-[0_0_70%] px-1.5 sm:flex-[0_0_58%] sm:px-2 md:flex-[0_0_40%] md:px-2.5 lg:flex-[0_0_32%] xl:flex-[0_0_26%];
+  }
+
+  .portfolio-card {
+    @apply mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem];
+  }
+
+  .portfolio-img {
+    @apply relative h-36 w-full shrink-0 overflow-hidden bg-muted sm:h-40;
+  }
+
+  .portfolio-body {
+    @apply flex min-h-0 flex-1 flex-col border-t border-border p-4 md:p-5;
+  }
+
+  .portfolio-title {
+    @apply mb-2 line-clamp-2 shrink-0 text-lg font-bold leading-snug md:text-xl;
+  }
+
+  .portfolio-desc {
+    @apply min-h-0 flex-1 overflow-y-auto text-sm leading-relaxed text-muted-foreground md:text-base;
+  }
+}
+
 @layer utilities {
   /** Aligns with HeroSection: same max width at every breakpoint */
   .content-max {

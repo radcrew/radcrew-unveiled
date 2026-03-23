@@ -17,7 +17,7 @@ const Index = () => {
       <PortfolioSection />
       <TeamSection />
       {/* One viewport for contact CTA + footer together */}
-      <div className="flex min-h-screen min-h-dvh flex-col">
+      <div className="contact-footer-stack">
         <ContactSection />
         <FooterSection />
       </div>

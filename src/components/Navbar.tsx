@@ -2,26 +2,35 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 
+const NAV_LINKS = [
+  { href: "#services", label: "Services" },
+  { href: "#how-we-work", label: "How we work" },
+  { href: "#portfolio", label: "Portfolio" },
+  { href: "#team", label: "Team" },
+  { href: "#contact", label: "Contact" },
+] as const;
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-      <div className="content-max section-padding flex h-16 items-center justify-between">
+    <nav className="nav-shell">
+      <div className="nav-inner">
         <Link to="/" className="text-xl font-bold tracking-tight">
           Rad<span className="text-accent">Crew</span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">Services</a>
-          <a href="#how-we-work" className="text-muted-foreground hover:text-foreground transition-colors">How we work</a>
-          <a href="#portfolio" className="text-muted-foreground hover:text-foreground transition-colors">Portfolio</a>
-          <a href="#team" className="text-muted-foreground hover:text-foreground transition-colors">Team</a>
-          <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
+        <div className="hidden gap-8 text-sm font-medium md:flex">
+          {NAV_LINKS.map(({ href, label }) => (
+            <a key={href} href={href} className="nav-link">
+              {label}
+            </a>
+          ))}
         </div>
 
         <button
-          className="md:hidden p-2 text-foreground active:scale-95 transition-transform"
+          type="button"
+          className="p-2 text-foreground transition-transform active:scale-95 md:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
@@ -30,12 +39,12 @@ const Navbar = () => {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-background section-padding py-4 flex flex-col gap-4 text-sm font-medium">
-          <a href="#services" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">Services</a>
-          <a href="#how-we-work" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">How we work</a>
-          <a href="#portfolio" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">Portfolio</a>
-          <a href="#team" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">Team</a>
-          <a href="#contact" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">Contact</a>
+        <div className="section-padding flex flex-col gap-4 border-t border-border bg-background py-4 text-sm font-medium md:hidden">
+          {NAV_LINKS.map(({ href, label }) => (
+            <a key={href} href={href} className="nav-link" onClick={() => setOpen(false)}>
+              {label}
+            </a>
+          ))}
         </div>
       )}
     </nav>
