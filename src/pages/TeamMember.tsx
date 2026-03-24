@@ -1,10 +1,52 @@
 import { useParams, Link } from "react-router-dom";
-import { teamMembers } from "@/lib/team-data";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { useEngineerMember } from "@/hooks/useEngineerMember";
+import { isContentfulConfigured } from "@/lib/contentful";
 
 const TeamMember = () => {
   const { memberId } = useParams();
-  const member = teamMembers.find((m) => m.id === memberId);
+  const { data: member, isPending, isError, error } = useEngineerMember(memberId);
+
+  if (!isContentfulConfigured()) {
+    return (
+      <div className="team-member-not-found">
+        <p className="text-muted-foreground">Contentful is not configured.</p>
+        <Link to="/" className="text-sm font-medium text-accent hover:underline">
+          ← Back home
+        </Link>
+      </div>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <div className="team-member-root">
+        <div className="content-max section-padding w-full">
+          <div className="w-full max-w-3xl animate-pulse pt-16 text-left">
+            <div className="mb-8 h-5 w-32 rounded bg-muted" />
+            <div className="mb-8 h-20 w-20 rounded-full bg-muted" />
+            <div className="mb-4 h-10 w-3/4 rounded bg-muted" />
+            <div className="mb-8 h-5 w-48 rounded bg-muted" />
+            <div className="space-y-3">
+              <div className="h-4 w-full rounded bg-muted" />
+              <div className="h-4 w-full rounded bg-muted" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="team-member-not-found">
+        <p className="text-destructive">{error instanceof Error ? error.message : "Something went wrong."}</p>
+        <Link to="/" className="text-sm font-medium text-accent hover:underline">
+          ← Back home
+        </Link>
+      </div>
+    );
+  }
 
   if (!member) {
     return (
@@ -16,6 +58,10 @@ const TeamMember = () => {
       </div>
     );
   }
+
+  const hasQuote = Boolean(member.quote?.trim());
+  const hasExperience = Boolean(member.experience?.trim());
+  const hasSkills = member.skills.length > 0;
 
   return (
     <div className="team-member-root">
@@ -48,34 +94,40 @@ const TeamMember = () => {
               )}
             </div>
 
-            <blockquote className="mb-12 border-l-2 border-accent pl-6 text-lg italic leading-relaxed text-muted-foreground">
-              "{member.quote}"
-            </blockquote>
+            {hasQuote && (
+              <blockquote className="mb-12 border-l-2 border-accent pl-6 text-lg italic leading-relaxed text-muted-foreground">
+                &ldquo;{member.quote}&rdquo;
+              </blockquote>
+            )}
 
             <div className="space-y-8 text-left">
               <div>
                 <h2 className="kicker mb-3">About</h2>
-                <p className="leading-relaxed text-foreground">{member.bio}</p>
+                <p className="leading-relaxed text-foreground">{member.bio || "—"}</p>
               </div>
 
-              <div>
-                <h2 className="kicker mb-3">Experience</h2>
-                <p className="text-foreground">{member.experience}</p>
-              </div>
-
-              <div>
-                <h2 className="kicker mb-4">Skills</h2>
-                <div className="flex flex-wrap gap-2">
-                  {member.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+              {hasExperience && (
+                <div>
+                  <h2 className="kicker mb-3">Experience</h2>
+                  <p className="text-foreground">{member.experience}</p>
                 </div>
-              </div>
+              )}
+
+              {hasSkills && (
+                <div>
+                  <h2 className="kicker mb-4">Skills</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {member.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="rounded-full bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
