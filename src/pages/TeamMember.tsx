@@ -20,7 +20,7 @@ const TeamMember = () => {
   return (
     <div className="team-member-root">
       <div className="content-max section-padding w-full">
-        <div className="mx-auto max-w-3xl pt-16">
+        <div className="w-full max-w-3xl pt-16 text-left">
           <Link to="/" className="back-link">
             <ArrowLeft size={16} /> Back to home
           </Link>
@@ -52,19 +52,19 @@ const TeamMember = () => {
               "{member.quote}"
             </blockquote>
 
-            <div className="space-y-8">
+            <div className="space-y-8 text-left">
               <div>
-                <h2 className="muted-label mb-3">About</h2>
+                <h2 className="kicker mb-3">About</h2>
                 <p className="leading-relaxed text-foreground">{member.bio}</p>
               </div>
 
               <div>
-                <h2 className="muted-label mb-3">Experience</h2>
+                <h2 className="kicker mb-3">Experience</h2>
                 <p className="text-foreground">{member.experience}</p>
               </div>
 
               <div>
-                <h2 className="muted-label mb-4">Skills</h2>
+                <h2 className="kicker mb-4">Skills</h2>
                 <div className="flex flex-wrap gap-2">
                   {member.skills.map((skill) => (
                     <span
