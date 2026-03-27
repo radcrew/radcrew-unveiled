@@ -5,10 +5,11 @@ function messageContentToString(content: unknown): string {
   if (Array.isArray(content)) {
     return content
       .map((part) => {
-        if (part && typeof part === "object" && "text" in part && typeof (part as { text: unknown }).text === "string") {
-          return (part as { text: string }).text;
+        if (!part || typeof part !== "object" || !("text" in part)) {
+          return "";
         }
-        return "";
+        const text = (part as { text: unknown }).text;
+        return typeof text === "string" ? text : "";
       })
       .join("");
   }

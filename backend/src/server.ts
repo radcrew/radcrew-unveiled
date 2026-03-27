@@ -50,38 +50,46 @@ export function createServer(config: AppConfig, knowledgeChunks: KnowledgeChunk[
       return res.status(400).json({ error: "Invalid request payload." });
     }
 
-    const { message } = parsed.data;
-    const relevantChunks = retrieveRelevantChunks(knowledgeChunks, message, 5);
-    const fallbackNeeded = relevantChunks.length === 0 || relevantChunks[0].score < 1.2;
+    try {
+      const { message } = parsed.data;
+      const relevantChunks = retrieveRelevantChunks(knowledgeChunks, message, 5);
+      const fallbackNeeded = relevantChunks.length === 0 || relevantChunks[0].score < 1.2;
 
-    if (fallbackNeeded) {
-      const fallback: ChatResponsePayload = {
-        answer:
-          "I don't have enough verified context for that yet. Please email hello@radcrew.dev and the team can help directly.",
-        confidence: 0.2,
-        sources: [],
+      if (fallbackNeeded) {
+        const fallback: ChatResponsePayload = {
+          answer:
+            "I don't have enough verified context for that yet. Please email hello@radcrew.dev and the team can help directly.",
+          confidence: 0.2,
+          sources: [],
+        };
+        return res.json(fallback);
+      }
+
+      const prompt = buildChatPrompt(
+        message,
+        relevantChunks.map(({ score: _score, ...chunk }) => chunk),
+      );
+      const answer = await generateAnswer(config.HUGGINGFACE_MODEL, config.HUGGINGFACE_API_KEY, prompt);
+
+      const payload: ChatResponsePayload = {
+        answer,
+        confidence: Math.min(1, relevantChunks[0].score / 3),
+        sources: relevantChunks.map((chunk) => ({
+          id: chunk.id,
+          title: chunk.title,
+          snippet: chunk.text,
+          url: chunk.url,
+        })),
       };
-      return res.json(fallback);
+
+      return res.json(payload);
+    } catch (error) {
+      console.error("POST /chat failed:", error);
+      return res.status(502).json({
+        error:
+          "The AI service is temporarily unavailable. Please try again in a moment or email hello@radcrew.dev.",
+      });
     }
-
-    const prompt = buildChatPrompt(
-      message,
-      relevantChunks.map(({ score: _score, ...chunk }) => chunk),
-    );
-    const answer = await generateAnswer(config.HUGGINGFACE_MODEL, config.HUGGINGFACE_API_KEY, prompt);
-
-    const payload: ChatResponsePayload = {
-      answer,
-      confidence: Math.min(1, relevantChunks[0].score / 3),
-      sources: relevantChunks.map((chunk) => ({
-        id: chunk.id,
-        title: chunk.title,
-        snippet: chunk.text,
-        url: chunk.url,
-      })),
-    };
-
-    return res.json(payload);
   });
 
   return app;

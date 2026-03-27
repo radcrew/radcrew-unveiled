@@ -19,6 +19,9 @@
     },
     {
       "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./backend/tsconfig.json"
     }
   ]
 }
