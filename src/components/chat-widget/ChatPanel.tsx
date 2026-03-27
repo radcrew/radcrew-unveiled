@@ -8,6 +8,8 @@ import {
 import type { FormEvent, RefObject } from "react";
 import type { ChatMessage } from "./types";
 import { ChatComposer } from "./ChatComposer";
+import { ChatErrorBanner } from "./ChatErrorBanner";
+import { ChatMessageList } from "./ChatMessageList";
 
 interface ChatPanelProps {
   open: boolean;
@@ -43,6 +45,10 @@ export function ChatPanel({
           <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
           <SheetDescription>Grounded answers from this site and CMS content.</SheetDescription>
         </SheetHeader>
+
+        <div className="flex min-h-0 flex-1 flex-col">
+          <ChatMessageList messages={messages} pending={pending} scrollAnchorRef={scrollAnchorRef} />
+          {error && <ChatErrorBanner message={error} />}
           <ChatComposer
             draft={draft}
             onDraftChange={onDraftChange}
@@ -51,6 +57,7 @@ export function ChatPanel({
             onSubmit={onSubmit}
             onSend={onSend}
           />
+        </div>
       </SheetContent>
     </Sheet>
   );
