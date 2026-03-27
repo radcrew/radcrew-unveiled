@@ -15,6 +15,9 @@ async function bootstrap() {
   app.listen(config.PORT, () => {
     console.log(`Chatbot backend listening on http://localhost:${config.PORT}`);
     console.log(`Knowledge chunks loaded: ${chunks.length}`);
+    if (!config.HUGGINGFACE_API_KEY) {
+      console.warn("HUGGINGFACE_API_KEY / HF_TOKEN is not set; /chat will return a setup message until you configure backend/.env.");
+    }
   });
 }
 

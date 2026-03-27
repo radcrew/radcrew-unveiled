@@ -4,8 +4,10 @@
   "type": "module",
   "workspaces": ["frontend", "backend"],
   "scripts": {
-    "dev": "npm run dev -w frontend",
-    "build": "npm run build -w frontend",
+    "dev": "concurrently -n frontend,backend -c cyan,magenta \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "dev:frontend": "npm run dev -w frontend",
+    "build": "concurrently -n frontend,backend -c cyan,magenta \"npm run build -w frontend\" \"npm run build -w backend\"",
+    "build:frontend": "npm run build -w frontend",
     "build:dev": "npm run build:dev -w frontend",
     "lint": "eslint frontend/src",
     "preview": "npm run preview -w frontend",
@@ -16,6 +18,7 @@
     "build:backend": "npm run build -w backend"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "@eslint/js": "^9.32.0",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",

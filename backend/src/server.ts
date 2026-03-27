@@ -65,6 +65,15 @@ export function createServer(config: AppConfig, knowledgeChunks: KnowledgeChunk[
         return res.json(fallback);
       }
 
+      if (!config.HUGGINGFACE_API_KEY) {
+        return res.json({
+          answer:
+            "The FAQ assistant is not configured yet. Set HUGGINGFACE_API_KEY or HF_TOKEN in backend/.env (see backend/.env.example), then restart the server.",
+          confidence: 0,
+          sources: [],
+        } satisfies ChatResponsePayload);
+      }
+
       const prompt = buildChatPrompt(
         message,
         relevantChunks.map(({ score: _score, ...chunk }) => chunk),

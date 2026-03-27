@@ -18,7 +18,7 @@ export function ChatWidget() {
 
   const canSend = draft.trim().length >= 2 && !pending;
 
-  async function sendMessage() {
+  const sendMessage = async () => {
     const text = draft.trim();
     if (text.length < 2 || pending) return;
 
@@ -48,12 +48,12 @@ export function ChatWidget() {
     } finally {
       setPending(false);
     }
-  }
+  };
 
-  function onSubmit(e: FormEvent) {
+  const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     void sendMessage();
-  }
+  };
 
   return (
     <>

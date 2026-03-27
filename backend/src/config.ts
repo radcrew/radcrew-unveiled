@@ -4,7 +4,13 @@ import { z } from "zod";
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(8787),
   FRONTEND_ORIGIN: z.string().url().default("http://localhost:8080"),
-  HUGGINGFACE_API_KEY: z.string().min(1),
+  HUGGINGFACE_API_KEY: z
+    .string()
+    .optional()
+    .transform((value) => {
+      const trimmed = value?.trim();
+      return trimmed && trimmed.length > 0 ? trimmed : undefined;
+    }),
   HUGGINGFACE_MODEL: z.string().default("Qwen/Qwen2.5-1.5B-Instruct"),
   CONTENTFUL_SPACE_ID: z.string().optional(),
   CONTENTFUL_DELIVERY_TOKEN: z.string().optional(),

@@ -10,21 +10,19 @@ From the repository root:
 npm install
 ```
 
-## Frontend
+## Dev (frontend + backend)
+
+From the repo root, one command starts both the Vite app and the chat API:
 
 ```bash
 npm run dev
 ```
 
+- **Frontend only:** `npm run dev:frontend`
+- **Backend only:** `npm run dev:backend`
+
 - Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set Contentful and chat API URL as needed.
-
-## Chatbot backend
-
-```bash
-npm run dev:backend
-```
-
-- Env: copy `backend/.env.example` to `backend/.env`.
+- Env: copy `backend/.env.example` to `backend/.env` for the API (Hugging Face token, etc.).
 
 ### Backend env vars
 
