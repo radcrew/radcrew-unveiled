@@ -1,35 +1,56 @@
 # RadCrew Unveiled
 
-Marketing site for RadCrew with a FAQ chatbot.
+Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`).
+
+## Install
+
+From the repository root:
+
+```bash
+npm install
+```
 
 ## Frontend
 
-- Install dependencies: `yarn install`
-- Start dev server: `yarn dev`
-- Frontend env: copy `.env.example` to `.env`
+```bash
+npm run dev
+```
 
-## Chatbot Backend
+- Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set Contentful and chat API URL as needed.
 
-- Move to backend folder: `cd backend`
-- Install dependencies: `yarn install`
-- Configure env: copy `backend/.env.example` to `backend/.env`
-- Start backend dev server: `yarn dev`
+## Chatbot backend
 
-### Required backend env vars
+```bash
+npm run dev:backend
+```
+
+- Env: copy `backend/.env.example` to `backend/.env`.
+
+### Backend env vars
 
 - `HUGGINGFACE_API_KEY`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)); you can use `HF_TOKEN` instead if you already have that set
-- `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`—pick any model your account can run on [Inference Providers](https://huggingface.co/docs/inference-providers))
+- `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
-- `CONTENTFUL_SPACE_ID` and `CONTENTFUL_DELIVERY_TOKEN` (optional but recommended for richer FAQ context)
+- `CONTENTFUL_SPACE_ID` and `CONTENTFUL_DELIVERY_TOKEN` (optional; richer FAQ context)
 
 ## Chatbot flow
 
-- Frontend sends user question to `POST /chat`
-- Backend retrieves matching snippets from static site content + Contentful entries
-- Hugging Face Inference (`chatCompletion`) generates a grounded answer from those snippets
-- If retrieval confidence is too low, backend returns a safe fallback with contact guidance
+- Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
+- Backend retrieves snippets from static site copy + Contentful
+- Hugging Face `chatCompletion` produces grounded answers
+- Low retrieval confidence returns a safe fallback with contact guidance
 
 ## Tests
 
-- Frontend tests: `yarn test`
-- Backend tests: `cd backend && yarn test`
+```bash
+npm test
+npm run test:backend
+```
+
+## Lint
+
+Run from the repository root:
+
+```bash
+npm run lint
+```
