@@ -12,6 +12,8 @@ const envSchema = z.object({
       return trimmed && trimmed.length > 0 ? trimmed : undefined;
     }),
   HUGGINGFACE_MODEL: z.string().default("Qwen/Qwen2.5-1.5B-Instruct"),
+  /** Inference provider for @huggingface/inference (see https://huggingface.co/docs/inference-providers). */
+  HUGGINGFACE_PROVIDER: z.string().default("hf-inference"),
   CONTENTFUL_SPACE_ID: z.string().optional(),
   CONTENTFUL_DELIVERY_TOKEN: z.string().optional(),
   CONTENTFUL_ENVIRONMENT: z.string().default("master"),

@@ -78,7 +78,12 @@ export function createServer(config: AppConfig, knowledgeChunks: KnowledgeChunk[
         message,
         relevantChunks.map(({ score: _score, ...chunk }) => chunk),
       );
-      const answer = await generateAnswer(config.HUGGINGFACE_MODEL, config.HUGGINGFACE_API_KEY, prompt);
+      const answer = await generateAnswer(
+        config.HUGGINGFACE_MODEL,
+        config.HUGGINGFACE_API_KEY,
+        prompt,
+        config.HUGGINGFACE_PROVIDER,
+      );
 
       const payload: ChatResponsePayload = {
         answer,
