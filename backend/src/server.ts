@@ -27,6 +27,9 @@ export function createServer(config: AppConfig, knowledgeChunks: KnowledgeChunk[
     }),
   );
 
+  app.get("/health", (_req, res) => {
+    res.json({ ok: true, chunks: knowledgeChunks.length });
+  });
 
   return app;
 }

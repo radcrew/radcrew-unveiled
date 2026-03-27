@@ -1,12 +1,15 @@
 import { getConfig } from "./config.js";
 import { loadContentfulDocuments } from "./knowledge/contentful-loader.js";
 import { getStaticSiteDocuments } from "./knowledge/site-content.js";
+import { buildKnowledgeChunks, persistKnowledgeIndex } from "./chat/retrieval.js";
 import { createServer } from "./server.js";
 
 async function bootstrap() {
   const config = getConfig();
   const staticDocs = getStaticSiteDocuments();
   const contentfulDocs = await loadContentfulDocuments(config);
+  const chunks = buildKnowledgeChunks([...staticDocs, ...contentfulDocs]);
+  await persistKnowledgeIndex(chunks);
 
   const app = createServer(config, chunks);
   app.listen(config.PORT, () => {
