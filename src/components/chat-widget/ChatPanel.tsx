@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sheet";
 import type { FormEvent, RefObject } from "react";
 import type { ChatMessage } from "./types";
+import { ChatComposer } from "./ChatComposer";
 
 interface ChatPanelProps {
   open: boolean;
@@ -42,6 +43,14 @@ export function ChatPanel({
           <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
           <SheetDescription>Grounded answers from this site and CMS content.</SheetDescription>
         </SheetHeader>
+          <ChatComposer
+            draft={draft}
+            onDraftChange={onDraftChange}
+            pending={pending}
+            canSend={canSend}
+            onSubmit={onSubmit}
+            onSend={onSend}
+          />
       </SheetContent>
     </Sheet>
   );
