@@ -37,24 +37,24 @@ export async function loadContentfulDocuments(config: AppConfig): Promise<Knowle
     include: 0,
   });
 
-  return entries.items
-    .map((entry) => {
-      const fields = entry.fields as Record<string, unknown>;
-      const text = fieldsToText(fields);
-      if (!text) return null;
+  return entries.items.flatMap((entry): KnowledgeDocument[] => {
+    const fields = entry.fields as Record<string, unknown>;
+    const text = fieldsToText(fields);
+    if (!text) return [];
 
-      const title =
-        pickString(fields.title) ||
-        pickString(fields.name) ||
-        pickString(fields.heading) ||
-        `Contentful entry ${entry.sys.id}`;
+    const title =
+      pickString(fields.title) ||
+      pickString(fields.name) ||
+      pickString(fields.heading) ||
+      `Contentful entry ${entry.sys.id}`;
 
-      return {
+    return [
+      {
         id: `contentful:${entry.sys.id}`,
         title,
         text,
         url: `https://app.contentful.com/spaces/${config.CONTENTFUL_SPACE_ID}/entries/${entry.sys.id}`,
-      } satisfies KnowledgeDocument;
-    })
-    .filter((doc): doc is KnowledgeDocument => doc !== null);
+      },
+    ];
+  });
 }

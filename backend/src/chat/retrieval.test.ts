@@ -7,7 +7,7 @@ describe("retrieveRelevantChunks", () => {
       {
         id: "a",
         title: "Contact",
-        text: "Email hello@radcrew.dev and expect a reply in one to two business days.",
+        text: "To contact RadCrew, email hello@radcrew.dev. We usually reply in one to two business days.",
       },
       {
         id: "b",

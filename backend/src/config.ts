@@ -13,8 +13,8 @@ const envSchema = z.object({
 
 export type AppConfig = z.infer<typeof envSchema>;
 
-function mergedProcessEnv(): NodeJS.ProcessEnv {
-  const env = { ...process.env };
+function mergedProcessEnv(): Record<string, string | undefined> {
+  const env: Record<string, string | undefined> = { ...process.env };
   if (!env.HUGGINGFACE_API_KEY && env.HF_TOKEN) {
     env.HUGGINGFACE_API_KEY = env.HF_TOKEN;
   }
