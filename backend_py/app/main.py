@@ -1,18 +1,11 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import get_settings
 
-def _env_int(name: str, default: int) -> int:
-    raw = os.getenv(name)
-    if raw is None or raw.strip() == "":
-        return default
-    return int(raw)
-
-
-PORT = _env_int("PORT", 8787)
-FRONTEND_ORIGIN = os.getenv("FRONTEND_ORIGIN", "http://localhost:8080").strip() or "http://localhost:8080"
+_settings = get_settings()
+PORT = _settings.PORT
+FRONTEND_ORIGIN = _settings.FRONTEND_ORIGIN
 
 app = FastAPI()
 app.add_middleware(
