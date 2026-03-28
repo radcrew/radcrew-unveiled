@@ -1,3 +1,5 @@
+from app.chat.huggingface import generate_answer
+from app.chat.prompt import build_chat_prompt
 from app.chat.retrieval import (
     RETRIEVAL_FALLBACK_SCORE_THRESHOLD,
     build_knowledge_chunks,
@@ -9,7 +11,9 @@ from app.chat.retrieval import (
 
 __all__ = [
     "RETRIEVAL_FALLBACK_SCORE_THRESHOLD",
+    "build_chat_prompt",
     "build_knowledge_chunks",
+    "generate_answer",
     "persist_knowledge_index",
     "retrieval_fallback_needed",
     "retrieve_relevant_chunks",
