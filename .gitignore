@@ -11,6 +11,8 @@ node_modules
 __pycache__/
 *.py[cod]
 .venv/
+.pytest_cache/
+pytest-cache-files-*/
 
 dist
 dist-ssr
