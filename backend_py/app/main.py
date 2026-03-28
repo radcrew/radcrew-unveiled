@@ -38,7 +38,7 @@ _MSG_FALLBACK_LOW_CONTEXT = (
 )
 _MSG_MISSING_HF_KEY = (
     "The FAQ assistant is not configured yet. Set HUGGINGFACE_API_KEY or HF_TOKEN in "
-    "backend/.env (see backend/.env.example), then restart the server."
+    "backend_py/.env (see backend_py/.env.example), then restart the server."
 )
 _MSG_AI_UNAVAILABLE = (
     "The AI service is temporarily unavailable. Please try again in a moment or "

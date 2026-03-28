@@ -1,6 +1,11 @@
 # RadCrew Unveiled
 
-Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`).
+Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend_py`, FastAPI + Uvicorn).
+
+## Prerequisites
+
+- **Node.js** (for the frontend; npm workspaces)
+- **Python 3.11+** (for the chat API)
 
 ## Install
 
@@ -10,7 +15,33 @@ From the repository root:
 npm install
 ```
 
-## Dev (frontend + backend)
+Create a virtual environment for the API (recommended), then install Python dependencies:
+
+```bash
+cd backend_py
+python -m venv .venv
+```
+
+Activate the venv — on Windows (PowerShell):
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+On macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Then:
+
+```bash
+pip install -r requirements.txt
+cd ..
+```
+
+## Dev (frontend + API)
 
 From the repo root, one command starts both the Vite app and the chat API:
 
@@ -19,12 +50,12 @@ npm run dev
 ```
 
 - **Frontend only:** `npm run dev:frontend`
-- **Backend only:** `npm run dev:backend`
+- **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend_py`)
 
 - Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set Contentful and chat API URL as needed.
-- Env: copy `backend/.env.example` to `backend/.env` for the API (Hugging Face token, etc.).
+- Env: copy [`backend_py/.env.example`](backend_py/.env.example) to `backend_py/.env` for the API (Hugging Face token, etc.).
 
-### Backend env vars
+### API env vars
 
 - `HUGGINGFACE_API_KEY`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)); you can use `HF_TOKEN` instead if you already have that set
 - `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
@@ -35,8 +66,8 @@ npm run dev
 ## Chatbot flow
 
 - Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
-- Backend retrieves snippets from static site copy + Contentful
-- Hugging Face `chatCompletion` (with `textGeneration` fallback) produces grounded answers
+- The API retrieves snippets from static site copy + Contentful
+- Hugging Face chat completion (with text-generation fallback) produces grounded answers
 - Low retrieval confidence returns a safe fallback with contact guidance
 
 ## Tests
@@ -46,6 +77,8 @@ npm test
 npm run test:backend
 ```
 
+The Python suite runs from `backend_py` (pytest).
+
 ## Lint
 
 Run from the repository root:
@@ -53,3 +86,14 @@ Run from the repository root:
 ```bash
 npm run lint
 ```
+
+## Production API
+
+There is no separate compile step for the Python service beyond installing dependencies. Run Uvicorn (or your process manager) against `app.main:app` with working directory `backend_py`, for example:
+
+```bash
+cd backend_py
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8787
+```
+
+`npm run build:backend` runs `compileall` on `backend_py/app` as a quick syntax check only.

@@ -2,20 +2,20 @@
   "name": "radcrew-unveiled",
   "private": true,
   "type": "module",
-  "workspaces": ["frontend", "backend"],
+  "workspaces": ["frontend"],
   "scripts": {
-    "dev": "concurrently -n frontend,backend -c cyan,magenta \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "dev": "concurrently -n frontend,api -c cyan,magenta \"npm run dev -w frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev -w frontend",
-    "build": "concurrently -n frontend,backend -c cyan,magenta \"npm run build -w frontend\" \"npm run build -w backend\"",
+    "build": "npm run build -w frontend",
     "build:frontend": "npm run build -w frontend",
     "build:dev": "npm run build:dev -w frontend",
     "lint": "eslint frontend/src",
     "preview": "npm run preview -w frontend",
     "test": "npm run test -w frontend",
     "test:watch": "npm run test:watch -w frontend",
-    "dev:backend": "npm run dev -w backend",
-    "test:backend": "npm run test -w backend",
-    "build:backend": "npm run build -w backend"
+    "dev:backend": "cd backend_py && python -m uvicorn app.main:app --host 0.0.0.0 --reload --reload-dir app",
+    "test:backend": "cd backend_py && python -m pytest",
+    "build:backend": "cd backend_py && python -m compileall -q app"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
