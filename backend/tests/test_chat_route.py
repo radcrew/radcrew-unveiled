@@ -102,4 +102,4 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     assert body["confidence"] == 0
     assert body["sources"] == []
     assert "HUGGINGFACE_API_KEY" in body["answer"]
-    assert "backend_py/.env" in body["answer"]
+    assert "backend/.env" in body["answer"]

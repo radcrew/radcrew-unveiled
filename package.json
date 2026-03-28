@@ -13,9 +13,9 @@
     "preview": "npm run preview -w frontend",
     "test": "npm run test -w frontend",
     "test:watch": "npm run test:watch -w frontend",
-    "dev:backend": "cd backend_py && python -m uvicorn app.main:app --host 0.0.0.0 --reload --reload-dir app",
-    "test:backend": "cd backend_py && python -m pytest",
-    "build:backend": "cd backend_py && python -m compileall -q app"
+    "dev:backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --reload --reload-dir app",
+    "test:backend": "cd backend && python -m pytest",
+    "build:backend": "cd backend && python -m compileall -q app"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",

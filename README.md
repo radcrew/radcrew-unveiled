@@ -1,6 +1,6 @@
 # RadCrew Unveiled
 
-Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend_py`, FastAPI + Uvicorn).
+Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`, FastAPI + Uvicorn).
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ npm install
 Create a virtual environment for the API (recommended), then install Python dependencies:
 
 ```bash
-cd backend_py
+cd backend
 python -m venv .venv
 ```
 
@@ -50,10 +50,10 @@ npm run dev
 ```
 
 - **Frontend only:** `npm run dev:frontend`
-- **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend_py`)
+- **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend`)
 
 - Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set Contentful and chat API URL as needed.
-- Env: copy [`backend_py/.env.example`](backend_py/.env.example) to `backend_py/.env` for the API (Hugging Face token, etc.).
+- Env: copy [`backend/.env.example`](backend/.env.example) to `backend/.env` for the API (Hugging Face token, etc.).
 
 ### API env vars
 
@@ -77,7 +77,7 @@ npm test
 npm run test:backend
 ```
 
-The Python suite runs from `backend_py` (pytest).
+The Python suite runs from `backend` (pytest).
 
 ## Lint
 
@@ -89,11 +89,11 @@ npm run lint
 
 ## Production API
 
-There is no separate compile step for the Python service beyond installing dependencies. Run Uvicorn (or your process manager) against `app.main:app` with working directory `backend_py`, for example:
+There is no separate compile step for the Python service beyond installing dependencies. Run Uvicorn (or your process manager) against `app.main:app` with working directory `backend`, for example:
 
 ```bash
-cd backend_py
+cd backend
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8787
 ```
 
-`npm run build:backend` runs `compileall` on `backend_py/app` as a quick syntax check only.
+`npm run build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
