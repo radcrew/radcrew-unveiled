@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from pydantic import AnyHttpUrl, Field, TypeAdapter, field_validator, model_validator
@@ -11,12 +12,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _origin_url = TypeAdapter(AnyHttpUrl)
 
+# Always load `backend/.env` regardless of process cwd (uvicorn from repo root, IDEs, etc.).
+_BACKEND_DIR = Path(__file__).resolve().parent.parent
+_ENV_FILE = _BACKEND_DIR / ".env"
+
 
 class Settings(BaseSettings):
     """Loaded from environment and optional `.env` (same variable names as Node)."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=_ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -24,6 +29,8 @@ class Settings(BaseSettings):
     PORT: int = Field(default=8787, ge=1)
     FRONTEND_ORIGIN: str = Field(default="http://localhost:8080")
     HUGGINGFACE_API_KEY: str | None = None
+    # Declared so values from `backend/.env` are loaded; merged into HUGGINGFACE_API_KEY in validator.
+    HF_TOKEN: str | None = None
     HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
     HUGGINGFACE_PROVIDER: str = Field(default="hf-inference")
     CONTENTFUL_SPACE_ID: str | None = None
