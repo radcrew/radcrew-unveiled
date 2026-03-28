@@ -13,7 +13,7 @@
     "preview": "npm run preview -w frontend",
     "test": "npm run test -w frontend",
     "test:watch": "npm run test:watch -w frontend",
-    "dev:backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --reload --reload-dir app",
+    "dev:backend": "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port 8787 --reload --reload-dir app",
     "test:backend": "cd backend && python -m pytest",
     "build:backend": "cd backend && python -m compileall -q app"
   },
