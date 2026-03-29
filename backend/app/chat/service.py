@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from app.chat.huggingface import generate_answer, generate_answer_stream
+from app.chat.huggingface import generate_answer
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
 from app.chat.prompt import build_chat_prompt
 from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
@@ -21,41 +21,6 @@ def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
         tokens=scored.tokens,
         url=scored.url,
     )
-
-
-def handle_chat_request(
-    body: ChatRequest,
-    knowledge_chunks: list[KnowledgeChunk],
-) -> dict:
-    message = body.message
-    relevant = retrieve_relevant_chunks(knowledge_chunks, message, 5)
-
-    if retrieval_fallback_needed(relevant):
-        return {
-            "answer": MSG_FALLBACK_LOW_CONTEXT,
-            "confidence": 0.2,
-        }
-
-    settings = get_settings()
-    if not settings.HUGGINGFACE_API_KEY:
-        return {
-            "answer": MSG_MISSING_HF_KEY,
-            "confidence": 0,
-        }
-
-    context_chunks = [scored_to_chunk(c) for c in relevant]
-    prompt = build_chat_prompt(message, context_chunks)
-    answer = generate_answer(
-        settings.HUGGINGFACE_MODEL,
-        settings.HUGGINGFACE_API_KEY,
-        prompt,
-        settings.HUGGINGFACE_PROVIDER,
-    )
-
-    return {
-        "answer": answer,
-        "confidence": min(1.0, relevant[0].score / 3),
-    }
 
 
 def stream_chat_request(
@@ -79,7 +44,7 @@ def stream_chat_request(
     context_chunks = [scored_to_chunk(c) for c in relevant]
     prompt = build_chat_prompt(message, context_chunks)
     return (
-        generate_answer_stream(
+        generate_answer(
             settings.HUGGINGFACE_MODEL,
             settings.HUGGINGFACE_API_KEY,
             prompt,
