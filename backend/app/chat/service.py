@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from collections.abc import Iterator
 
 from app.chat.huggingface import generate_answer
@@ -11,6 +12,9 @@ from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_need
 from app.config import get_settings
 from app.models import KnowledgeChunk, KnowledgeChunkScored
 from app.schemas import ChatRequest
+
+STREAM_TEXT_CHUNK_SIZE = 24
+FALLBACK_STREAM_CHUNK_DELAY_SECONDS = 0.03
 
 
 def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
@@ -23,6 +27,15 @@ def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
     )
 
 
+def stream_text_chunks(text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE) -> Iterator[str]:
+    for i in range(0, len(text), chunk_size):
+        chunk = text[i : i + chunk_size]
+        if chunk:
+            yield chunk
+            # Make synthetic fallback messages feel like real streaming in the UI.
+            time.sleep(FALLBACK_STREAM_CHUNK_DELAY_SECONDS)
+
+
 def stream_chat_request(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
@@ -31,15 +44,11 @@ def stream_chat_request(
     relevant = retrieve_relevant_chunks(knowledge_chunks, message, 5)
 
     if retrieval_fallback_needed(relevant):
-        def fallback_stream() -> Iterator[str]:
-            yield MSG_FALLBACK_LOW_CONTEXT
-        return fallback_stream(), 0.2
+        return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT), 0.2
 
     settings = get_settings()
     if not settings.HUGGINGFACE_API_KEY:
-        def config_stream() -> Iterator[str]:
-            yield MSG_MISSING_HF_KEY
-        return config_stream(), 0
+        return stream_text_chunks(MSG_MISSING_HF_KEY), 0
 
     context_chunks = [scored_to_chunk(c) for c in relevant]
     prompt = build_chat_prompt(message, context_chunks)

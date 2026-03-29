@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -9,6 +10,20 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.models import KnowledgeChunkScored
+
+
+def _stream_content(response_text: str) -> str:
+    out: list[str] = []
+    for event in response_text.split("\n\n"):
+        if not event.startswith("data: "):
+            continue
+        payload = event.removeprefix("data: ").strip()
+        if not payload:
+            continue
+        parsed = json.loads(payload)
+        if parsed.get("type") == "chunk" and isinstance(parsed.get("content"), str):
+            out.append(parsed["content"])
+    return "".join(out)
 
 
 @pytest.fixture
@@ -39,7 +54,7 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
-    assert '"type": "chunk"' in r.text
+    assert r.text.count('"type": "chunk"') > 1
     assert "hello@radcrew.dev" in r.text
     assert '"type": "done"' in r.text
     assert '"confidence": 0.2' in r.text
@@ -79,7 +94,8 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     r = client.post("/chat", json={"message": "hello world"})
     assert r.status_code == 200
     assert '"type": "chunk"' in r.text
-    assert "HUGGINGFACE_API_KEY" in r.text
-    assert "backend/.env" in r.text
+    streamed_answer = _stream_content(r.text)
+    assert "HUGGINGFACE_API_KEY" in streamed_answer
+    assert "backend/.env" in streamed_answer
     assert '"type": "done"' in r.text
     assert '"confidence": 0' in r.text
