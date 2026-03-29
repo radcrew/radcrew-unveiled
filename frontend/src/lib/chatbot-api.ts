@@ -41,7 +41,7 @@ function parseSseEvent(rawEvent: string): ChatStreamEvent | null {
 }
 
 export async function streamChatMessage(message: string, handlers: StreamChatHandlers): Promise<void> {
-  const response = await fetch(`${baseUrl}/chat/stream`, {
+  const response = await fetch(`${baseUrl}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

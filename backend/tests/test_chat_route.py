@@ -1,4 +1,4 @@
-"""POST /chat: validation, fallback, and error handling (parity with backend/src/server.ts)."""
+"""POST /chat: validation and streaming responses."""
 
 from __future__ import annotations
 
@@ -39,39 +39,20 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
-    body = r.json()
-    assert body["confidence"] == 0.2
-    assert "hello@radcrew.dev" in body["answer"]
+    assert '"type": "chunk"' in r.text
+    assert "hello@radcrew.dev" in r.text
+    assert '"type": "done"' in r.text
+    assert '"confidence": 0.2' in r.text
 
 
-@patch("app.chat.service.generate_answer", side_effect=RuntimeError("no provider"))
-@patch("app.chat.service.get_settings")
-@patch("app.chat.service.retrieve_relevant_chunks")
-def test_chat_hf_failure_returns_502(
-    mock_retrieve: MagicMock,
-    mock_settings: MagicMock,
-    _mock_gen: object,
-    client: TestClient,
-) -> None:
-    mock_retrieve.return_value = [
-        KnowledgeChunkScored(
-            id="c1",
-            title="Title",
-            text="snippet text",
-            tokens=["hello", "world"],
-            score=2.0,
-            url=None,
-        )
-    ]
-    cfg = MagicMock()
-    cfg.HUGGINGFACE_API_KEY = "token"
-    cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
-    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
-    mock_settings.return_value = cfg
-
+@patch("app.main.stream_chat_request", side_effect=RuntimeError("no provider"))
+def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello world"})
-    assert r.status_code == 502
-    assert r.json()["error"].startswith("The AI service is temporarily unavailable")
+    assert r.status_code == 200
+    assert '"type": "chunk"' in r.text
+    assert "The AI service is temporarily unavailable" in r.text
+    assert '"type": "done"' in r.text
+    assert '"confidence": 0' in r.text
 
 
 @patch("app.chat.service.get_settings")
@@ -97,7 +78,8 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
 
     r = client.post("/chat", json={"message": "hello world"})
     assert r.status_code == 200
-    body = r.json()
-    assert body["confidence"] == 0
-    assert "HUGGINGFACE_API_KEY" in body["answer"]
-    assert "backend/.env" in body["answer"]
+    assert '"type": "chunk"' in r.text
+    assert "HUGGINGFACE_API_KEY" in r.text
+    assert "backend/.env" in r.text
+    assert '"type": "done"' in r.text
+    assert '"confidence": 0' in r.text
