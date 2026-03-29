@@ -33,11 +33,16 @@ class Settings(BaseSettings):
     HF_TOKEN: str | None = None
     HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
     HUGGINGFACE_PROVIDER: str = Field(default="hf-inference")
+    GITHUB_KB_REPO_URL: AnyHttpUrl | None = None
+    GITHUB_KB_TOKEN: str | None = None
+    GITHUB_KB_BRANCH: str | None = None
+    GITHUB_KB_PATH: str | None = None
+    GITHUB_KB_PRIVATE_REPO: bool = Field(default=False)
 
     @model_validator(mode="before")
     @classmethod
-    def merge_hf_token(cls, data: Any) -> Any:
-        """If HUGGINGFACE_API_KEY is unset/empty, use HF_TOKEN (same as Node mergedProcessEnv)."""
+    def normalize_api_tokens(cls, data: Any) -> Any:
+        """Normalize HF/GitHub token-related env values before field parsing."""
         if not isinstance(data, dict):
             return data
         merged = dict(data)
@@ -46,6 +51,15 @@ class Settings(BaseSettings):
             token = merged.get("HF_TOKEN") or os.environ.get("HF_TOKEN")
             if token is not None and str(token).strip() != "":
                 merged["HUGGINGFACE_API_KEY"] = str(token).strip()
+        github_token = merged.get("GITHUB_KB_TOKEN")
+        if isinstance(github_token, str):
+            stripped = github_token.strip()
+            merged["GITHUB_KB_TOKEN"] = stripped if stripped else None
+        for key in ("GITHUB_KB_BRANCH", "GITHUB_KB_PATH"):
+            value = merged.get(key)
+            if isinstance(value, str):
+                stripped = value.strip()
+                merged[key] = stripped if stripped else None
         return merged
 
     @field_validator("FRONTEND_ORIGIN")
@@ -65,6 +79,27 @@ class Settings(BaseSettings):
             stripped = value.strip()
             return stripped if stripped else None
         return value
+
+    @field_validator("GITHUB_KB_REPO_URL", mode="before")
+    @classmethod
+    def github_kb_repo_url_empty_to_none(cls, value: object) -> object:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            stripped = value.strip()
+            return stripped if stripped else None
+        return value
+
+    @model_validator(mode="after")
+    def validate_github_kb_settings(self) -> Settings:
+        """Require token when private GitHub repo ingestion is enabled."""
+        if self.GITHUB_KB_TOKEN and not self.GITHUB_KB_REPO_URL:
+            raise ValueError("GITHUB_KB_REPO_URL is required when GITHUB_KB_TOKEN is set.")
+        if self.GITHUB_KB_REPO_URL and self.GITHUB_KB_PRIVATE_REPO and not self.GITHUB_KB_TOKEN:
+            raise ValueError(
+                "GITHUB_KB_TOKEN is required when GITHUB_KB_PRIVATE_REPO is true."
+            )
+        return self
 
 
 @lru_cache
