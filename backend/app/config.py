@@ -33,9 +33,6 @@ class Settings(BaseSettings):
     HF_TOKEN: str | None = None
     HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
     HUGGINGFACE_PROVIDER: str = Field(default="hf-inference")
-    CONTENTFUL_SPACE_ID: str | None = None
-    CONTENTFUL_DELIVERY_TOKEN: str | None = None
-    CONTENTFUL_ENVIRONMENT: str = Field(default="master")
 
     @model_validator(mode="before")
     @classmethod

@@ -52,7 +52,7 @@ npm run dev
 - **Frontend only:** `npm run dev:frontend`
 - **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend`)
 
-- Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set Contentful and chat API URL as needed.
+- Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set chat API URL as needed.
 - Env: copy [`backend/.env.example`](backend/.env.example) to `backend/.env` for the API (Hugging Face token, etc.).
 
 ### API env vars
@@ -61,12 +61,11 @@ npm run dev
 - `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
 - `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
-- `CONTENTFUL_SPACE_ID` and `CONTENTFUL_DELIVERY_TOKEN` (optional; richer FAQ context)
 
 ## Chatbot flow
 
 - Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
-- The API retrieves snippets from static site copy + Contentful
+- The API retrieves snippets from static site copy
 - Hugging Face chat completion (with text-generation fallback) produces grounded answers
 - Low retrieval confidence returns a safe fallback with contact guidance
 
