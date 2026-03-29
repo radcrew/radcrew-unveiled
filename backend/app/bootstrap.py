@@ -7,7 +7,7 @@ from typing import AsyncIterator, Callable
 
 from fastapi import FastAPI
 
-from app.chat.retrieval import build_knowledge_chunks, persist_knowledge_index
+from app.chat.retrieval import build_knowledge_chunks
 from app.config import get_settings
 from app.knowledge import get_static_site_documents
 from app.knowledge.github_loader import get_github_markdown_documents
@@ -33,7 +33,6 @@ def create_lifespan(
             ),
         ]
         chunks = build_knowledge_chunks(documents)
-        persist_knowledge_index(chunks)
         on_chunks_loaded(chunks)
         yield
 

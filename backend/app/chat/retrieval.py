@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import json
 import re
-from dataclasses import asdict
-from pathlib import Path
 
 from app.models import KnowledgeChunk, KnowledgeChunkScored, KnowledgeDocument
 
@@ -60,14 +57,6 @@ def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[Knowledge
             if len(ch.tokens) > 0:
                 out.append(ch)
     return out
-
-
-def persist_knowledge_index(chunks: list[KnowledgeChunk]) -> None:
-    cache_dir = Path.cwd() / ".cache"
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    path = cache_dir / "knowledge-index.json"
-    payload = [asdict(c) for c in chunks]
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def retrieve_relevant_chunks(

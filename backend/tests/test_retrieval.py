@@ -1,9 +1,6 @@
-import pytest
-
 from app.chat.retrieval import (
     RETRIEVAL_FALLBACK_SCORE_THRESHOLD,
     build_knowledge_chunks,
-    persist_knowledge_index,
     retrieval_fallback_needed,
     retrieve_relevant_chunks,
     tokenize,
@@ -72,15 +69,3 @@ def test_retrieval_fallback_threshold_boundary():
     assert retrieval_fallback_needed([high]) is False
     assert retrieval_fallback_needed([]) is True
     assert RETRIEVAL_FALLBACK_SCORE_THRESHOLD == 1.2
-
-
-def test_persist_knowledge_index_writes_json(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    doc = KnowledgeDocument(id="z", title="Z", text="Hello there.")
-    chunks = build_knowledge_chunks([doc])
-    persist_knowledge_index(chunks)
-    p = tmp_path / ".cache" / "knowledge-index.json"
-    assert p.is_file()
-    raw = p.read_text(encoding="utf-8")
-    assert "Hello there." in raw
-    assert '"tokens"' in raw
