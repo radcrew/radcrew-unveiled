@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 MSG_FALLBACK_LOW_CONTEXT = (
-    "I don't have enough verified context for that yet. Please email hello@radcrew.dev "
-    "and the team can help directly."
+    "I don't have enough reliable information on that yet. If you'd like, email "
+    "hello@radcrew.dev and the team can help you directly."
 )
 MSG_MISSING_HF_KEY = (
     "The FAQ assistant is not configured yet. Set HUGGINGFACE_API_KEY or HF_TOKEN in "
