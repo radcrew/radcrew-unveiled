@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Iterator
 from typing import Any
 
 from huggingface_hub import InferenceClient
@@ -70,6 +71,54 @@ def _normalize_text_generation_output(out: Any) -> str:
     return ""
 
 
+def _extract_chat_stream_delta(chunk: Any) -> str:
+    if isinstance(chunk, dict):
+        choices = chunk.get("choices")
+        if isinstance(choices, list) and choices:
+            first = choices[0]
+            if isinstance(first, dict):
+                delta = first.get("delta")
+                if isinstance(delta, dict):
+                    content = delta.get("content")
+                    if isinstance(content, str):
+                        return content
+    if hasattr(chunk, "choices"):
+        try:
+            choices = getattr(chunk, "choices")
+            if choices:
+                first = choices[0]
+                delta = getattr(first, "delta", None)
+                content = getattr(delta, "content", None)
+                return content if isinstance(content, str) else ""
+        except Exception:
+            return ""
+    return ""
+
+
+def _extract_text_generation_stream_delta(chunk: Any) -> str:
+    if isinstance(chunk, str):
+        return chunk
+    if isinstance(chunk, dict):
+        token = chunk.get("token")
+        if isinstance(token, dict):
+            text = token.get("text")
+            if isinstance(text, str):
+                return text
+        generated_text = chunk.get("generated_text")
+        if isinstance(generated_text, str):
+            return generated_text
+    if hasattr(chunk, "token"):
+        token = getattr(chunk, "token", None)
+        text = getattr(token, "text", None)
+        if isinstance(text, str):
+            return text
+    if hasattr(chunk, "generated_text"):
+        text = getattr(chunk, "generated_text", None)
+        if isinstance(text, str):
+            return text
+    return ""
+
+
 def generate_answer(
     model: str,
     access_token: str,
@@ -115,6 +164,66 @@ def generate_answer(
 
     raise RuntimeError(
         f'No inference provider could run model "{model}". Try HUGGINGFACE_PROVIDER=auto, '
+        "pick another HUGGINGFACE_MODEL, or enable a provider at "
+        "https://huggingface.co/settings/inference-providers",
+    )
+
+
+def generate_answer_stream(
+    model: str,
+    access_token: str,
+    prompt: str,
+    provider_policy: str = "hf-inference",
+) -> Iterator[str]:
+    providers = _providers_to_try(provider_policy)
+
+    for provider in providers:
+        try:
+            client = InferenceClient(model=model, token=access_token, provider=provider)  # type: ignore[arg-type]
+            stream = client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=512,
+                stream=True,
+            )
+            yielded_any = False
+            for chunk in stream:
+                delta = _extract_chat_stream_delta(chunk)
+                if delta:
+                    yielded_any = True
+                    yield delta
+            if yielded_any:
+                return
+        except Exception as err:
+            if isinstance(err, (HfHubHTTPError, HFValidationError)):
+                _log_hf_error("chatCompletionStream", str(provider), err)
+            else:
+                logger.error("[HF chatCompletionStream provider=%s] %s", provider, err)
+
+    for provider in providers:
+        try:
+            client = InferenceClient(model=model, token=access_token, provider=provider)  # type: ignore[arg-type]
+            stream = client.text_generation(
+                prompt,
+                max_new_tokens=512,
+                return_full_text=False,
+                stream=True,
+            )
+            yielded_any = False
+            for chunk in stream:
+                delta = _extract_text_generation_stream_delta(chunk)
+                if delta:
+                    yielded_any = True
+                    yield delta
+            if yielded_any:
+                return
+        except Exception as err:
+            if isinstance(err, (HfHubHTTPError, HFValidationError)):
+                _log_hf_error("textGenerationStream", str(provider), err)
+            else:
+                logger.error("[HF textGenerationStream provider=%s] %s", provider, err)
+
+    raise RuntimeError(
+        f'No inference provider could stream model "{model}". Try HUGGINGFACE_PROVIDER=auto, '
         "pick another HUGGINGFACE_MODEL, or enable a provider at "
         "https://huggingface.co/settings/inference-providers",
     )
