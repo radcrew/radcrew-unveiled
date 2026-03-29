@@ -61,6 +61,21 @@ npm run dev
 - `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
 - `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
+- `GITHUB_KB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
+- `GITHUB_KB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_KB_PRIVATE_REPO=true`)
+- `GITHUB_KB_BRANCH`: optional branch or ref to ingest (defaults to repository default branch)
+- `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
+- `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
+
+### Private GitHub repo knowledge setup
+
+1. Generate a GitHub personal access token (classic or fine-grained) that can read repository contents.
+2. In `backend/.env`, set:
+   - `GITHUB_KB_REPO_URL=https://github.com/<owner>/<repo>`
+   - `GITHUB_KB_PRIVATE_REPO=true`
+   - `GITHUB_KB_TOKEN=<your_token>`
+3. Optionally set `GITHUB_KB_BRANCH` and/or `GITHUB_KB_PATH` if your Markdown docs live outside default branch root.
+4. Restart the backend (`npm run dev:backend` or `npm run dev`) so startup ingestion reloads from GitHub.
 
 ## Chatbot flow
 
