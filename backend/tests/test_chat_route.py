@@ -41,7 +41,6 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     assert r.status_code == 200
     body = r.json()
     assert body["confidence"] == 0.2
-    assert body["sources"] == []
     assert "hello@radcrew.dev" in body["answer"]
 
 
@@ -100,6 +99,5 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     assert r.status_code == 200
     body = r.json()
     assert body["confidence"] == 0
-    assert body["sources"] == []
     assert "HUGGINGFACE_API_KEY" in body["answer"]
     assert "backend/.env" in body["answer"]

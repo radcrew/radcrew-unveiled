@@ -25,11 +25,14 @@ export async function sendChatMessage(message: string): Promise<ChatbotResponse>
   const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const message =
-      typeof body === "object" && body !== null && "error" in body && typeof (body as { error: unknown }).error === "string"
+    const errorMessage =
+      typeof body === "object" &&
+      body !== null &&
+      "error" in body &&
+      typeof (body as { error: unknown }).error === "string"
         ? (body as { error: string }).error
         : "The chatbot service is currently unavailable.";
-    throw new Error(message);
+    throw new Error(errorMessage);
   }
 
   return body as ChatbotResponse;

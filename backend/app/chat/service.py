@@ -32,7 +32,6 @@ def handle_chat_request(
         return {
             "answer": MSG_FALLBACK_LOW_CONTEXT,
             "confidence": 0.2,
-            "sources": [],
         }
 
     settings = get_settings()
@@ -40,7 +39,6 @@ def handle_chat_request(
         return {
             "answer": MSG_MISSING_HF_KEY,
             "confidence": 0,
-            "sources": [],
         }
 
     context_chunks = [scored_to_chunk(c) for c in relevant]
@@ -55,13 +53,4 @@ def handle_chat_request(
     return {
         "answer": answer,
         "confidence": min(1.0, relevant[0].score / 3),
-        "sources": [
-            {
-                "id": c.id,
-                "title": c.title,
-                "snippet": c.text,
-                **({"url": c.url} if c.url is not None else {}),
-            }
-            for c in relevant
-        ],
     }
