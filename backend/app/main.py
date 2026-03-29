@@ -1,9 +1,10 @@
 import logging
+import json
 
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from app.chat.messages import MSG_AI_UNAVAILABLE
-from app.chat.service import handle_chat_request
+from app.chat.service import handle_chat_request, stream_chat_request
 from app.bootstrap import create_lifespan
 from app.config import get_settings
 from app.http import create_http_app
@@ -44,6 +45,33 @@ def chat(body: ChatRequest) -> dict | JSONResponse:
             status_code=502,
             content={"error": MSG_AI_UNAVAILABLE},
         )
+
+
+@app.post("/chat/stream", response_model=None)
+def chat_stream(body: ChatRequest) -> StreamingResponse | JSONResponse:
+    try:
+        answer_stream, confidence = stream_chat_request(body, knowledge_chunks)
+    except Exception:
+        logger.exception("POST /chat/stream failed")
+        return JSONResponse(
+            status_code=502,
+            content={"error": MSG_AI_UNAVAILABLE},
+        )
+
+    def event_stream():
+        for chunk in answer_stream:
+            if chunk:
+                yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+        yield f"data: {json.dumps({'type': 'done', 'confidence': confidence})}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 if __name__ == "__main__":

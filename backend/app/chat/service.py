@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from app.chat.huggingface import generate_answer
+from collections.abc import Iterator
+
+from app.chat.huggingface import generate_answer, generate_answer_stream
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
 from app.chat.prompt import build_chat_prompt
 from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
@@ -54,3 +56,34 @@ def handle_chat_request(
         "answer": answer,
         "confidence": min(1.0, relevant[0].score / 3),
     }
+
+
+def stream_chat_request(
+    body: ChatRequest,
+    knowledge_chunks: list[KnowledgeChunk],
+) -> tuple[Iterator[str], float]:
+    message = body.message
+    relevant = retrieve_relevant_chunks(knowledge_chunks, message, 5)
+
+    if retrieval_fallback_needed(relevant):
+        def fallback_stream() -> Iterator[str]:
+            yield MSG_FALLBACK_LOW_CONTEXT
+        return fallback_stream(), 0.2
+
+    settings = get_settings()
+    if not settings.HUGGINGFACE_API_KEY:
+        def config_stream() -> Iterator[str]:
+            yield MSG_MISSING_HF_KEY
+        return config_stream(), 0
+
+    context_chunks = [scored_to_chunk(c) for c in relevant]
+    prompt = build_chat_prompt(message, context_chunks)
+    return (
+        generate_answer_stream(
+            settings.HUGGINGFACE_MODEL,
+            settings.HUGGINGFACE_API_KEY,
+            prompt,
+            settings.HUGGINGFACE_PROVIDER,
+        ),
+        min(1.0, relevant[0].score / 3),
+    )
