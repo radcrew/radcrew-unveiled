@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from app.models import KnowledgeChunk, KnowledgeChunkScored
-
 MSG_FALLBACK_LOW_CONTEXT = (
     "I don't have enough verified context for that yet. Please email hello@radcrew.dev "
     "and the team can help directly."
@@ -16,13 +14,3 @@ MSG_AI_UNAVAILABLE = (
     "The AI service is temporarily unavailable. Please try again in a moment or "
     "email hello@radcrew.dev."
 )
-
-
-def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
-    return KnowledgeChunk(
-        id=scored.id,
-        title=scored.title,
-        text=scored.text,
-        tokens=scored.tokens,
-        url=scored.url,
-    )
