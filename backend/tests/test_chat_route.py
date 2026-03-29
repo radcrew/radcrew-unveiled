@@ -35,7 +35,7 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
     assert r.json() == {"error": "Invalid request payload."}
 
 
-@patch("app.main.retrieve_relevant_chunks", return_value=[])
+@patch("app.chat.service.retrieve_relevant_chunks", return_value=[])
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
@@ -45,9 +45,9 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     assert "hello@radcrew.dev" in body["answer"]
 
 
-@patch("app.main.generate_answer", side_effect=RuntimeError("no provider"))
-@patch("app.main.get_settings")
-@patch("app.main.retrieve_relevant_chunks")
+@patch("app.chat.service.generate_answer", side_effect=RuntimeError("no provider"))
+@patch("app.chat.service.get_settings")
+@patch("app.chat.service.retrieve_relevant_chunks")
 def test_chat_hf_failure_returns_502(
     mock_retrieve: MagicMock,
     mock_settings: MagicMock,
@@ -75,8 +75,8 @@ def test_chat_hf_failure_returns_502(
     assert r.json()["error"].startswith("The AI service is temporarily unavailable")
 
 
-@patch("app.main.get_settings")
-@patch("app.main.retrieve_relevant_chunks")
+@patch("app.chat.service.get_settings")
+@patch("app.chat.service.retrieve_relevant_chunks")
 def test_chat_missing_hf_key_returns_200_with_config_message(
     mock_retrieve: MagicMock,
     mock_settings: MagicMock,
