@@ -15,6 +15,7 @@ interface ChatPanelProps {
   onOpenChange: (open: boolean) => void;
   messages: ChatMessage[];
   pending: boolean;
+  showLoading: boolean;
   error: string | null;
   draft: string;
   onDraftChange: (value: string) => void;
@@ -29,6 +30,7 @@ export function ChatPanel({
   onOpenChange,
   messages,
   pending,
+  showLoading,
   error,
   draft,
   onDraftChange,
@@ -45,7 +47,7 @@ export function ChatPanel({
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col">
-          <ChatMessageList messages={messages} pending={pending} scrollAnchorRef={scrollAnchorRef} />
+          <ChatMessageList messages={messages} showLoading={showLoading} scrollAnchorRef={scrollAnchorRef} />
           {error && <ChatErrorBanner message={error} />}
           <ChatComposer
             draft={draft}

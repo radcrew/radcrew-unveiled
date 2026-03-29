@@ -9,6 +9,7 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
+  const [streamStarted, setStreamStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
 
@@ -40,10 +41,12 @@ export function ChatWidget() {
     setDraft("");
     setError(null);
     setPending(true);
+    setStreamStarted(false);
 
     try {
       await streamChatMessage(text, {
         onChunk: (chunk) => {
+          setStreamStarted(true);
           setMessages((existing) =>
             existing.map((msg) =>
               msg.id === assistantId ? { ...msg, content: `${msg.content}${chunk}` } : msg,
@@ -58,6 +61,7 @@ export function ChatWidget() {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setPending(false);
+      setStreamStarted(false);
     }
   };
 
@@ -74,6 +78,7 @@ export function ChatWidget() {
         onOpenChange={setOpen}
         messages={messages}
         pending={pending}
+        showLoading={pending && !streamStarted}
         error={error}
         draft={draft}
         onDraftChange={setDraft}

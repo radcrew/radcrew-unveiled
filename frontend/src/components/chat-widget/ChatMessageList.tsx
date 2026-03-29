@@ -5,17 +5,19 @@ import { ChatBubble } from "./ChatBubble";
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
-  pending: boolean;
+  showLoading: boolean;
   scrollAnchorRef: RefObject<HTMLDivElement | null>;
 }
 
-export function ChatMessageList({ messages, pending, scrollAnchorRef }: ChatMessageListProps) {
+export function ChatMessageList({ messages, showLoading, scrollAnchorRef }: ChatMessageListProps) {
+  const visibleMessages = messages.filter((msg) => msg.role === "user" || msg.content.trim().length > 0);
+
   return (
     <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
-      {messages.map((msg) => (
+      {visibleMessages.map((msg) => (
         <ChatBubble key={msg.id} role={msg.role} content={msg.content} />
       ))}
-      {pending && (
+      {showLoading && (
         <div className="mr-auto flex max-w-[92%] items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
           Thinking…
