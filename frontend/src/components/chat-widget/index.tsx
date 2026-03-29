@@ -40,7 +40,6 @@ export function ChatWidget() {
           id: `a-${Date.now()}`,
           role: "assistant",
           content: res.answer,
-          sources: res.sources,
         },
       ]);
     } catch (err) {
