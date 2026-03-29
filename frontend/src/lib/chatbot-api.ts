@@ -1,20 +1,47 @@
-export interface ChatbotSource {
-  id: string;
-  title: string;
-  snippet: string;
-  url?: string;
-}
-
-export interface ChatbotResponse {
-  answer: string;
-  confidence: number;
-  sources: ChatbotSource[];
-}
-
 const baseUrl = (import.meta.env.VITE_CHATBOT_API_BASE_URL ?? "http://localhost:8787").replace(/\/$/, "");
 
-export async function sendChatMessage(message: string): Promise<ChatbotResponse> {
-  const response = await fetch(`${baseUrl}/chat`, {
+type ChatStreamEvent =
+  | { type: "chunk"; content: string }
+  | { type: "done"; confidence: number }
+  | { type: "error"; error: string };
+
+interface StreamChatHandlers {
+  onChunk: (chunk: string) => void;
+  onDone?: (confidence: number) => void;
+}
+
+function extractErrorMessage(body: unknown): string {
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "error" in body &&
+    typeof (body as { error: unknown }).error === "string"
+  ) {
+    return (body as { error: string }).error;
+  }
+  return "The chatbot service is currently unavailable.";
+}
+
+function parseSseEvent(rawEvent: string): ChatStreamEvent | null {
+  const normalized = rawEvent.replace(/\r\n/g, "\n");
+  const data = normalized
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("data:"))
+    .map((line) => line.slice(5).trim())
+    .join("");
+
+  if (!data) return null;
+
+  try {
+    return JSON.parse(data) as ChatStreamEvent;
+  } catch {
+    return null;
+  }
+}
+
+export async function streamChatMessage(message: string, handlers: StreamChatHandlers): Promise<void> {
+  const response = await fetch(`${baseUrl}/chat/stream`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,18 +49,38 @@ export async function sendChatMessage(message: string): Promise<ChatbotResponse>
     body: JSON.stringify({ message }),
   });
 
-  const body = await response.json().catch(() => ({}));
-
   if (!response.ok) {
-    const errorMessage =
-      typeof body === "object" &&
-      body !== null &&
-      "error" in body &&
-      typeof (body as { error: unknown }).error === "string"
-        ? (body as { error: string }).error
-        : "The chatbot service is currently unavailable.";
-    throw new Error(errorMessage);
+    const body = await response.json().catch(() => ({}));
+    throw new Error(extractErrorMessage(body));
   }
 
-  return body as ChatbotResponse;
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error("The chatbot service did not return a stream.");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const events = buffer.split("\n\n");
+    buffer = events.pop() ?? "";
+
+    for (const rawEvent of events) {
+      const event = parseSseEvent(rawEvent);
+      if (!event) continue;
+
+      if (event.type === "chunk" && event.content) {
+        handlers.onChunk(event.content);
+      } else if (event.type === "done") {
+        handlers.onDone?.(event.confidence);
+      } else if (event.type === "error") {
+        throw new Error(event.error);
+      }
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { sendChatMessage } from "@/lib/chatbot-api";
+import { streamChatMessage } from "@/lib/chatbot-api";
 import { ChatFloatingButton } from "./ChatFloatingButton";
 import { ChatPanel } from "./ChatPanel";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
@@ -27,22 +27,34 @@ export function ChatWidget() {
       role: "user",
       content: text,
     };
-    setMessages((m) => [...m, userMsg]);
+    const assistantId = `a-${Date.now()}`;
+    setMessages((m) => [
+      ...m,
+      userMsg,
+      {
+        id: assistantId,
+        role: "assistant",
+        content: "",
+      },
+    ]);
     setDraft("");
     setError(null);
     setPending(true);
 
     try {
-      const res = await sendChatMessage(text);
-      setMessages((m) => [
-        ...m,
-        {
-          id: `a-${Date.now()}`,
-          role: "assistant",
-          content: res.answer,
+      await streamChatMessage(text, {
+        onChunk: (chunk) => {
+          setMessages((existing) =>
+            existing.map((msg) =>
+              msg.id === assistantId ? { ...msg, content: `${msg.content}${chunk}` } : msg,
+            ),
+          );
         },
-      ]);
+      });
     } catch (err) {
+      setMessages((existing) =>
+        existing.filter((msg) => !(msg.id === assistantId && msg.content.trim().length === 0)),
+      );
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setPending(false);
