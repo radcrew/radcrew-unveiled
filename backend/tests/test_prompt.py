@@ -22,7 +22,7 @@ def test_build_chat_prompt_joins_sources_and_question():
     assert "Source 1 (About): We build things." in out
     assert "Source 2 (Contact): Email us." in out
     assert "Question: What do you do?" in out
-    assert "Respond in plain text." in out
+    assert "Format the answer in simple Markdown for readability" in out
 
 
 def test_build_chat_prompt_no_context_falls_back_to_placeholder():

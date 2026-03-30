@@ -49,6 +49,6 @@ def build_chat_prompt(
             "",
             f"Question: {question}",
             "",
-            "Respond in plain text.",
+            "Format the answer in simple Markdown for readability (use bold labels and short bullet lists when helpful).",
         ]
     )
