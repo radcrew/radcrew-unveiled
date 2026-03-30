@@ -25,7 +25,7 @@ interface ChatPanelProps {
   scrollAnchorRef: RefObject<HTMLDivElement | null>;
 }
 
-export function ChatPanel({
+export const ChatPanel = ({
   open,
   onOpenChange,
   messages,
@@ -38,30 +38,28 @@ export function ChatPanel({
   onSubmit,
   onSend,
   scrollAnchorRef,
-}: ChatPanelProps) {
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-        <SheetHeader className="shrink-0 space-y-1 border-b border-border px-6 py-4 text-left">
-          <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
-          <p className="text-xs text-muted-foreground">
-            AI assistant responses may be inaccurate. Please verify important details.
-          </p>
-        </SheetHeader>
+}: ChatPanelProps) => (
+  <Sheet open={open} onOpenChange={onOpenChange}>
+    <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+      <SheetHeader className="shrink-0 space-y-1 border-b border-border px-6 py-4 text-left">
+        <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
+        <p className="text-xs text-muted-foreground">
+          AI assistant responses may be inaccurate. Please verify important details.
+        </p>
+      </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col">
-          <ChatMessageList messages={messages} showLoading={showLoading} scrollAnchorRef={scrollAnchorRef} />
-          {error && <ChatErrorBanner message={error} />}
-          <ChatComposer
-            draft={draft}
-            onDraftChange={onDraftChange}
-            pending={pending}
-            canSend={canSend}
-            onSubmit={onSubmit}
-            onSend={onSend}
-          />
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
+      <div className="flex min-h-0 flex-1 flex-col">
+        <ChatMessageList messages={messages} showLoading={showLoading} scrollAnchorRef={scrollAnchorRef} />
+        {error && <ChatErrorBanner message={error} />}
+        <ChatComposer
+          draft={draft}
+          onDraftChange={onDraftChange}
+          pending={pending}
+          canSend={canSend}
+          onSubmit={onSubmit}
+          onSend={onSend}
+        />
+      </div>
+    </SheetContent>
+  </Sheet>
+);

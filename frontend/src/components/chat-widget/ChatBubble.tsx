@@ -13,12 +13,11 @@ interface ChatBubbleProps {
   content: string;
 }
 
-function isExternalHref(href: string): boolean {
-  return href.startsWith("http://") || href.startsWith("https://");
-}
+const isExternalHref = (href: string): boolean =>
+  href.startsWith("http://") || href.startsWith("https://");
 
-function SegmentList({ segments }: { segments: InlineSegment[] }): ReactNode {
-  return segments
+const SegmentList = ({ segments }: { segments: InlineSegment[] }): ReactNode =>
+  segments
     .map((seg, i) => ({ seg, i }))
     .filter(({ seg }) => seg.kind !== "text" || seg.value.length > 0)
     .map(({ seg, i }) => {
@@ -38,19 +37,17 @@ function SegmentList({ segments }: { segments: InlineSegment[] }): ReactNode {
         </a>
       );
     });
-}
 
-function InlineRunList({ runs }: { runs: InlineRun[] }): ReactNode {
-  return runs.map((run, i) => {
+const InlineRunList = ({ runs }: { runs: InlineRun[] }): ReactNode =>
+  runs.map((run, i) => {
     const inner = <SegmentList segments={run.segments} />;
     if (run.bold) {
       return <strong key={`b-${i}`}>{inner}</strong>;
     }
     return <span key={`p-${i}`}>{inner}</span>;
   });
-}
 
-function AssistantMessageBody({ content }: { content: string }): ReactNode {
+const AssistantMessageBody = ({ content }: { content: string }): ReactNode => {
   const blocks: AssistantBlock[] = parseAssistantBlocks(content);
 
   return (
@@ -88,23 +85,17 @@ function AssistantMessageBody({ content }: { content: string }): ReactNode {
       })}
     </div>
   );
-}
+};
 
-export function ChatBubble({ role, content }: ChatBubbleProps) {
-  return (
-    <div
-      className={cn(
-        "max-w-[92%] rounded-xl px-3 py-2.5 text-sm leading-relaxed shadow-sm",
-        role === "user"
-          ? "ml-auto bg-accent text-accent-foreground"
-          : "mr-auto border border-border bg-card text-card-foreground",
-      )}
-    >
-      {role === "assistant" ? (
-        <AssistantMessageBody content={content} />
-      ) : (
-        <p className="whitespace-pre-wrap">{content}</p>
-      )}
-    </div>
-  );
-}
+export const ChatBubble = ({ role, content }: ChatBubbleProps) => (
+  <div
+    className={cn(
+      "max-w-[92%] rounded-xl px-3 py-2.5 text-sm leading-relaxed shadow-sm",
+      role === "user"
+        ? "ml-auto bg-accent text-accent-foreground"
+        : "mr-auto border border-border bg-card text-card-foreground",
+    )}
+  >
+    {role === "assistant" ? <AssistantMessageBody content={content} /> : <p className="whitespace-pre-wrap">{content}</p>}
+  </div>
+);

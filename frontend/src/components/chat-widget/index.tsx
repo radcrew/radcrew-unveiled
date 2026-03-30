@@ -4,7 +4,7 @@ import { ChatFloatingButton } from "./ChatFloatingButton";
 import { ChatPanel } from "./ChatPanel";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
 
-export function ChatWidget() {
+export const ChatWidget = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState("");
@@ -54,16 +54,20 @@ export function ChatWidget() {
     setStreamStarted(false);
 
     try {
-      await streamChatMessage(text, {
-        onChunk: (chunk) => {
-          setStreamStarted(true);
-          setMessages((existing) =>
-            existing.map((msg) =>
-              msg.id === assistantId ? { ...msg, content: `${msg.content}${chunk}` } : msg,
-            ),
-          );
+      await streamChatMessage(
+        text,
+        {
+          onChunk: (chunk) => {
+            setStreamStarted(true);
+            setMessages((existing) =>
+              existing.map((msg) =>
+                msg.id === assistantId ? { ...msg, content: `${msg.content}${chunk}` } : msg,
+              ),
+            );
+          },
         },
-      }, history);
+        history,
+      );
     } catch (err) {
       setMessages((existing) =>
         existing.filter((msg) => !(msg.id === assistantId && msg.content.trim().length === 0)),
@@ -99,4 +103,4 @@ export function ChatWidget() {
       />
     </>
   );
-}
+};

@@ -9,7 +9,7 @@ interface ChatMessageListProps {
   scrollAnchorRef: RefObject<HTMLDivElement | null>;
 }
 
-export function ChatMessageList({ messages, showLoading, scrollAnchorRef }: ChatMessageListProps) {
+export const ChatMessageList = ({ messages, showLoading, scrollAnchorRef }: ChatMessageListProps) => {
   const visibleMessages = messages.filter((msg) => msg.role === "user" || msg.content.trim().length > 0);
 
   return (
@@ -26,4 +26,4 @@ export function ChatMessageList({ messages, showLoading, scrollAnchorRef }: Chat
       <div ref={scrollAnchorRef} aria-hidden className="h-px w-full shrink-0" />
     </div>
   );
-}
+};
