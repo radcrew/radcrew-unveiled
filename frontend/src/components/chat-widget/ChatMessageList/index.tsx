@@ -1,7 +1,8 @@
 import { Loader2 } from "lucide-react";
 import type { RefObject } from "react";
-import type { ChatMessage } from "./types";
-import { ChatBubble } from "./ChatBubble";
+import { ChatBubble } from "../ChatBubble";
+import type { ChatMessage } from "../types";
+import * as styles from "./styles";
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
@@ -13,17 +14,17 @@ export const ChatMessageList = ({ messages, showLoading, scrollAnchorRef }: Chat
   const visibleMessages = messages.filter((msg) => msg.role === "user" || msg.content.trim().length > 0);
 
   return (
-    <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
+    <div className={styles.root}>
       {visibleMessages.map((msg) => (
         <ChatBubble key={msg.id} role={msg.role} content={msg.content} />
       ))}
       {showLoading && (
-        <div className="mr-auto flex max-w-[92%] items-center gap-2 rounded-xl border border-border bg-muted/50 px-3 py-2.5 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+        <div className={styles.loadingRow}>
+          <Loader2 className={styles.loadingSpinner} aria-hidden />
           Thinking…
         </div>
       )}
-      <div ref={scrollAnchorRef} aria-hidden className="h-px w-full shrink-0" />
+      <div ref={scrollAnchorRef} aria-hidden className={styles.scrollAnchor} />
     </div>
   );
 };
