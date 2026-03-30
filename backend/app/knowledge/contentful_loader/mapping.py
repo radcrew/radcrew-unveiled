@@ -25,12 +25,19 @@ def map_engineer_entry(entry: dict[str, object], site_base_url: str) -> Knowledg
     bio = field_to_plain(fields, "summery") or field_to_plain(fields, "summary")
     website = field_to_plain(fields, "website")
 
-    title = f"{name} — {role}" if name else "RadCrew team member"
-    parts = [f"Name: {name or 'Unknown'}", f"Role: {role or 'Engineer'}"]
+    title = f"{name} — {role}" if name and role else (name or "RadCrew team member")
+    parts: list[str] = []
+    if name:
+        parts.append(f"Name: {name}")
+    if role:
+        parts.append(f"Role: {role}")
     if bio:
         parts.append(f"Bio: {bio}")
     if website:
         parts.append(f"Website: {website}")
+
+    if not parts:
+        parts.append("No profile details available.")
 
     path = parse.urljoin(site_base_url.rstrip("/") + "/", f"team/{entry_id}")
     return KnowledgeDocument(

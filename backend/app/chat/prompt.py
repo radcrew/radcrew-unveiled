@@ -36,6 +36,7 @@ def build_chat_prompt(
             "Answer only using the conversation history and provided context sources.",
             "If both history and context sources are insufficient, say you do not have enough information and suggest emailing hello@radcrew.dev.",
             "Keep answers consistent, factual, concise, helpful, and accurate.",
+            "Never contradict yourself.",
             "",
             "Conversation history:",
             history_section,
