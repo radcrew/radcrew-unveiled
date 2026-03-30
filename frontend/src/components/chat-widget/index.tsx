@@ -23,6 +23,16 @@ export function ChatWidget() {
     const text = draft.trim();
     if (text.length < 2 || pending) return;
 
+    // Send previous turns so the backend can treat this as a follow-up question.
+    // Backend constraints: max 12 history messages, and each message content max 2000 chars.
+    const history = messages
+      .filter((m) => m.id !== "welcome")
+      .slice(-12)
+      .map((m) => ({
+        role: m.role,
+        content: m.content.slice(0, 2000),
+      }));
+
     const userMsg: ChatMessage = {
       id: `u-${Date.now()}`,
       role: "user",
@@ -53,7 +63,7 @@ export function ChatWidget() {
             ),
           );
         },
-      });
+      }, history);
     } catch (err) {
       setMessages((existing) =>
         existing.filter((msg) => !(msg.id === assistantId && msg.content.trim().length === 0)),

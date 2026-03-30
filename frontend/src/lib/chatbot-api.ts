@@ -10,6 +10,8 @@ interface StreamChatHandlers {
   onDone?: (confidence: number) => void;
 }
 
+type ChatHistoryMessage = { role: "user" | "assistant"; content: string };
+
 function extractErrorMessage(body: unknown): string {
   if (
     typeof body === "object" &&
@@ -40,13 +42,17 @@ function parseSseEvent(rawEvent: string): ChatStreamEvent | null {
   }
 }
 
-export async function streamChatMessage(message: string, handlers: StreamChatHandlers): Promise<void> {
+export async function streamChatMessage(
+  message: string,
+  handlers: StreamChatHandlers,
+  history?: ChatHistoryMessage[],
+): Promise<void> {
   const response = await fetch(`${baseUrl}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, ...(history ? { history } : {}) }),
   });
 
   if (!response.ok) {
