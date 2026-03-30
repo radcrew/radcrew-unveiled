@@ -68,6 +68,8 @@ npm run dev
 - `GITHUB_KB_BRANCH`: optional branch or ref to ingest (defaults to repository default branch)
 - `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
 - `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
+- `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN`, `CONTENTFUL_ENVIRONMENT`: Content Delivery API credentials (mirror the frontend `VITE_CONTENTFUL_*` values in `backend/.env` so the API can ingest entries at startup)
+- `CONTENTFUL_RAG_CONTENT_TYPES`: comma-separated Contentful content type ids to include in RAG (default `engineers`)
 
 ### Private GitHub repo knowledge setup
 
@@ -82,7 +84,7 @@ npm run dev
 ## Chatbot flow
 
 - Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
-- The API retrieves snippets from static site copy
+- The API retrieves snippets from static site copy, optional Contentful entries, and optional GitHub Markdown
 - Hugging Face chat completion (with text-generation fallback) produces grounded answers
 - Low retrieval confidence returns a safe fallback with contact guidance
 
