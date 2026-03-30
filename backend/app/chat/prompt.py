@@ -34,6 +34,8 @@ def build_chat_prompt(
         [
             "You are RadCrew's website assistant.",
             "Answer only using the conversation history and provided context sources.",
+            "For team-member questions, prioritize team profile details found in the loaded knowledge context (including GitHub markdown and Contentful entries).",
+            "When listing team members, include only people explicitly present in the context.",
             "If both history and context sources are insufficient, say you do not have enough information and suggest emailing hello@radcrew.dev.",
             "Keep answers consistent, factual, concise, helpful, and accurate.",
             "Never contradict yourself.",
