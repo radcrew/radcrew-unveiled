@@ -83,13 +83,20 @@ def stream_chat_request(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
 ) -> tuple[Iterator[str], float]:
+    settings = get_settings()
     message = body.message
-    relevant = retrieve_relevant_chunks(knowledge_chunks, message, 5)
+    relevant = retrieve_relevant_chunks(
+        knowledge_chunks,
+        message,
+        5,
+        embedding_access_token=settings.HUGGINGFACE_API_KEY,
+        embedding_model=settings.HUGGINGFACE_EMBEDDING_MODEL,
+        embedding_provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
+    )
 
     if retrieval_fallback_needed(relevant):
         return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT), 0.2
 
-    settings = get_settings()
     if not settings.HUGGINGFACE_API_KEY:
         return stream_text_chunks(MSG_MISSING_HF_KEY), 0
 

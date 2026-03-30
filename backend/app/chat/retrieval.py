@@ -1,9 +1,11 @@
-"""Chunking and lexical overlap retrieval (parity with backend/src/chat/retrieval.ts)."""
+"""Chunking and hybrid retrieval (lexical + semantic embeddings)."""
 
 from __future__ import annotations
 
+import logging
 import re
 
+from huggingface_hub import InferenceClient
 from app.models import KnowledgeChunk, KnowledgeChunkScored, KnowledgeDocument
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
@@ -11,10 +13,38 @@ SENTENCE_SPLIT = re.compile(r"(?<=[.?!])\s+")
 
 # Same threshold as backend/src/server.ts (`relevantChunks[0].score < 1.2`).
 RETRIEVAL_FALLBACK_SCORE_THRESHOLD = 1.2
+SEMANTIC_SCORE_WEIGHT = 2.0
+
+logger = logging.getLogger(__name__)
 
 
 def tokenize(text: str) -> list[str]:
     return [t for t in TOKEN_RE.findall(text.lower()) if len(t) > 1]
+
+
+def _semantic_scores(
+    *,
+    chunks: list[KnowledgeChunk],
+    query: str,
+    embedding_access_token: str,
+    embedding_model: str,
+    embedding_provider: str,
+) -> list[float]:
+    if not chunks:
+        return []
+    client = InferenceClient(
+        model=embedding_model,
+        token=embedding_access_token,
+        provider=embedding_provider,  # type: ignore[arg-type]
+    )
+    candidates = [f"{chunk.title}\n{chunk.text}" for chunk in chunks]
+    similarities = client.sentence_similarity(
+        sentence=query,
+        other_sentences=candidates,
+        model=embedding_model,
+    )
+    # Clamp negatives to 0 so semantic score only boosts, never penalizes lexical matches.
+    return [max(0.0, float(s)) for s in similarities]
 
 
 def _chunk_document(doc: KnowledgeDocument) -> list[KnowledgeChunk]:
@@ -63,16 +93,34 @@ def retrieve_relevant_chunks(
     chunks: list[KnowledgeChunk],
     query: str,
     limit: int = 5,
+    *,
+    embedding_access_token: str | None = None,
+    embedding_model: str | None = None,
+    embedding_provider: str = "hf-inference",
 ) -> list[KnowledgeChunkScored]:
     query_tokens = set(tokenize(query))
     if len(query_tokens) == 0:
         return []
 
+    semantic_by_index = [0.0] * len(chunks)
+    if embedding_access_token and embedding_model:
+        try:
+            semantic_by_index = _semantic_scores(
+                chunks=chunks,
+                query=query,
+                embedding_access_token=embedding_access_token,
+                embedding_model=embedding_model,
+                embedding_provider=embedding_provider,
+            )
+        except Exception as exc:
+            logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
+
     scored: list[KnowledgeChunkScored] = []
-    for chunk in chunks:
+    for idx, chunk in enumerate(chunks):
         overlap = sum(1 for t in chunk.tokens if t in query_tokens)
         density = overlap / max(len(chunk.tokens), 1)
-        score = overlap + density
+        lexical_score = overlap + density
+        score = lexical_score + (SEMANTIC_SCORE_WEIGHT * semantic_by_index[idx])
         if score > 0:
             scored.append(
                 KnowledgeChunkScored(
