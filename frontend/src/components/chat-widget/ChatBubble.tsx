@@ -1,4 +1,11 @@
 import { cn } from "@/lib/utils";
+import {
+  parseAssistantBlocks,
+  textToInlineRuns,
+  type AssistantBlock,
+  type InlineRun,
+  type InlineSegment,
+} from "@/lib/chat-bubble-format";
 import type { ReactNode } from "react";
 
 interface ChatBubbleProps {
@@ -6,44 +13,67 @@ interface ChatBubbleProps {
   content: string;
 }
 
-function renderInlineMarkdown(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, index) => {
-    const boldMatch = /^\*\*([^*]+)\*\*$/.exec(part);
-    if (boldMatch) {
-      return <strong key={`b-${index}`}>{boldMatch[1]}</strong>;
+function isExternalHref(href: string): boolean {
+  return href.startsWith("http://") || href.startsWith("https://");
+}
+
+function SegmentList({ segments }: { segments: InlineSegment[] }): ReactNode {
+  return segments
+    .map((seg, i) => ({ seg, i }))
+    .filter(({ seg }) => seg.kind !== "text" || seg.value.length > 0)
+    .map(({ seg, i }) => {
+      if (seg.kind === "text") {
+        return <span key={`t-${i}`}>{seg.value}</span>;
+      }
+      const external = isExternalHref(seg.href);
+      return (
+        <a
+          key={`a-${i}`}
+          href={seg.href}
+          target={external ? "_blank" : undefined}
+          rel={external ? "noopener noreferrer" : undefined}
+          className="underline underline-offset-2"
+        >
+          {seg.label}
+        </a>
+      );
+    });
+}
+
+function InlineRunList({ runs }: { runs: InlineRun[] }): ReactNode {
+  return runs.map((run, i) => {
+    const inner = <SegmentList segments={run.segments} />;
+    if (run.bold) {
+      return <strong key={`b-${i}`}>{inner}</strong>;
     }
-    return <span key={`t-${index}`}>{part}</span>;
+    return <span key={`p-${i}`}>{inner}</span>;
   });
 }
 
-function renderAssistantContent(content: string): ReactNode {
-  const blocks = content.split(/\n{2,}/).filter((b) => b.trim().length > 0);
+function AssistantMessageBody({ content }: { content: string }): ReactNode {
+  const blocks: AssistantBlock[] = parseAssistantBlocks(content);
+
   return (
     <div className="space-y-2">
       {blocks.map((block, index) => {
-        const lines = block.split("\n").filter((line) => line.trim().length > 0);
-        const ordered = lines.every((line) => /^\d+\.\s+/.test(line.trim()));
-        const unordered = lines.every((line) => /^-\s+/.test(line.trim()));
-
-        if (ordered) {
+        if (block.kind === "ordered") {
           return (
             <ol key={`o-${index}`} className="list-decimal space-y-1 pl-5">
-              {lines.map((line, lineIndex) => (
+              {block.items.map((item, lineIndex) => (
                 <li key={`ol-${index}-${lineIndex}`}>
-                  {renderInlineMarkdown(line.trim().replace(/^\d+\.\s+/, ""))}
+                  <InlineRunList runs={textToInlineRuns(item)} />
                 </li>
               ))}
             </ol>
           );
         }
 
-        if (unordered) {
+        if (block.kind === "unordered") {
           return (
             <ul key={`u-${index}`} className="list-disc space-y-1 pl-5">
-              {lines.map((line, lineIndex) => (
+              {block.items.map((item, lineIndex) => (
                 <li key={`ul-${index}-${lineIndex}`}>
-                  {renderInlineMarkdown(line.trim().replace(/^-\s+/, ""))}
+                  <InlineRunList runs={textToInlineRuns(item)} />
                 </li>
               ))}
             </ul>
@@ -52,7 +82,7 @@ function renderAssistantContent(content: string): ReactNode {
 
         return (
           <p key={`p-${index}`} className="whitespace-pre-wrap">
-            {renderInlineMarkdown(block)}
+            <InlineRunList runs={textToInlineRuns(block.body)} />
           </p>
         );
       })}
@@ -70,7 +100,11 @@ export function ChatBubble({ role, content }: ChatBubbleProps) {
           : "mr-auto border border-border bg-card text-card-foreground",
       )}
     >
-      {role === "assistant" ? renderAssistantContent(content) : <p className="whitespace-pre-wrap">{content}</p>}
+      {role === "assistant" ? (
+        <AssistantMessageBody content={content} />
+      ) : (
+        <p className="whitespace-pre-wrap">{content}</p>
+      )}
     </div>
   );
 }
