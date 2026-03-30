@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import time
 from collections.abc import Iterator
+from collections import OrderedDict
+from threading import Lock
 
 from app.chat.huggingface import generate_answer
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
@@ -15,6 +18,46 @@ from app.schemas import ChatRequest
 
 STREAM_TEXT_CHUNK_SIZE = 24
 FALLBACK_STREAM_CHUNK_DELAY_SECONDS = 0.03
+RESPONSE_CACHE_MAX_SIZE = 256
+
+_response_cache: OrderedDict[str, str] = OrderedDict()
+_response_cache_lock = Lock()
+
+
+def _prompt_cache_key(prompt: str) -> str:
+    return hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+
+
+def _cache_get(key: str) -> str | None:
+    with _response_cache_lock:
+        value = _response_cache.get(key)
+        if value is None:
+            return None
+        # Maintain LRU recency.
+        _response_cache.move_to_end(key)
+        return value
+
+
+def _cache_put(key: str, value: str) -> None:
+    if not value:
+        return
+    with _response_cache_lock:
+        _response_cache[key] = value
+        _response_cache.move_to_end(key)
+        while len(_response_cache) > RESPONSE_CACHE_MAX_SIZE:
+            _response_cache.popitem(last=False)
+
+
+def _stream_and_cache(
+    answer_stream: Iterator[str],
+    cache_key: str,
+) -> Iterator[str]:
+    parts: list[str] = []
+    for chunk in answer_stream:
+        if chunk:
+            parts.append(chunk)
+            yield chunk
+    _cache_put(cache_key, "".join(parts))
 
 
 def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
@@ -52,12 +95,20 @@ def stream_chat_request(
 
     context_chunks = [scored_to_chunk(c) for c in relevant]
     prompt = build_chat_prompt(message, context_chunks)
+    cache_key = _prompt_cache_key(prompt)
+    cached = _cache_get(cache_key)
+    if cached is not None:
+        return stream_text_chunks(cached), min(1.0, relevant[0].score / 3)
+
     return (
-        generate_answer(
-            settings.HUGGINGFACE_MODEL,
-            settings.HUGGINGFACE_API_KEY,
-            prompt,
-            settings.HUGGINGFACE_PROVIDER,
+        _stream_and_cache(
+            generate_answer(
+                settings.HUGGINGFACE_MODEL,
+                settings.HUGGINGFACE_API_KEY,
+                prompt,
+                settings.HUGGINGFACE_PROVIDER,
+            ),
+            cache_key,
         ),
         min(1.0, relevant[0].score / 3),
     )

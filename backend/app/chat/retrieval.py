@@ -85,7 +85,8 @@ def retrieve_relevant_chunks(
                 )
             )
 
-    scored.sort(key=lambda c: c.score, reverse=True)
+    # Stable tie-breaking keeps context ordering deterministic across runs.
+    scored.sort(key=lambda c: (-c.score, c.id, c.title))
     return scored[:limit]
 
 

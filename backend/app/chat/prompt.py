@@ -16,7 +16,7 @@ def build_chat_prompt(question: str, context_chunks: list[KnowledgeChunk]) -> st
             "You are RadCrew's website assistant.",
             "Answer only using the provided sources and don't mention about the sources in your answer.",
             "If the sources are insufficient, say you do not have enough information and suggest emailing hello@radcrew.dev.",
-            "Keep answers concise, helpful, and accurate.",
+            "Keep answers consistent, factual, concise, helpful, and accurate.",
             "",
             "Context sources:",
             context or "No context found.",

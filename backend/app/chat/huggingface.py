@@ -12,6 +12,8 @@ from huggingface_hub.errors import HFValidationError, HfHubHTTPError
 
 logger = logging.getLogger(__name__)
 
+DETERMINISTIC_GENERATION_SEED = 42
+
 
 def _providers_to_try(provider_policy: str) -> list[str]:
     primary = provider_policy
@@ -108,6 +110,9 @@ def generate_answer(
             stream = client.chat_completion(
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=512,
+                temperature=0,
+                top_p=1,
+                seed=DETERMINISTIC_GENERATION_SEED,
                 stream=True,
             )
             yielded_any = False
@@ -131,6 +136,10 @@ def generate_answer(
                 prompt,
                 max_new_tokens=512,
                 return_full_text=False,
+                do_sample=False,
+                temperature=0,
+                top_p=1,
+                seed=DETERMINISTIC_GENERATION_SEED,
                 stream=True,
             )
             yielded_any = False

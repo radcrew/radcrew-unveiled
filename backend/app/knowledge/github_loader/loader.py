@@ -55,7 +55,11 @@ def get_github_markdown_documents(
             return []
 
         documents: list[KnowledgeDocument] = []
-        for entry in tree_items:
+        sorted_tree_items = sorted(
+            tree_items,
+            key=lambda entry: str(entry.get("path") or "") if isinstance(entry, dict) else "",
+        )
+        for entry in sorted_tree_items:
             if not isinstance(entry, dict):
                 continue
             if entry.get("type") != "blob":
