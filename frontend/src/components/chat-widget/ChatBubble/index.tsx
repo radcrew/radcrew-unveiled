@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   parseAssistantBlocks,
   textToInlineRuns,
@@ -7,6 +6,7 @@ import {
   type InlineSegment,
 } from "@/lib/chat-bubble-format";
 import type { ReactNode } from "react";
+import * as styles from "./styles";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -31,7 +31,7 @@ const SegmentList = ({ segments }: { segments: InlineSegment[] }): ReactNode =>
           href={seg.href}
           target={external ? "_blank" : undefined}
           rel={external ? "noopener noreferrer" : undefined}
-          className="underline underline-offset-2"
+          className={styles.link}
         >
           {seg.label}
         </a>
@@ -51,11 +51,11 @@ const AssistantMessageBody = ({ content }: { content: string }): ReactNode => {
   const blocks: AssistantBlock[] = parseAssistantBlocks(content);
 
   return (
-    <div className="space-y-2">
+    <div className={styles.assistantBody}>
       {blocks.map((block, index) => {
         if (block.kind === "ordered") {
           return (
-            <ol key={`o-${index}`} className="list-decimal space-y-1 pl-5">
+            <ol key={`o-${index}`} className={styles.orderedList}>
               {block.items.map((item, lineIndex) => (
                 <li key={`ol-${index}-${lineIndex}`}>
                   <InlineRunList runs={textToInlineRuns(item)} />
@@ -67,7 +67,7 @@ const AssistantMessageBody = ({ content }: { content: string }): ReactNode => {
 
         if (block.kind === "unordered") {
           return (
-            <ul key={`u-${index}`} className="list-disc space-y-1 pl-5">
+            <ul key={`u-${index}`} className={styles.unorderedList}>
               {block.items.map((item, lineIndex) => (
                 <li key={`ul-${index}-${lineIndex}`}>
                   <InlineRunList runs={textToInlineRuns(item)} />
@@ -78,7 +78,7 @@ const AssistantMessageBody = ({ content }: { content: string }): ReactNode => {
         }
 
         return (
-          <p key={`p-${index}`} className="whitespace-pre-wrap">
+          <p key={`p-${index}`} className={styles.assistantParagraph}>
             <InlineRunList runs={textToInlineRuns(block.body)} />
           </p>
         );
@@ -88,14 +88,11 @@ const AssistantMessageBody = ({ content }: { content: string }): ReactNode => {
 };
 
 export const ChatBubble = ({ role, content }: ChatBubbleProps) => (
-  <div
-    className={cn(
-      "max-w-[92%] rounded-xl px-3 py-2.5 text-sm leading-relaxed shadow-sm",
-      role === "user"
-        ? "ml-auto bg-accent text-accent-foreground"
-        : "mr-auto border border-border bg-card text-card-foreground",
+  <div className={styles.shellClassName(role)}>
+    {role === "assistant" ? (
+      <AssistantMessageBody content={content} />
+    ) : (
+      <p className={styles.userParagraph}>{content}</p>
     )}
-  >
-    {role === "assistant" ? <AssistantMessageBody content={content} /> : <p className="whitespace-pre-wrap">{content}</p>}
   </div>
 );
