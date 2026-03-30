@@ -85,28 +85,41 @@ def stream_chat_request(
 ) -> tuple[Iterator[str], float]:
     settings = get_settings()
     message = body.message
+
+    # Memory: `history` should be included both in retrieval and in the prompt.
+    # We keep retrieval query bounded by only using the most recent user turns.
+    history = body.history or []
+    recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
+    retrieval_query = message
+    if recent_user_turns:
+        recent_context = "\n".join(recent_user_turns[-2:])
+        retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
+
     relevant = retrieve_relevant_chunks(
         knowledge_chunks,
-        message,
+        retrieval_query,
         5,
         embedding_access_token=settings.HUGGINGFACE_API_KEY,
         embedding_model=settings.HUGGINGFACE_EMBEDDING_MODEL,
         embedding_provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
     )
 
-    if retrieval_fallback_needed(relevant):
+    # If there is conversation history, allow the model to answer from that memory
+    # even when RAG retrieval is weak for the current standalone wording.
+    if retrieval_fallback_needed(relevant) and not history:
         return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT), 0.2
 
     if not settings.HUGGINGFACE_API_KEY:
         return stream_text_chunks(MSG_MISSING_HF_KEY), 0
 
     context_chunks = [scored_to_chunk(c) for c in relevant]
-    prompt = build_chat_prompt(message, context_chunks)
+    prompt = build_chat_prompt(message, context_chunks, history=history)
     cache_key = _prompt_cache_key(prompt)
     cached = _cache_get(cache_key)
     if cached is not None:
         return stream_text_chunks(cached), min(1.0, relevant[0].score / 3)
 
+    confidence = min(1.0, relevant[0].score / 3) if relevant else 0.6
     return (
         _stream_and_cache(
             generate_answer(
@@ -117,5 +130,5 @@ def stream_chat_request(
             ),
             cache_key,
         ),
-        min(1.0, relevant[0].score / 3),
+        confidence,
     )

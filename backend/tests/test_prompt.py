@@ -17,7 +17,7 @@ def test_build_chat_prompt_joins_sources_and_question():
             tokens=["email", "us"],
         ),
     ]
-    out = build_chat_prompt("What do you do?", chunks)
+    out = build_chat_prompt("What do you do?", chunks, history=None)
     assert "You are RadCrew's website assistant." in out
     assert "Source 1 (About): We build things." in out
     assert "Source 2 (Contact): Email us." in out
@@ -26,6 +26,6 @@ def test_build_chat_prompt_joins_sources_and_question():
 
 
 def test_build_chat_prompt_no_context_falls_back_to_placeholder():
-    out = build_chat_prompt("Hello?", [])
+    out = build_chat_prompt("Hello?", [], history=None)
     assert "Context sources:" in out
     assert "No context found." in out

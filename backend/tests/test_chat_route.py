@@ -60,6 +60,37 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     assert '"confidence": 0.2' in r.text
 
 
+@patch("app.chat.service.generate_answer", return_value=iter(["Your name is Macho."]))
+@patch("app.chat.service.get_settings")
+@patch("app.chat.service.retrieve_relevant_chunks", return_value=[])
+def test_chat_with_history_does_not_force_retrieval_fallback(
+    _mock_retrieve: object,
+    mock_settings: MagicMock,
+    _mock_generate: object,
+    client: TestClient,
+) -> None:
+    cfg = MagicMock()
+    cfg.HUGGINGFACE_API_KEY = "hf_test_token"
+    cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
+    cfg.HUGGINGFACE_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+    cfg.HUGGINGFACE_EMBEDDING_PROVIDER = "hf-inference"
+    mock_settings.return_value = cfg
+
+    r = client.post(
+        "/chat",
+        json={
+            "message": "What is my name?",
+            "history": [{"role": "user", "content": "My name is Macho."}],
+        },
+    )
+    assert r.status_code == 200
+    streamed_answer = _stream_content(r.text)
+    assert "Your name is Macho." in streamed_answer
+    assert "hello@radcrew.dev" not in streamed_answer
+    assert '"type": "done"' in r.text
+
+
 @patch("app.main.stream_chat_request", side_effect=RuntimeError("no provider"))
 def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello world"})
