@@ -5,10 +5,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { FormEvent, RefObject } from "react";
-import type { ChatMessage } from "./types";
-import { ChatComposer } from "./ChatComposer";
-import { ChatErrorBanner } from "./ChatErrorBanner";
-import { ChatMessageList } from "./ChatMessageList";
+import { ChatComposer } from "../ChatComposer";
+import { ChatErrorBanner } from "../ChatErrorBanner";
+import { ChatMessageList } from "../ChatMessageList";
+import type { ChatMessage } from "../types";
+import * as styles from "./styles";
 
 interface ChatPanelProps {
   open: boolean;
@@ -40,15 +41,15 @@ export const ChatPanel = ({
   scrollAnchorRef,
 }: ChatPanelProps) => (
   <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-      <SheetHeader className="shrink-0 space-y-1 border-b border-border px-6 py-4 text-left">
-        <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
-        <p className="text-xs text-muted-foreground">
+    <SheetContent side="right" className={styles.sheetContent}>
+      <SheetHeader className={styles.sheetHeader}>
+        <SheetTitle className={styles.sheetTitle}>RadCrew FAQ</SheetTitle>
+        <p className={styles.disclaimer}>
           AI assistant responses may be inaccurate. Please verify important details.
         </p>
       </SheetHeader>
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className={styles.body}>
         <ChatMessageList messages={messages} showLoading={showLoading} scrollAnchorRef={scrollAnchorRef} />
         {error && <ChatErrorBanner message={error} />}
         <ChatComposer
