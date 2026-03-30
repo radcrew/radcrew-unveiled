@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from app.chat.retrieval import build_knowledge_chunks
 from app.config import get_settings
 from app.knowledge import get_static_site_documents
+from app.knowledge.contentful_loader import get_contentful_documents
 from app.knowledge.github_loader import get_github_markdown_documents
 from app.models import KnowledgeChunk
 
@@ -25,6 +26,13 @@ def create_lifespan(
         )
         documents = [
             *get_static_site_documents(),
+            *get_contentful_documents(
+                space_id=settings.CONTENTFUL_SPACE_ID,
+                access_token=settings.CONTENTFUL_DELIVERY_TOKEN,
+                environment=settings.CONTENTFUL_ENVIRONMENT or "master",
+                content_types_csv=settings.CONTENTFUL_RAG_CONTENT_TYPES,
+                site_base_url=settings.FRONTEND_ORIGIN,
+            ),
             *get_github_markdown_documents(
                 repo_url=github_repo_url,
                 token=settings.GITHUB_KB_TOKEN,
