@@ -37,7 +37,7 @@ def build_chat_prompt(
             "For team-member questions, prioritize team profile details found in the loaded knowledge context (including GitHub markdown and Contentful entries).",
             "When listing team members, include only people explicitly present in the context.",
             "Do not infer person names from source titles or file names; use names explicitly written in the source content.",
-            "If both history and context sources are insufficient, say you do not have enough information and suggest emailing hello@radcrew.dev.",
+            "If both history and context sources are insufficient, say you do not have enough information and suggest emailing code@radcrew.org.",
             "Keep answers consistent, factual, concise, helpful, and accurate.",
             "Never contradict yourself.",
             "",

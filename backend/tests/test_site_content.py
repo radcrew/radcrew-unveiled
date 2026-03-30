@@ -7,4 +7,4 @@ def test_static_documents_match_expected_ids_and_titles():
     by_id = {d.id: d for d in docs}
     assert by_id["hero"].title == "RadCrew overview"
     assert by_id["contact"].url == "/#contact"
-    assert "hello@radcrew.dev" in by_id["contact"].text
+    assert "code@radcrew.org" in by_id["contact"].text

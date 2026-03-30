@@ -11,7 +11,7 @@ const FooterSection = () => {
           </p>
         </div>
         <div className="space-y-2 text-sm text-muted-foreground">
-          <p>hello@radcrew.dev</p>
+          <p>code@radcrew.org</p>
           <p>© {new Date().getFullYear()} RadCrew. All rights reserved.</p>
         </div>
       </div>

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 MSG_FALLBACK_LOW_CONTEXT = (
     "I don't have enough reliable information on that yet. If you'd like, email "
-    "hello@radcrew.dev and the team can help you directly."
+    "code@radcrew.org and the team can help you directly."
 )
 MSG_MISSING_HF_KEY = (
     "The FAQ assistant is not configured yet. Set HUGGINGFACE_API_KEY or HF_TOKEN in "
@@ -12,5 +12,5 @@ MSG_MISSING_HF_KEY = (
 )
 MSG_AI_UNAVAILABLE = (
     "The AI service is temporarily unavailable. Please try again in a moment or "
-    "email hello@radcrew.dev."
+    "email code@radcrew.org."
 )

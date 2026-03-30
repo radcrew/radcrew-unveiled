@@ -3,7 +3,7 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const ContactSection = () => {
   const ref = useScrollReveal();
-  const email = "hello@radcrew.dev";
+  const email = "code@radcrew.org";
 
   return (
     <section id="contact" className="contact-shell" ref={ref}>

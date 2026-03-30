@@ -55,7 +55,7 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
     assert r.text.count('"type": "chunk"') > 1
-    assert "hello@radcrew.dev" in r.text
+    assert "code@radcrew.org" in r.text
     assert '"type": "done"' in r.text
     assert '"confidence": 0.2' in r.text
 
@@ -87,7 +87,7 @@ def test_chat_with_history_does_not_force_retrieval_fallback(
     assert r.status_code == 200
     streamed_answer = _stream_content(r.text)
     assert "Your name is Macho." in streamed_answer
-    assert "hello@radcrew.dev" not in streamed_answer
+    assert "code@radcrew.org" not in streamed_answer
     assert '"type": "done"' in r.text
 
 

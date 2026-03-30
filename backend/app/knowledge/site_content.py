@@ -47,7 +47,7 @@ def get_static_site_documents() -> list[KnowledgeDocument]:
             url="/#contact",
             text=" ".join(
                 [
-                    "Contact email is hello@radcrew.dev.",
+                    "Contact email is code@radcrew.org.",
                     "They usually respond within one to two business days.",
                 ]
             ),
