@@ -11,7 +11,7 @@ from app.knowledge.github_loader.parsing import (
     is_markdown_file,
     normalize_path_prefix,
     parse_repo_source_url,
-    title_from_path,
+    title_from_markdown,
 )
 from app.models import KnowledgeDocument
 
@@ -84,7 +84,7 @@ def get_github_markdown_documents(
             documents.append(
                 KnowledgeDocument(
                     id=f"github:{blob_path}",
-                    title=title_from_path(blob_path),
+                    title=title_from_markdown(blob_path, text),
                     text=text,
                     url=f"https://{repo_ref.host}/{repo_ref.owner}/{repo_ref.repo}/blob/{ref}/{blob_path}",
                 )

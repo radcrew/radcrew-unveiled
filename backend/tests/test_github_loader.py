@@ -36,9 +36,33 @@ def test_github_loader_returns_markdown_documents(monkeypatch):
     assert len(docs) == 1
     doc = docs[0]
     assert doc.id == "github:docs/guide.md"
-    assert doc.title == "guide"
+    assert doc.title == "Guide"
     assert "Private repo setup details" in doc.text
     assert doc.url == "https://github.com/example-org/example-repo/blob/main/docs/guide.md"
+
+
+def test_github_loader_prefers_real_name_from_markdown_over_filename(monkeypatch):
+    blob_text = "Name: Brian Kim\n\nRole: Team Leader"
+    encoded_blob = base64.b64encode(blob_text.encode("utf-8")).decode("utf-8")
+
+    def fake_get_json(url: str, *, token: str | None):
+        if "/git/trees/" in url:
+            return {"tree": [{"type": "blob", "path": "team/realactioner.md", "sha": "sha-brian"}]}
+        if url.endswith("/git/blobs/sha-brian"):
+            return {"content": encoded_blob, "encoding": "base64"}
+        raise AssertionError(f"Unexpected URL called: {url}")
+
+    monkeypatch.setattr("app.knowledge.github_loader.loader.get_json", fake_get_json)
+
+    docs = get_github_markdown_documents(
+        repo_url="https://github.com/example-org/example-repo",
+        token="ghp_test_token",
+        branch="main",
+        path_prefix="team",
+    )
+
+    assert len(docs) == 1
+    assert docs[0].title == "Brian Kim"
 
 
 def test_github_loader_returns_empty_when_repo_url_missing(monkeypatch):
