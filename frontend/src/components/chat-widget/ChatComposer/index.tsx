@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { Loader2, SendHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import * as styles from "./styles";
 
 interface ChatComposerProps {
   draft: string;
@@ -20,13 +21,13 @@ export const ChatComposer = ({
   onSubmit,
   onSend,
 }: ChatComposerProps) => (
-  <form onSubmit={onSubmit} className="shrink-0 space-y-2 border-t border-border bg-background p-4">
+  <form onSubmit={onSubmit} className={styles.form}>
     <Textarea
       value={draft}
       onChange={(e) => onDraftChange(e.target.value)}
       placeholder="e.g. What does RadCrew build? How do I contact you?"
       rows={3}
-      className="min-h-[5rem] resize-none"
+      className={styles.textarea}
       disabled={pending}
       onKeyDown={(e) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -35,16 +36,16 @@ export const ChatComposer = ({
         }
       }}
     />
-    <div className="flex justify-end">
-      <Button type="submit" disabled={!canSend} className="gap-2">
+    <div className={styles.actionsRow}>
+      <Button type="submit" disabled={!canSend} className={styles.submitButton}>
         {pending ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className={styles.pendingSpinner} />
             Sending
           </>
         ) : (
           <>
-            <SendHorizontal className="h-4 w-4" />
+            <SendHorizontal className={styles.sendIcon} />
             Send
           </>
         )}
