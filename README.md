@@ -60,6 +60,8 @@ npm run dev
 - `HUGGINGFACE_API_KEY`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)); you can use `HF_TOKEN` instead if you already have that set
 - `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
 - `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
+- `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for semantic retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
+- `HUGGINGFACE_EMBEDDING_PROVIDER`: provider for embedding inference (default `hf-inference`)
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
 - `GITHUB_KB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
 - `GITHUB_KB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_KB_PRIVATE_REPO=true`)
