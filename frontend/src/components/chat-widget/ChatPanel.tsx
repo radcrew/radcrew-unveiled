@@ -44,6 +44,9 @@ export function ChatPanel({
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
         <SheetHeader className="shrink-0 space-y-1 border-b border-border px-6 py-4 text-left">
           <SheetTitle className="text-lg">RadCrew FAQ</SheetTitle>
+          <p className="text-xs text-muted-foreground">
+            AI assistant responses may be inaccurate. Please verify important details.
+          </p>
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col">
