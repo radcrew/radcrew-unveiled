@@ -12,7 +12,7 @@ def test_tokenize_filters_single_character_tokens():
     assert tokenize("a bc de") == ["bc", "de"]
 
 
-def test_chunk_single_block_when_few_sentences():
+def test_one_chunk_per_document():
     doc = KnowledgeDocument(
         id="x",
         title="t",
@@ -24,13 +24,13 @@ def test_chunk_single_block_when_few_sentences():
     assert "sentence" in chunks[0].tokens
 
 
-def test_chunk_pairs_sentences_when_many():
+def test_one_chunk_per_document_keeps_full_text():
     text = "First sentence here. Second one follows. Third is last."
     doc = KnowledgeDocument(id="d", title="T", text=text)
     chunks = build_knowledge_chunks([doc])
-    assert len(chunks) == 2
-    assert chunks[0].text.startswith("First sentence")
-    assert "Third" in chunks[1].text
+    assert len(chunks) == 1
+    assert chunks[0].text == text
+    assert "first" in chunks[0].tokens and "third" in chunks[0].tokens
 
 
 def test_retrieve_sorts_by_score_and_respects_limit():

@@ -13,6 +13,7 @@ def map_engineer_entry(entry: dict[str, object], site_base_url: str) -> Knowledg
     sys_obj = entry.get("sys")
     if not isinstance(sys_obj, dict):
         raise ValueError("Entry missing sys")
+
     entry_id = str(sys_obj.get("id", ""))
     fields_raw = entry.get("fields")
     if not isinstance(fields_raw, dict):

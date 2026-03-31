@@ -1,4 +1,4 @@
-"""Chunking and hybrid retrieval (lexical + semantic embeddings)."""
+"""Knowledge indexing (one unit per document) and hybrid retrieval (lexical + semantic embeddings)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from huggingface_hub import InferenceClient
 from app.models import KnowledgeChunk, KnowledgeChunkScored, KnowledgeDocument
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
-SENTENCE_SPLIT = re.compile(r"(?<=[.?!])\s+")
 
 # Same threshold as backend/src/server.ts (`relevantChunks[0].score < 1.2`).
 RETRIEVAL_FALLBACK_SCORE_THRESHOLD = 1.2
@@ -47,45 +46,22 @@ def _semantic_scores(
     return [max(0.0, float(s)) for s in similarities]
 
 
-def _chunk_document(doc: KnowledgeDocument) -> list[KnowledgeChunk]:
-    sentence_chunks = [p.strip() for p in SENTENCE_SPLIT.split(doc.text) if p.strip()]
-
-    if len(sentence_chunks) <= 2:
-        return [
+def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[KnowledgeChunk]:
+    """One retrieval row per document (full body text; no sentence splitting)."""
+    out: list[KnowledgeChunk] = []
+    for doc in documents:
+        tokens = tokenize(doc.text)
+        if len(tokens) == 0:
+            continue
+        out.append(
             KnowledgeChunk(
                 id=f"{doc.id}:0",
                 title=doc.title,
                 text=doc.text,
-                tokens=tokenize(doc.text),
-                url=doc.url,
-            )
-        ]
-
-    chunks: list[KnowledgeChunk] = []
-    i = 0
-    while i < len(sentence_chunks):
-        pair = sentence_chunks[i : i + 2]
-        chunk_text = " ".join(pair).strip()
-        chunk_idx = i // 2
-        chunks.append(
-            KnowledgeChunk(
-                id=f"{doc.id}:{chunk_idx}",
-                title=doc.title,
-                text=chunk_text,
-                tokens=tokenize(chunk_text),
+                tokens=tokens,
                 url=doc.url,
             )
         )
-        i += 2
-    return chunks
-
-
-def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[KnowledgeChunk]:
-    out: list[KnowledgeChunk] = []
-    for doc in documents:
-        for ch in _chunk_document(doc):
-            if len(ch.tokens) > 0:
-                out.append(ch)
     return out
 
 
