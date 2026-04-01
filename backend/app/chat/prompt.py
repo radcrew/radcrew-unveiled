@@ -50,5 +50,8 @@ def build_chat_prompt(
             f"Question: {question}",
             "",
             "Format the answer in simple Markdown for readability (use bold labels and short bullet lists when helpful).",
+            "Do not use '*' bullet symbols.",
+            "Use '-' for list bullets, and keep nested lists as indented '+' items only when needed.",
+            "Do not nest content deeper than 2 levels.",
         ]
     )

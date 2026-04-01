@@ -29,3 +29,10 @@ def test_build_chat_prompt_no_context_falls_back_to_placeholder():
     out = build_chat_prompt("Hello?", [], history=None)
     assert "Context sources:" in out
     assert "No context found." in out
+
+
+def test_build_chat_prompt_includes_markdown_list_style_guidance():
+    out = build_chat_prompt("List the team", [], history=None)
+    assert "Do not use '*' for section or subheader lines" in out
+    assert "Use '-' for list bullets" in out
+    assert "Do not nest content deeper than 2 levels." in out
