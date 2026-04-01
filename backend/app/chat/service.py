@@ -11,7 +11,11 @@ from threading import Lock
 from app.chat.huggingface import generate_answer
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
 from app.chat.prompt import build_chat_prompt
-from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
+from app.chat.retrieval import (
+    EmbeddingInferenceConfig,
+    retrieve_relevant_chunks,
+    retrieval_fallback_needed,
+)
 from app.config import get_settings
 from app.models import KnowledgeChunk
 from app.schemas import ChatRequest
@@ -81,13 +85,16 @@ def generate_chat_stream(
         recent_context = "\n".join(recent_user_turns[-2:])
         retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
+    embedding = EmbeddingInferenceConfig(
+        access_token=settings.HUGGINGFACE_API_KEY,
+        model=settings.HUGGINGFACE_EMBEDDING_MODEL,
+        provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
+    )
     relevant_chunks = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
         5,
-        embedding_access_token=settings.HUGGINGFACE_API_KEY,
-        embedding_model=settings.HUGGINGFACE_EMBEDDING_MODEL,
-        embedding_provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
+        embedding=embedding,
     )
 
     if retrieval_fallback_needed(relevant_chunks) and not history:

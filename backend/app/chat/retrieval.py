@@ -4,9 +4,17 @@ from __future__ import annotations
 
 import logging
 import re
+from dataclasses import dataclass
 
 from huggingface_hub import InferenceClient
 from app.models import KnowledgeChunk, KnowledgeDocument
+
+
+@dataclass(frozen=True, slots=True)
+class EmbeddingInferenceConfig:
+    access_token: str | None = None
+    model: str | None = None
+    provider: str | None = None
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
 
@@ -25,22 +33,24 @@ def _semantic_scores(
     *,
     chunks: list[KnowledgeChunk],
     query: str,
-    embedding_access_token: str,
-    embedding_model: str,
-    embedding_provider: str,
+    embedding: EmbeddingInferenceConfig,
 ) -> list[float]:
     if not chunks:
         return []
+    token = embedding.access_token
+    model = embedding.model
+    if not token or not model:
+        return []
     client = InferenceClient(
-        model=embedding_model,
-        token=embedding_access_token,
-        provider=embedding_provider,  # type: ignore[arg-type]
+        model=model,
+        token=token,
+        provider=embedding.provider,  # type: ignore[arg-type]
     )
     candidates = [f"{chunk.title}\n{chunk.text}" for chunk in chunks]
     similarities = client.sentence_similarity(
         sentence=query,
         other_sentences=candidates,
-        model=embedding_model,
+        model=model,
     )
     # Clamp negatives to 0 so semantic score only boosts, never penalizes lexical matches.
     return [max(0.0, float(s)) for s in similarities]
@@ -70,23 +80,19 @@ def retrieve_relevant_chunks(
     query: str,
     limit: int = 5,
     *,
-    embedding_access_token: str | None = None,
-    embedding_model: str | None = None,
-    embedding_provider: str | None = None,
+    embedding: EmbeddingInferenceConfig | None = None,
 ) -> list[KnowledgeChunk]:
     query_tokens = set(tokenize(query))
     if len(query_tokens) == 0:
         return []
 
     semantic_by_index = [0.0] * len(chunks)
-    if embedding_access_token and embedding_model:
+    if embedding is not None and embedding.access_token and embedding.model:
         try:
             semantic_by_index = _semantic_scores(
                 chunks=chunks,
                 query=query,
-                embedding_access_token=embedding_access_token,
-                embedding_model=embedding_model,
-                embedding_provider=embedding_provider,
+                embedding=embedding,
             )
         except Exception as exc:
             logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
@@ -119,6 +125,4 @@ def retrieval_fallback_needed(chunks: list[KnowledgeChunk]) -> bool:
     if len(chunks) == 0:
         return True
     top = chunks[0].score
-    if top is None:
-        return True
-    return top < RETRIEVAL_FALLBACK_SCORE_THRESHOLD
+    return top is None or top < RETRIEVAL_FALLBACK_SCORE_THRESHOLD
