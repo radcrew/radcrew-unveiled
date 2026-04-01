@@ -13,7 +13,7 @@ from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
 from app.chat.prompt import build_chat_prompt
 from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
 from app.config import get_settings
-from app.models import KnowledgeChunk, KnowledgeChunkScored
+from app.models import KnowledgeChunk
 from app.schemas import ChatRequest
 
 STREAM_TEXT_CHUNK_SIZE = 2
@@ -59,16 +59,6 @@ def _stream_and_cache(
     _cache_put(cache_key, "".join(parts))
 
 
-def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
-    return KnowledgeChunk(
-        id=scored.id,
-        title=scored.title,
-        text=scored.text,
-        tokens=scored.tokens,
-        url=scored.url,
-    )
-
-
 def stream_text_chunks(text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE) -> Iterator[str]:
     for i in range(0, len(text), chunk_size):
         yield text[i:i + chunk_size]
@@ -89,7 +79,7 @@ def generate_chat_stream(
         recent_context = "\n".join(recent_user_turns[-2:])
         retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
-    relevant = retrieve_relevant_chunks(
+    relevant_chunks = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
         5,
@@ -98,14 +88,13 @@ def generate_chat_stream(
         embedding_provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
     )
 
-    if retrieval_fallback_needed(relevant) and not history:
+    if retrieval_fallback_needed(relevant_chunks) and not history:
         return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT)
 
     if not settings.HUGGINGFACE_API_KEY:
         return stream_text_chunks(MSG_MISSING_HF_KEY)
 
-    context_chunks = [scored_to_chunk(c) for c in relevant]
-    prompt = build_chat_prompt(message, context_chunks, history=history)
+    prompt = build_chat_prompt(message, relevant_chunks, history=history)
     cache_key = _prompt_cache_key(prompt)
     cached = _cache_get(cache_key)
     if cached is not None:

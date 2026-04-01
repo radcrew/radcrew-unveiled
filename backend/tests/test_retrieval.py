@@ -5,7 +5,7 @@ from app.chat.retrieval import (
     retrieve_relevant_chunks,
     tokenize,
 )
-from app.models import KnowledgeChunkScored, KnowledgeDocument
+from app.models import KnowledgeChunk, KnowledgeDocument
 
 
 def test_tokenize_filters_single_character_tokens():
@@ -21,6 +21,7 @@ def test_one_chunk_per_document():
     chunks = build_knowledge_chunks([doc])
     assert len(chunks) == 1
     assert chunks[0].id == "x:0"
+    assert chunks[0].score is None
     assert "sentence" in chunks[0].tokens
 
 
@@ -51,14 +52,14 @@ def test_retrieve_empty_when_query_has_no_tokens():
 
 
 def test_retrieval_fallback_threshold_boundary():
-    low = KnowledgeChunkScored(
+    low = KnowledgeChunk(
         id="1",
         title="t",
         text="x",
         tokens=["hello"],
         score=1.19,
     )
-    high = KnowledgeChunkScored(
+    high = KnowledgeChunk(
         id="2",
         title="t",
         text="x",

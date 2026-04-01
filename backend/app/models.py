@@ -20,13 +20,4 @@ class KnowledgeChunk:
     text: str
     tokens: list[str]
     url: str | None = None
-
-
-@dataclass(frozen=True)
-class KnowledgeChunkScored:
-    id: str
-    title: str
-    text: str
-    tokens: list[str]
-    score: float
-    url: str | None = None
+    score: float | None = None

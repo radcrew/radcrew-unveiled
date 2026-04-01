@@ -6,7 +6,7 @@ import logging
 import re
 
 from huggingface_hub import InferenceClient
-from app.models import KnowledgeChunk, KnowledgeChunkScored, KnowledgeDocument
+from app.models import KnowledgeChunk, KnowledgeDocument
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
 
@@ -73,7 +73,7 @@ def retrieve_relevant_chunks(
     embedding_access_token: str | None = None,
     embedding_model: str | None = None,
     embedding_provider: str | None = None,
-) -> list[KnowledgeChunkScored]:
+) -> list[KnowledgeChunk]:
     query_tokens = set(tokenize(query))
     if len(query_tokens) == 0:
         return []
@@ -91,29 +91,34 @@ def retrieve_relevant_chunks(
         except Exception as exc:
             logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
 
-    scored: list[KnowledgeChunkScored] = []
+    ranked: list[KnowledgeChunk] = []
     for idx, chunk in enumerate(chunks):
         overlap = sum(1 for t in chunk.tokens if t in query_tokens)
         density = overlap / max(len(chunk.tokens), 1)
         lexical_score = overlap + density
         score = lexical_score + (SEMANTIC_SCORE_WEIGHT * semantic_by_index[idx])
         if score > 0:
-            scored.append(
-                KnowledgeChunkScored(
+            ranked.append(
+                KnowledgeChunk(
                     id=chunk.id,
                     title=chunk.title,
                     text=chunk.text,
                     tokens=chunk.tokens,
-                    score=score,
                     url=chunk.url,
+                    score=score,
                 )
             )
 
     # Stable tie-breaking keeps context ordering deterministic across runs.
-    scored.sort(key=lambda c: (-c.score, c.id, c.title))
-    return scored[:limit]
+    ranked.sort(key=lambda c: (-(c.score or 0.0), c.id, c.title))
+    return ranked[:limit]
 
 
-def retrieval_fallback_needed(chunks: list[KnowledgeChunkScored]) -> bool:
+def retrieval_fallback_needed(chunks: list[KnowledgeChunk]) -> bool:
     """True when the chat handler should use the low-context fallback response."""
-    return len(chunks) == 0 or chunks[0].score < RETRIEVAL_FALLBACK_SCORE_THRESHOLD
+    if len(chunks) == 0:
+        return True
+    top = chunks[0].score
+    if top is None:
+        return True
+    return top < RETRIEVAL_FALLBACK_SCORE_THRESHOLD

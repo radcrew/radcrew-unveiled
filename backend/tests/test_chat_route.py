@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models import KnowledgeChunkScored
+from app.models import KnowledgeChunk
 
 
 def _stream_content(response_text: str) -> str:
@@ -55,7 +55,7 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
     assert r.text.count('"type": "chunk"') > 1
-    assert "code@radcrew.org" in r.text
+    assert "code@radcrew.org" in _stream_content(r.text)
     assert '"type": "done"' in r.text
 
 
@@ -107,7 +107,7 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     client: TestClient,
 ) -> None:
     mock_retrieve.return_value = [
-        KnowledgeChunkScored(
+        KnowledgeChunk(
             id="c1",
             title="Title",
             text="snippet text",
