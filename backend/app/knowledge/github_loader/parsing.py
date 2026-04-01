@@ -62,7 +62,21 @@ def title_from_path(file_path: str) -> str:
 
 
 def title_from_markdown(file_path: str, markdown_text: str) -> str:
-    """Prefer explicit in-content names over filename-derived labels."""
+    """Prefer in-content names over filename-derived labels."""
+    for raw_line in markdown_text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        # Team-member markdown convention: first non-empty line is the member name.
+        candidate = re.sub(r"^\s*#+\s*", "", line).strip()
+        name_match = re.match(r"^(?:real\s+name|name)\s*:\s*(.+?)\s*$", candidate, re.IGNORECASE)
+        if name_match:
+            candidate = name_match.group(1).strip()
+        candidate = candidate.strip("*_`").strip()
+        if candidate:
+            return candidate
+        break
+
     name_line = _NAME_LINE_RE.search(markdown_text)
     if name_line:
         candidate = name_line.group(1).strip()

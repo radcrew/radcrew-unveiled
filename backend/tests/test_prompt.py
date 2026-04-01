@@ -33,6 +33,8 @@ def test_build_chat_prompt_no_context_falls_back_to_placeholder():
 
 def test_build_chat_prompt_includes_markdown_list_style_guidance():
     out = build_chat_prompt("List the team", [], history=None)
-    assert "Do not use '*' for section or subheader lines" in out
+    assert "Do not use '*' bullet symbols." in out
     assert "Use '-' for list bullets" in out
     assert "Do not nest content deeper than 2 levels." in out
+    assert "use Contentful engineer entries for short summary fields" in out
+    assert "first line of each GitHub team markdown file as the canonical team-member name" in out
