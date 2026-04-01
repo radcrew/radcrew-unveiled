@@ -4,7 +4,7 @@ import json
 from fastapi.responses import StreamingResponse
 
 from app.chat.messages import MSG_AI_UNAVAILABLE
-from app.chat.service import stream_chat_request
+from app.chat.service import generate_chat_stream
 from app.bootstrap import create_lifespan
 from app.config import get_settings
 from app.http import create_http_app
@@ -38,7 +38,7 @@ def health() -> dict:
 @app.post("/chat")
 def chat(body: ChatRequest) -> StreamingResponse:
     try:
-        answer_stream, confidence = stream_chat_request(body, knowledge_chunks)
+        answer_stream = generate_chat_stream(body, knowledge_chunks)
     except Exception:
         logger.exception("POST /chat failed")
         answer_stream = iter((MSG_AI_UNAVAILABLE,))

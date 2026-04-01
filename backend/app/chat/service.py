@@ -79,7 +79,7 @@ def stream_text_chunks(text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE) -> I
             time.sleep(FALLBACK_STREAM_CHUNK_DELAY_SECONDS)
 
 
-def stream_chat_request(
+def generate_chat_stream(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
 ) -> Iterator[str]:
