@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.models import KnowledgeChunk
+from app.knowledge.models import KnowledgeChunk
 
 
 def _stream_content(response_text: str) -> str:

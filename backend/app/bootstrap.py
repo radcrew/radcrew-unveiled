@@ -12,7 +12,7 @@ from app.config import get_settings
 from app.knowledge import get_static_site_documents
 from app.knowledge.contentful_loader import get_contentful_documents
 from app.knowledge.github_loader import get_github_markdown_documents
-from app.models import KnowledgeChunk
+from app.knowledge.models import KnowledgeChunk
 
 
 def create_lifespan(

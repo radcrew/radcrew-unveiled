@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.models import KnowledgeChunk
+from app.knowledge.models import KnowledgeChunk
 from app.schemas import ChatHistoryMessage
 
 

@@ -6,7 +6,7 @@ from urllib import parse
 
 from app.knowledge.contentful_loader.constants import ENGINEERS_CONTENT_TYPE
 from app.knowledge.contentful_loader.plain_text import field_to_plain
-from app.models import KnowledgeDocument
+from app.knowledge.models import KnowledgeDocument
 
 
 def map_engineer_entry(entry: dict[str, object], site_base_url: str) -> KnowledgeDocument:

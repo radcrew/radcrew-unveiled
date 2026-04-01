@@ -5,7 +5,7 @@ from app.chat.retrieval import (
     retrieve_relevant_chunks,
     tokenize,
 )
-from app.models import KnowledgeChunk, KnowledgeDocument
+from app.knowledge.models import KnowledgeChunk, KnowledgeDocument
 
 
 def test_tokenize_filters_single_character_tokens():

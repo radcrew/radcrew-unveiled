@@ -1,4 +1,4 @@
-"""Shared data shapes (parity with backend/src/types.ts)."""
+"""Knowledge indexing data shapes (parity with backend/src/types.ts)."""
 
 from __future__ import annotations
 

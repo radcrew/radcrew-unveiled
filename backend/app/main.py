@@ -8,7 +8,7 @@ from app.chat.service import generate_chat_stream
 from app.bootstrap import create_lifespan
 from app.config import get_settings
 from app.http import create_http_app
-from app.models import KnowledgeChunk
+from app.knowledge.models import KnowledgeChunk
 from app.schemas import ChatRequest
 
 logger = logging.getLogger(__name__)

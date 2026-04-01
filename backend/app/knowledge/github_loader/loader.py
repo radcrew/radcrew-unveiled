@@ -13,7 +13,7 @@ from app.knowledge.github_loader.parsing import (
     parse_repo_source_url,
     title_from_markdown,
 )
-from app.models import KnowledgeDocument
+from app.knowledge.models import KnowledgeDocument
 
 logger = logging.getLogger(__name__)
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.models import KnowledgeDocument
+from app.knowledge.models import KnowledgeDocument
 
 
 def get_static_site_documents() -> list[KnowledgeDocument]:

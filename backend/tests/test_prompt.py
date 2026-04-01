@@ -1,5 +1,5 @@
 from app.chat.prompt import build_chat_prompt
-from app.models import KnowledgeChunk
+from app.knowledge.models import KnowledgeChunk
 
 
 def test_build_chat_prompt_joins_sources_and_question():

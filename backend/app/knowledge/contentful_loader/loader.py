@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from app.knowledge.contentful_loader.api import fetch_contentful_entries
 from app.knowledge.contentful_loader.constants import ENGINEERS_CONTENT_TYPE
 from app.knowledge.contentful_loader.mapping import map_engineer_entry, map_generic_entry
-from app.models import KnowledgeDocument
+from app.knowledge.models import KnowledgeDocument
 
 logger = logging.getLogger(__name__)
 

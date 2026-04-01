@@ -4,17 +4,11 @@ from __future__ import annotations
 
 import logging
 import re
-from dataclasses import dataclass
 
 from huggingface_hub import InferenceClient
-from app.models import KnowledgeChunk, KnowledgeDocument
 
-
-@dataclass(frozen=True, slots=True)
-class EmbeddingInferenceConfig:
-    access_token: str | None = None
-    model: str | None = None
-    provider: str | None = None
+from app.chat.models import EmbeddingInferenceConfig
+from app.knowledge.models import KnowledgeChunk, KnowledgeDocument
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)
 
