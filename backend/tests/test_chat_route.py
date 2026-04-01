@@ -57,7 +57,6 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
     assert r.text.count('"type": "chunk"') > 1
     assert "code@radcrew.org" in r.text
     assert '"type": "done"' in r.text
-    assert '"confidence": 0.2' in r.text
 
 
 @patch("app.chat.service.generate_answer", return_value=iter(["Your name is Macho."]))
@@ -98,7 +97,6 @@ def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, cli
     assert '"type": "chunk"' in r.text
     assert "The AI service is temporarily unavailable" in r.text
     assert '"type": "done"' in r.text
-    assert '"confidence": 0' in r.text
 
 
 @patch("app.chat.service.get_settings")
@@ -129,4 +127,3 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     assert "HUGGINGFACE_API_KEY" in streamed_answer
     assert "backend/.env" in streamed_answer
     assert '"type": "done"' in r.text
-    assert '"confidence": 0' in r.text

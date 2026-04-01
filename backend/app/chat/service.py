@@ -82,7 +82,7 @@ def stream_text_chunks(text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE) -> I
 def stream_chat_request(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
-) -> tuple[Iterator[str], float]:
+) -> Iterator[str]:
     settings = get_settings()
     message = body.message
 
@@ -107,28 +107,24 @@ def stream_chat_request(
     # If there is conversation history, allow the model to answer from that memory
     # even when RAG retrieval is weak for the current standalone wording.
     if retrieval_fallback_needed(relevant) and not history:
-        return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT), 0.2
+        return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT)
 
     if not settings.HUGGINGFACE_API_KEY:
-        return stream_text_chunks(MSG_MISSING_HF_KEY), 0
+        return stream_text_chunks(MSG_MISSING_HF_KEY)
 
     context_chunks = [scored_to_chunk(c) for c in relevant]
     prompt = build_chat_prompt(message, context_chunks, history=history)
     cache_key = _prompt_cache_key(prompt)
     cached = _cache_get(cache_key)
     if cached is not None:
-        return stream_text_chunks(cached), min(1.0, relevant[0].score / 3)
+        return stream_text_chunks(cached)
 
-    confidence = min(1.0, relevant[0].score / 3) if relevant else 0.6
-    return (
-        _stream_and_cache(
-            generate_answer(
-                settings.HUGGINGFACE_MODEL,
-                settings.HUGGINGFACE_API_KEY,
-                prompt,
-                settings.HUGGINGFACE_PROVIDER,
-            ),
-            cache_key,
+    return _stream_and_cache(
+        generate_answer(
+            settings.HUGGINGFACE_MODEL,
+            settings.HUGGINGFACE_API_KEY,
+            prompt,
+            settings.HUGGINGFACE_PROVIDER,
         ),
-        confidence,
+        cache_key,
     )

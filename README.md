@@ -86,7 +86,7 @@ npm run dev
 - Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
 - The API retrieves snippets from static site copy, optional Contentful entries, and optional GitHub Markdown
 - Hugging Face chat completion (with text-generation fallback) produces grounded answers
-- Low retrieval confidence returns a safe fallback with contact guidance
+- Weak retrieval (with no prior conversation history) returns a safe fallback with contact guidance
 
 ## Tests
 

@@ -41,14 +41,13 @@ def chat(body: ChatRequest) -> StreamingResponse:
         answer_stream, confidence = stream_chat_request(body, knowledge_chunks)
     except Exception:
         logger.exception("POST /chat failed")
-        answer_stream = iter([MSG_AI_UNAVAILABLE])
-        confidence = 0
+        answer_stream = iter((MSG_AI_UNAVAILABLE,))
 
     def event_stream():
         for chunk in answer_stream:
             if chunk:
                 yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
-        yield f"data: {json.dumps({'type': 'done', 'confidence': confidence})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
     return StreamingResponse(
         event_stream(),

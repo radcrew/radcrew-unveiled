@@ -2,12 +2,11 @@ const baseUrl = (import.meta.env.VITE_CHATBOT_API_BASE_URL ?? "http://localhost:
 
 type ChatStreamEvent =
   | { type: "chunk"; content: string }
-  | { type: "done"; confidence: number }
+  | { type: "done" }
   | { type: "error"; error: string };
 
 interface StreamChatHandlers {
   onChunk: (chunk: string) => void;
-  onDone?: (confidence: number) => void;
 }
 
 type ChatHistoryMessage = { role: "user" | "assistant"; content: string };
@@ -82,8 +81,6 @@ export async function streamChatMessage(
 
       if (event.type === "chunk" && event.content) {
         handlers.onChunk(event.content);
-      } else if (event.type === "done") {
-        handlers.onDone?.(event.confidence);
       } else if (event.type === "error") {
         throw new Error(event.error);
       }
