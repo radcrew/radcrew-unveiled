@@ -72,7 +72,7 @@ def retrieve_relevant_chunks(
     *,
     embedding_access_token: str | None = None,
     embedding_model: str | None = None,
-    embedding_provider: str = "hf-inference",
+    embedding_provider: str | None = None,
 ) -> list[KnowledgeChunkScored]:
     query_tokens = set(tokenize(query))
     if len(query_tokens) == 0:

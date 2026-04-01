@@ -16,8 +16,7 @@ from app.config import get_settings
 from app.models import KnowledgeChunk, KnowledgeChunkScored
 from app.schemas import ChatRequest
 
-STREAM_TEXT_CHUNK_SIZE = 24
-FALLBACK_STREAM_CHUNK_DELAY_SECONDS = 0.03
+STREAM_TEXT_CHUNK_SIZE = 2
 RESPONSE_CACHE_MAX_SIZE = 256
 
 _response_cache: OrderedDict[str, str] = OrderedDict()
@@ -72,11 +71,7 @@ def scored_to_chunk(scored: KnowledgeChunkScored) -> KnowledgeChunk:
 
 def stream_text_chunks(text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE) -> Iterator[str]:
     for i in range(0, len(text), chunk_size):
-        chunk = text[i : i + chunk_size]
-        if chunk:
-            yield chunk
-            # Make synthetic fallback messages feel like real streaming in the UI.
-            time.sleep(FALLBACK_STREAM_CHUNK_DELAY_SECONDS)
+        yield text[i:i + chunk_size]
 
 
 def generate_chat_stream(
@@ -84,12 +79,11 @@ def generate_chat_stream(
     knowledge_chunks: list[KnowledgeChunk],
 ) -> Iterator[str]:
     settings = get_settings()
-    message = body.message
 
-    # Memory: `history` should be included both in retrieval and in the prompt.
-    # We keep retrieval query bounded by only using the most recent user turns.
+    message = body.message
     history = body.history or []
     recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
+
     retrieval_query = message
     if recent_user_turns:
         recent_context = "\n".join(recent_user_turns[-2:])
@@ -104,8 +98,6 @@ def generate_chat_stream(
         embedding_provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
     )
 
-    # If there is conversation history, allow the model to answer from that memory
-    # even when RAG retrieval is weak for the current standalone wording.
     if retrieval_fallback_needed(relevant) and not history:
         return stream_text_chunks(MSG_FALLBACK_LOW_CONTEXT)
 
