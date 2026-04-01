@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import time
-from collections.abc import Iterator
 from collections import OrderedDict
+from collections.abc import Iterator
 from threading import Lock
 
 from app.chat.huggingface import generate_answer

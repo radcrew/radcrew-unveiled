@@ -35,7 +35,7 @@ def health() -> dict:
     return {"ok": True, "chunks": len(knowledge_chunks)}
 
 
-@app.post("/chat", response_model=None)
+@app.post("/chat")
 def chat(body: ChatRequest) -> StreamingResponse:
     try:
         answer_stream, confidence = stream_chat_request(body, knowledge_chunks)

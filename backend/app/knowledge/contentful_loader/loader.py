@@ -23,9 +23,9 @@ def get_contentful_documents(
     site_base_url: str,
 ) -> list[KnowledgeDocument]:
     """Load knowledge documents from Contentful when space and token are set."""
-    if not space_id or not str(space_id).strip():
+    if not (space_id or "").strip():
         return []
-    if not access_token or not str(access_token).strip():
+    if not (access_token or "").strip():
         return []
 
     raw_types = [t.strip() for t in content_types_csv.split(",") if t.strip()]

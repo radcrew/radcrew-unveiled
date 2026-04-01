@@ -15,22 +15,14 @@ def build_chat_prompt(
     history: list[ChatHistoryMessage] | None,
 ) -> str:
     context = "\n".join(
-        (
-            f"Source {index + 1} "
-            + f"({chunk.title})"
-            + f": {chunk.text}"
-        )
+        f"Source {index + 1} ({chunk.title}): {chunk.text}"
         for index, chunk in enumerate(context_chunks)
     )
 
-    history = history or []
-    trimmed_history = [m for m in history if m.content]  # defensive; validators should already enforce
-    if len(trimmed_history) > MAX_HISTORY_MESSAGES:
-        trimmed_history = trimmed_history[-MAX_HISTORY_MESSAGES:]
+    history = (history or [])[-MAX_HISTORY_MESSAGES:]
 
     history_block = "\n".join(
-        f"{'User' if msg.role == 'user' else 'Assistant'}: {msg.content}"
-        for msg in trimmed_history
+        f"{'User' if msg.role == 'user' else 'Assistant'}: {msg.content}" for msg in history
     )
     history_section = history_block if history_block else "No prior conversation."
 
