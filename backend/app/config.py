@@ -53,11 +53,13 @@ class Settings(BaseSettings):
         if not isinstance(data, dict):
             return data
         merged = dict(data)
-        raw = merged.get("HUGGINGFACE_API_KEY")
-        if raw is None or (isinstance(raw, str) and raw.strip() == ""):
+
+        api_key = merged.get("HUGGINGFACE_API_KEY")
+        if api_key is None or (isinstance(api_key, str) and api_key.strip() == ""):
             token = merged.get("HF_TOKEN") or os.environ.get("HF_TOKEN")
             if token is not None and str(token).strip() != "":
                 merged["HUGGINGFACE_API_KEY"] = str(token).strip()
+
         github_token = merged.get("GITHUB_KB_TOKEN")
         if isinstance(github_token, str):
             stripped = github_token.strip()
@@ -67,6 +69,7 @@ class Settings(BaseSettings):
             if isinstance(value, str):
                 stripped = value.strip()
                 merged[key] = stripped if stripped else None
+        
         cf_env = merged.get("CONTENTFUL_ENVIRONMENT")
         if isinstance(cf_env, str):
             stripped = cf_env.strip()
@@ -76,6 +79,7 @@ class Settings(BaseSettings):
             if isinstance(value, str):
                 stripped = value.strip()
                 merged[key] = stripped if stripped else None
+        
         return merged
 
     @field_validator("FRONTEND_ORIGIN")

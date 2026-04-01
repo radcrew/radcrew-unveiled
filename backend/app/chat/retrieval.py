@@ -23,7 +23,7 @@ def tokenize(text: str) -> list[str]:
     return [t for t in TOKEN_RE.findall(text.lower()) if len(t) > 1]
 
 
-def _semantic_scores(
+def _get_semantic_scores(
     *,
     chunks: list[KnowledgeChunk],
     query: str,
@@ -31,16 +31,20 @@ def _semantic_scores(
 ) -> list[float]:
     if not chunks:
         return []
+
     token = embedding.access_token
     model = embedding.model
     if not token or not model:
         return []
+
     client = InferenceClient(
         model=model,
         token=token,
         provider=embedding.provider,  # type: ignore[arg-type]
     )
+
     candidates = [f"{chunk.title}\n{chunk.text}" for chunk in chunks]
+
     similarities = client.sentence_similarity(
         sentence=query,
         other_sentences=candidates,
@@ -53,10 +57,12 @@ def _semantic_scores(
 def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[KnowledgeChunk]:
     """One retrieval row per document (full body text; no sentence splitting)."""
     out: list[KnowledgeChunk] = []
+
     for doc in documents:
         tokens = tokenize(doc.text)
         if len(tokens) == 0:
             continue
+
         out.append(
             KnowledgeChunk(
                 id=f"{doc.id}:0",
@@ -66,6 +72,7 @@ def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[Knowledge
                 url=doc.url,
             )
         )
+
     return out
 
 
@@ -80,10 +87,10 @@ def retrieve_relevant_chunks(
     if len(query_tokens) == 0:
         return []
 
-    semantic_by_index = [0.0] * len(chunks)
+    semantic_scores = [0.0] * len(chunks)
     if embedding is not None and embedding.access_token and embedding.model:
         try:
-            semantic_by_index = _semantic_scores(
+            semantic_scores = _get_semantic_scores(
                 chunks=chunks,
                 query=query,
                 embedding=embedding,
@@ -91,14 +98,15 @@ def retrieve_relevant_chunks(
         except Exception as exc:
             logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
 
-    ranked: list[KnowledgeChunk] = []
+    relevant_chunks: list[KnowledgeChunk] = []
     for idx, chunk in enumerate(chunks):
         overlap = sum(1 for t in chunk.tokens if t in query_tokens)
         density = overlap / max(len(chunk.tokens), 1)
         lexical_score = overlap + density
-        score = lexical_score + (SEMANTIC_SCORE_WEIGHT * semantic_by_index[idx])
+        score = lexical_score + (SEMANTIC_SCORE_WEIGHT * semantic_scores[idx])
+
         if score > 0:
-            ranked.append(
+            relevant_chunks.append(
                 KnowledgeChunk(
                     id=chunk.id,
                     title=chunk.title,
@@ -110,8 +118,8 @@ def retrieve_relevant_chunks(
             )
 
     # Stable tie-breaking keeps context ordering deterministic across runs.
-    ranked.sort(key=lambda c: (-(c.score or 0.0), c.id, c.title))
-    return ranked[:limit]
+    relevant_chunks.sort(key=lambda c: (-(c.score or 0.0), c.id, c.title))
+    return relevant_chunks[:limit]
 
 
 def retrieval_fallback_needed(chunks: list[KnowledgeChunk]) -> bool:
