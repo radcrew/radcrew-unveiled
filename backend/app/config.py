@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     CONTENTFUL_DELIVERY_TOKEN: str | None = None
     CONTENTFUL_ENVIRONMENT: str = Field(default="master")
     CONTENTFUL_RAG_CONTENT_TYPES: str = Field(default="engineers")
+    # Company feedback via Web3Forms (https://web3forms.com): POST JSON to their API with access_key.
+    # When WEB3FORMS_ACCESS_KEY is unset, sending is disabled. Inbox is configured in the Web3Forms dashboard.
+    COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
+    WEB3FORMS_ACCESS_KEY: str | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -79,7 +83,17 @@ class Settings(BaseSettings):
             if isinstance(value, str):
                 stripped = value.strip()
                 merged[key] = stripped if stripped else None
-        
+
+        wf_key = merged.get("WEB3FORMS_ACCESS_KEY")
+        if isinstance(wf_key, str):
+            stripped = wf_key.strip()
+            merged["WEB3FORMS_ACCESS_KEY"] = stripped if stripped else None
+
+        cf_feedback = merged.get("COMPANY_FEEDBACK_EMAIL")
+        if isinstance(cf_feedback, str):
+            stripped = cf_feedback.strip()
+            merged["COMPANY_FEEDBACK_EMAIL"] = stripped if stripped else "code@radcrew.org"
+
         return merged
 
     @field_validator("FRONTEND_ORIGIN")
