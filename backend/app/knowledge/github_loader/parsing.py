@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-import re
 from pathlib import PurePosixPath
 from urllib import parse
 
-from app.knowledge.github_loader.types import GithubRepoSource
+from app.knowledge.models import GithubRepoSource
 
 _MARKDOWN_SUFFIXES = (".md", ".mdx")
-_NAME_LINE_RE = re.compile(r"^\s*(?:real\s+name|name)\s*:\s*(.+?)\s*$", re.IGNORECASE | re.MULTILINE)
-_H1_RE = re.compile(r"^\s*#\s+(.+?)\s*$", re.MULTILINE)
 
 
-def parse_repo_source_url(repo_url: str) -> GithubRepoSource:
-    parsed = parse.urlparse(repo_url.strip())
+def parse_repo_source_url(repo_url: object) -> GithubRepoSource:
+    url = str(repo_url).strip()
+    parsed = parse.urlparse(url)
     if parsed.scheme not in {"http", "https"}:
         raise ValueError("repo URL must be http(s)")
     host = parsed.netloc.lower()
@@ -44,31 +42,16 @@ def title_from_path(file_path: str) -> str:
 
 
 def title_from_markdown(file_path: str, markdown_text: str) -> str:
-    """Prefer in-content names over filename-derived labels."""
-    for raw_line in markdown_text.splitlines():
-        line = raw_line.strip()
-        if not line:
-            continue
-        # Team-member markdown convention: first non-empty line is the member name.
-        candidate = re.sub(r"^\s*#+\s*", "", line).strip()
-        name_match = re.match(r"^(?:real\s+name|name)\s*:\s*(.+?)\s*$", candidate, re.IGNORECASE)
-        if name_match:
-            candidate = name_match.group(1).strip()
-        candidate = candidate.strip("*_`").strip()
-        if candidate:
-            return candidate
-        break
+    text = markdown_text.lstrip("\ufeff")
 
-    name_line = _NAME_LINE_RE.search(markdown_text)
-    if name_line:
-        candidate = name_line.group(1).strip()
-        if candidate:
-            return candidate
+    lines = text.splitlines()
+    if not lines:
+        return title_from_path(file_path)
 
-    heading = _H1_RE.search(markdown_text)
-    if heading:
-        candidate = heading.group(1).strip().strip("#").strip()
-        if candidate:
-            return candidate
+    line = lines[0].strip()
+    if line.startswith("#"):
+        name = line[1:].lstrip()
+        if name:
+            return name
 
     return title_from_path(file_path)

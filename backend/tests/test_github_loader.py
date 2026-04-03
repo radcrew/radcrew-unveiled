@@ -41,8 +41,8 @@ def test_github_loader_returns_markdown_documents(monkeypatch):
     assert doc.url == "https://github.com/example-org/example-repo/blob/main/docs/guide.md"
 
 
-def test_github_loader_prefers_real_name_from_markdown_over_filename(monkeypatch):
-    blob_text = "Name: Brian Kim\n\nRole: Team Leader"
+def test_github_loader_uses_first_line_heading_as_title(monkeypatch):
+    blob_text = "# Brian Kim\n\nRole: Team Leader"
     encoded_blob = base64.b64encode(blob_text.encode("utf-8")).decode("utf-8")
 
     def fake_get_json(url: str, *, token: str | None):

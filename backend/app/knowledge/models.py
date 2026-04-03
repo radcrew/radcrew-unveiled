@@ -21,3 +21,10 @@ class KnowledgeChunk:
     tokens: list[str]
     url: str | None = None
     score: float | None = None
+
+
+@dataclass(frozen=True)
+class GithubRepoSource:
+    owner: str
+    repo: str
+    host: str
