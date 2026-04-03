@@ -28,7 +28,6 @@ def create_lifespan(
                 access_token=settings.CONTENTFUL_DELIVERY_TOKEN,
                 environment=settings.CONTENTFUL_ENVIRONMENT,
                 content_types_csv=settings.CONTENTFUL_RAG_CONTENT_TYPES,
-                site_base_url=settings.FRONTEND_ORIGIN,
             ),
             *get_github_markdown_documents(
                 repo_url=settings.GITHUB_KB_REPO_URL,

@@ -13,11 +13,14 @@ def get_json(url: str, *, token: str | None) -> dict[str, object]:
         headers=build_headers(token),
         method="GET",
     )
+
     with request.urlopen(req, timeout=20) as response:
         payload = response.read()
+
     parsed = json.loads(payload.decode("utf-8"))
     if not isinstance(parsed, dict):
         raise ValueError("GitHub API response must be a JSON object")
+
     return parsed
 
 

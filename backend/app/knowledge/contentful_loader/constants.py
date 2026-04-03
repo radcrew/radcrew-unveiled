@@ -1,7 +1,6 @@
-"""Contentful CDN and content-type identifiers."""
+"""Contentful CDN and HTTP client identifiers."""
 
 from __future__ import annotations
 
 CDN_BASE = "https://cdn.contentful.com"
-ENGINEERS_CONTENT_TYPE = "engineers"
 USER_AGENT = "radcrew-unveiled-kb-loader"

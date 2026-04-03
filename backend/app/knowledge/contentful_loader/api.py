@@ -41,12 +41,16 @@ def fetch_entries_page(
         params["order"] = order
 
     data = cdn_get_json(path, params)
+
     items_raw = data.get("items")
     if not isinstance(items_raw, list):
         return [], 0
+
     items: list[dict[str, object]] = [x for x in items_raw if isinstance(x, dict)]
+
     total_raw = data.get("total")
     total = int(total_raw) if isinstance(total_raw, int) else len(items)
+
     return items, total
 
 

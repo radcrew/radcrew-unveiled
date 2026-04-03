@@ -1,9 +1,9 @@
-"""Contentful RAG loader: rich text and engineer entry mapping."""
+"""Contentful RAG loader: rich text and entry mapping."""
 
 from __future__ import annotations
 
 from app.knowledge.contentful_loader.plain_text import field_to_plain, rich_text_to_plain
-from app.knowledge.contentful_loader.mapping import map_engineer_entry
+from app.knowledge.contentful_loader.mapping import map_generic_entry
 
 
 def test_rich_text_to_plain_paragraph() -> None:
@@ -44,7 +44,7 @@ def test_field_to_plain_rich_text_bio() -> None:
     assert field_to_plain(fields, "summery") == "Builds APIs."
 
 
-def test_map_engineer_entry() -> None:
+def test_map_generic_entry() -> None:
     entry = {
         "sys": {"id": "abc123"},
         "fields": {
@@ -54,9 +54,10 @@ def test_map_engineer_entry() -> None:
             "website": {"en-US": "https://example.com"},
         },
     }
-    doc = map_engineer_entry(entry, "http://localhost:8080")
-    assert doc.id == "contentful:engineers:abc123"
-    assert "Ada Lovelace" in doc.title
-    assert "Engineer" in doc.text
-    assert "Focus on reliability." in doc.text
-    assert doc.url == "http://localhost:8080/team/abc123"
+    doc = map_generic_entry(entry, "teamMember")
+    assert doc.id == "contentful:teamMember:abc123"
+    assert doc.title == "Ada Lovelace"
+    assert "name: Ada Lovelace" in doc.text
+    assert "role: Engineer / Founder" in doc.text
+    assert "summery: Focus on reliability." in doc.text
+    assert doc.url is None
