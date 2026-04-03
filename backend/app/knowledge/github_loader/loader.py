@@ -40,13 +40,12 @@ def get_github_markdown_documents(
         logger.warning("Skipping GitHub KB ingestion, invalid repo URL: %s", exc)
         return []
 
-    repo_ref = repo_source.repo
     ref = (branch or repo_source.inferred_branch or _DEFAULT_BRANCH).strip() or _DEFAULT_BRANCH
     normalized_prefix = normalize_path_prefix(path_prefix or repo_source.inferred_path_prefix)
 
     try:
         tree_payload = get_json(
-            f"{API_BASE}/repos/{repo_ref.owner}/{repo_ref.repo}/git/trees/{parse.quote(ref)}?recursive=1",
+            f"{API_BASE}/repos/{repo_source.owner}/{repo_source.repo}/git/trees/{parse.quote(ref)}?recursive=1",
             token=token,
         )
         tree_items = tree_payload.get("tree", [])
@@ -74,7 +73,7 @@ def get_github_markdown_documents(
                 continue
 
             blob_payload = get_json(
-                f"{API_BASE}/repos/{repo_ref.owner}/{repo_ref.repo}/git/blobs/{sha}",
+                f"{API_BASE}/repos/{repo_source.owner}/{repo_source.repo}/git/blobs/{sha}",
                 token=token,
             )
             text = decode_blob_content(blob_payload)
@@ -86,7 +85,7 @@ def get_github_markdown_documents(
                     id=f"github:{blob_path}",
                     title=title_from_markdown(blob_path, text),
                     text=text,
-                    url=f"https://{repo_ref.host}/{repo_ref.owner}/{repo_ref.repo}/blob/{ref}/{blob_path}",
+                    url=f"https://{repo_source.host}/{repo_source.owner}/{repo_source.repo}/blob/{ref}/{blob_path}",
                 )
             )
         return documents

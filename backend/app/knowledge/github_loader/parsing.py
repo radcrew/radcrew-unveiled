@@ -4,7 +4,7 @@ import re
 from pathlib import PurePosixPath
 from urllib import parse
 
-from app.knowledge.github_loader.types import GithubRepoRef, GithubRepoSource
+from app.knowledge.github_loader.types import GithubRepoSource
 
 _MARKDOWN_SUFFIXES = (".md", ".mdx")
 _NAME_LINE_RE = re.compile(r"^\s*(?:real\s+name|name)\s*:\s*(.+?)\s*$", re.IGNORECASE | re.MULTILINE)
@@ -38,7 +38,9 @@ def parse_repo_source_url(repo_url: str) -> GithubRepoSource:
         inferred_path_prefix = "/".join(segments[4:])
 
     return GithubRepoSource(
-        repo=GithubRepoRef(owner=owner, repo=repo, host=host),
+        owner=owner,
+        repo=repo,
+        host=host,
         inferred_branch=None,
         inferred_path_prefix=inferred_path_prefix,
     )
