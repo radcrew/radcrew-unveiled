@@ -10,8 +10,11 @@ def _collect_stream(chunks: Iterator[str]) -> str:
     return "".join(chunks)
 
 
-@patch("app.chat.huggingface.InferenceClient")
-def test_generate_answer_returns_chat_completion_text(mock_client_cls: MagicMock) -> None:
+@patch("app.chat.huggingface.text_generation.InferenceClient")
+@patch("app.chat.huggingface.chat_completion.InferenceClient")
+def test_generate_answer_returns_chat_completion_text(
+    mock_client_cls: MagicMock, _mock_tg_cls: MagicMock
+) -> None:
     mock_inst = MagicMock()
     mock_client_cls.return_value = mock_inst
     mock_inst.chat_completion.return_value = [
@@ -26,10 +29,14 @@ def test_generate_answer_returns_chat_completion_text(mock_client_cls: MagicMock
     mock_inst.text_generation.assert_not_called()
 
 
-@patch("app.chat.huggingface.InferenceClient")
-def test_generate_answer_falls_back_to_text_generation(mock_client_cls: MagicMock) -> None:
+@patch("app.chat.huggingface.text_generation.InferenceClient")
+@patch("app.chat.huggingface.chat_completion.InferenceClient")
+def test_generate_answer_falls_back_to_text_generation(
+    mock_cc_cls: MagicMock, mock_tg_cls: MagicMock
+) -> None:
     mock_inst = MagicMock()
-    mock_client_cls.return_value = mock_inst
+    mock_cc_cls.return_value = mock_inst
+    mock_tg_cls.return_value = mock_inst
     mock_inst.chat_completion.return_value = []
     mock_inst.text_generation.return_value = ["  From text gen.  "]
 
@@ -39,10 +46,14 @@ def test_generate_answer_falls_back_to_text_generation(mock_client_cls: MagicMoc
     mock_inst.text_generation.assert_called()
 
 
-@patch("app.chat.huggingface.InferenceClient")
-def test_generate_answer_raises_when_all_paths_fail(mock_client_cls: MagicMock) -> None:
+@patch("app.chat.huggingface.text_generation.InferenceClient")
+@patch("app.chat.huggingface.chat_completion.InferenceClient")
+def test_generate_answer_raises_when_all_paths_fail(
+    mock_cc_cls: MagicMock, mock_tg_cls: MagicMock
+) -> None:
     mock_inst = MagicMock()
-    mock_client_cls.return_value = mock_inst
+    mock_cc_cls.return_value = mock_inst
+    mock_tg_cls.return_value = mock_inst
     mock_inst.chat_completion.return_value = []
     mock_inst.text_generation.return_value = []
 
