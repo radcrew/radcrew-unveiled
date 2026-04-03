@@ -8,5 +8,3 @@ class GithubRepoSource:
     owner: str
     repo: str
     host: str
-    inferred_branch: str | None = None
-    inferred_path_prefix: str | None = None

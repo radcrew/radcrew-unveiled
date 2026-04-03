@@ -9,15 +9,12 @@ from app.knowledge.github_loader.api import API_BASE, get_json
 from app.knowledge.github_loader.decoder import decode_blob_content
 from app.knowledge.github_loader.parsing import (
     is_markdown_file,
-    normalize_path_prefix,
     parse_repo_source_url,
     title_from_markdown,
 )
 from app.knowledge.models import KnowledgeDocument
 
 logger = logging.getLogger(__name__)
-
-_DEFAULT_BRANCH = "HEAD"
 
 
 def get_github_markdown_documents(
@@ -34,18 +31,19 @@ def get_github_markdown_documents(
     if not repo_url:
         return []
 
+    if branch is None or not (branch := branch.strip()):
+        logger.warning("Skipping GitHub KB ingestion: branch is required when repo_url is set")
+        return []
+
     try:
         repo_source = parse_repo_source_url(repo_url)
     except ValueError as exc:
         logger.warning("Skipping GitHub KB ingestion, invalid repo URL: %s", exc)
         return []
 
-    ref = (branch or repo_source.inferred_branch or _DEFAULT_BRANCH).strip() or _DEFAULT_BRANCH
-    normalized_prefix = normalize_path_prefix(path_prefix or repo_source.inferred_path_prefix)
-
     try:
         tree_payload = get_json(
-            f"{API_BASE}/repos/{repo_source.owner}/{repo_source.repo}/git/trees/{parse.quote(ref)}?recursive=1",
+            f"{API_BASE}/repos/{repo_source.owner}/{repo_source.repo}/git/trees/{parse.quote(branch)}?recursive=1",
             token=token,
         )
         tree_items = tree_payload.get("tree", [])
@@ -54,11 +52,7 @@ def get_github_markdown_documents(
             return []
 
         documents: list[KnowledgeDocument] = []
-        sorted_tree_items = sorted(
-            tree_items,
-            key=lambda entry: str(entry.get("path") or "") if isinstance(entry, dict) else "",
-        )
-        for entry in sorted_tree_items:
+        for entry in tree_items:
             if not isinstance(entry, dict):
                 continue
             if entry.get("type") != "blob":
@@ -66,7 +60,7 @@ def get_github_markdown_documents(
             blob_path = str(entry.get("path") or "")
             if not blob_path or not is_markdown_file(blob_path):
                 continue
-            if normalized_prefix and not blob_path.startswith(normalized_prefix):
+            if path_prefix and not blob_path.startswith(path_prefix):
                 continue
             sha = str(entry.get("sha") or "")
             if not sha:
@@ -85,7 +79,7 @@ def get_github_markdown_documents(
                     id=f"github:{blob_path}",
                     title=title_from_markdown(blob_path, text),
                     text=text,
-                    url=f"https://{repo_source.host}/{repo_source.owner}/{repo_source.repo}/blob/{ref}/{blob_path}",
+                    url=f"https://{repo_source.host}/{repo_source.owner}/{repo_source.repo}/blob/{branch}/{blob_path}",
                 )
             )
         return documents

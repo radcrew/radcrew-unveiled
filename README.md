@@ -65,7 +65,7 @@ npm run dev
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
 - `GITHUB_KB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
 - `GITHUB_KB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_KB_PRIVATE_REPO=true`)
-- `GITHUB_KB_BRANCH`: optional branch or ref to ingest (defaults to repository default branch)
+- `GITHUB_KB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_KB_REPO_URL` is set; example: `main`)
 - `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
 - `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
 - `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN`, `CONTENTFUL_ENVIRONMENT`: Content Delivery API credentials (mirror the frontend `VITE_CONTENTFUL_*` values in `backend/.env` so the API can ingest entries at startup)
@@ -78,7 +78,7 @@ npm run dev
    - `GITHUB_KB_REPO_URL=https://github.com/<owner>/<repo>`
    - `GITHUB_KB_PRIVATE_REPO=true`
    - `GITHUB_KB_TOKEN=<your_token>`
-3. Optionally set `GITHUB_KB_BRANCH` and/or `GITHUB_KB_PATH` if your Markdown docs live outside default branch root.
+3. Set `GITHUB_KB_BRANCH` (e.g. `main`) and optionally `GITHUB_KB_PATH` if Markdown lives under a subdirectory.
 4. Restart the backend (`npm run dev:backend` or `npm run dev`) so startup ingestion reloads from GitHub.
 
 ## Chatbot flow

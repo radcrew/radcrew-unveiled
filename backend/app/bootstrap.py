@@ -21,7 +21,6 @@ def create_lifespan(
     @asynccontextmanager
     async def lifespan(_app: FastAPI):
         settings = get_settings()
-        github_repo_url = str(settings.GITHUB_KB_REPO_URL) if settings.GITHUB_KB_REPO_URL else None
         documents = [
             *get_static_site_documents(),
             *get_contentful_documents(
@@ -32,7 +31,7 @@ def create_lifespan(
                 site_base_url=settings.FRONTEND_ORIGIN,
             ),
             *get_github_markdown_documents(
-                repo_url=github_repo_url,
+                repo_url=settings.GITHUB_KB_REPO_URL,
                 token=settings.GITHUB_KB_TOKEN,
                 branch=settings.GITHUB_KB_BRANCH,
                 path_prefix=settings.GITHUB_KB_PATH,

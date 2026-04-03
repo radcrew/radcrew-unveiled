@@ -30,27 +30,7 @@ def parse_repo_source_url(repo_url: str) -> GithubRepoSource:
     if not owner or not repo:
         raise ValueError("repo URL must include owner and repo")
 
-    inferred_path_prefix: str | None = None
-    # Input URLs are expected in form:
-    # https://github.com/<owner>/<repo>/tree/<branch>/<directory>
-    # Branch comes from settings, so only directory path is inferred.
-    if len(segments) >= 5 and segments[2] == "tree":
-        inferred_path_prefix = "/".join(segments[4:])
-
-    return GithubRepoSource(
-        owner=owner,
-        repo=repo,
-        host=host,
-        inferred_branch=None,
-        inferred_path_prefix=inferred_path_prefix,
-    )
-
-
-def normalize_path_prefix(path_prefix: str | None) -> str:
-    if not path_prefix:
-        return ""
-    normalized = path_prefix.strip().strip("/")
-    return f"{normalized}/" if normalized else ""
+    return GithubRepoSource(owner=owner, repo=repo, host=host)
 
 
 def is_markdown_file(file_path: str) -> bool:
