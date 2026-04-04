@@ -22,6 +22,17 @@ from app.chat.huggingface.common import (
 
 logger = logging.getLogger(__name__)
 
+# Prepended to the routing completion so the model defaults to *no* tool call; without this,
+# a single exposed tool is often invoked on every turn (especially with user-only transcripts).
+TOOL_ROUTING_SYSTEM_MESSAGE = (
+    "You are an intent router for a chat assistant. One optional tool exists: "
+    "send_company_advice. Your default is to call NO tools. "
+    "Call send_company_advice only when the user's latest message clearly means they want to "
+    "submit feedback, suggestions, or a bug report to the company—e.g. they explicitly ask to "
+    "send feedback, email the team with feedback, or give product feedback meant for staff. "
+    "Do not call it for greetings, general questions, small talk, or normal FAQ-style questions."
+)
+
 # Tool schema for routing company feedback submission (Web3Forms payload fields).
 COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [
     {
@@ -30,8 +41,8 @@ COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [
             "name": "send_company_advice",
             "description": (
                 "Submit structured company or product feedback on behalf of the user. "
-                "Call this when the user wants to send advice, suggestions, or feedback "
-                "to the company rather than only asking a general question."
+                "Call ONLY when they clearly intend to send feedback to the company—not for "
+                "ordinary questions or conversation."
             ),
             "parameters": {
                 "type": "object",
@@ -52,12 +63,12 @@ COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [
 ]
 
 _JSON_FALLBACK_SUFFIX = (
-    "Based on the conversation above, decide whether the user intends to submit "
-    "company or product feedback via send_company_advice. "
+    "Based on the conversation and the routing rules in the system message, decide whether "
+    "the user's latest message clearly intends to submit company feedback via send_company_advice. "
     'Reply with ONLY a single JSON object (no markdown fences) of the form: '
-    '{"tool_calls":[]} if no submission is appropriate, or '
+    '{"tool_calls":[]} when no tool call is appropriate (this should be the usual case), or '
     '{"tool_calls":[{"name":"send_company_advice","arguments":{"message":"<text>",'
-    '"subject":"<optional>"}}]} when they want to send feedback.'
+    '"subject":"<optional>"}}]} only when they clearly want to send feedback to the company.'
 )
 
 

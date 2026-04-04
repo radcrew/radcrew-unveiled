@@ -11,7 +11,7 @@ from threading import Lock
 from typing import Any
 
 from app.chat.huggingface import generate_answer
-from app.chat.huggingface.tool_routing import route_tool_calls
+from app.chat.huggingface.tool_routing import TOOL_ROUTING_SYSTEM_MESSAGE, route_tool_calls
 from app.chat.messages import (
     MSG_FALLBACK_LOW_CONTEXT,
     MSG_FEEDBACK_NOT_CONFIGURED,
@@ -87,10 +87,12 @@ def get_text_chunk_stream(
 def _tool_routing_messages(
     message: str, history: list[ChatHistoryMessage]
 ) -> list[dict[str, Any]]:
-    """Up to two prior user turns from history, then the latest user message."""
-    recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
-    prior = recent_user_turns[-2:]
-    msgs: list[dict[str, Any]] = [{"role": "user", "content": c} for c in prior]
+    """System router, then full chat history (both roles), then the latest user message."""
+    msgs: list[dict[str, Any]] = [
+        {"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE},
+    ]
+    for m in history:
+        msgs.append({"role": m.role, "content": m.content})
     msgs.append({"role": "user", "content": message})
     return msgs
 
