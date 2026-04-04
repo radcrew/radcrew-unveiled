@@ -3,19 +3,36 @@
 from __future__ import annotations
 
 import hashlib
-import time
+import json
+import logging
 from collections import OrderedDict
 from collections.abc import Iterator
 from threading import Lock
+from typing import Any
 
 from app.chat.huggingface import generate_answer
-from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
+from app.chat.huggingface.tool_routing import route_tool_calls
+from app.chat.messages import (
+    MSG_FALLBACK_LOW_CONTEXT,
+    MSG_FEEDBACK_NOT_CONFIGURED,
+    MSG_FEEDBACK_SEND_FAILED,
+    MSG_FEEDBACK_THANKS,
+    MSG_MISSING_HF_KEY,
+)
 from app.chat.prompt import build_chat_prompt
 from app.chat.models import EmbeddingInferenceConfig
 from app.chat.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
 from app.config import get_settings
+from app.feedback.web3forms import (
+    FeedbackNotConfiguredError,
+    FeedbackSubmissionError,
+    FeedbackValidationError,
+    submit_feedback_via_web3forms,
+)
 from app.knowledge.models import KnowledgeChunk
-from app.schemas import ChatRequest
+from app.schemas import ChatHistoryMessage, ChatRequest
+
+logger = logging.getLogger(__name__)
 
 STREAM_TEXT_CHUNK_SIZE = 2
 RESPONSE_CACHE_MAX_SIZE = 256
@@ -67,6 +84,17 @@ def get_text_chunk_stream(
         yield text[i:i + chunk_size]
 
 
+def _tool_routing_messages(
+    message: str, history: list[ChatHistoryMessage]
+) -> list[dict[str, Any]]:
+    """Up to two prior user turns from history, then the latest user message."""
+    recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
+    prior = recent_user_turns[-2:]
+    msgs: list[dict[str, Any]] = [{"role": "user", "content": c} for c in prior]
+    msgs.append({"role": "user", "content": message})
+    return msgs
+
+
 def generate_chat_stream(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
@@ -76,6 +104,52 @@ def generate_chat_stream(
     message = body.message
     history = body.history or []
     recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
+
+    if settings.HUGGINGFACE_API_KEY:
+        try:
+            tool_msgs = _tool_routing_messages(message, history)
+            routed = route_tool_calls(
+                settings.HUGGINGFACE_MODEL,
+                settings.HUGGINGFACE_API_KEY,
+                tool_msgs,
+                settings.HUGGINGFACE_PROVIDER,
+            )
+        except Exception as exc:
+            logger.exception("[chat] tool routing failed: %s", exc)
+            routed = []
+
+        advice_call = next((c for c in routed if c.name == "send_company_advice"), None)
+        if advice_call is not None:
+            args: dict[str, Any] | None = None
+            try:
+                parsed = json.loads(advice_call.arguments)
+                args = parsed if isinstance(parsed, dict) else None
+            except json.JSONDecodeError:
+                logger.warning("[chat] could not parse send_company_advice arguments as JSON")
+
+            if args is not None and isinstance(args.get("message"), str):
+                body_text = args["message"]
+                raw_subj = args.get("subject")
+                subject = raw_subj if isinstance(raw_subj, str) else None
+                email = settings.COMPANY_FEEDBACK_EMAIL
+                try:
+                    submit_feedback_via_web3forms(
+                        body_text,
+                        subject,
+                        settings=settings,
+                    )
+                except FeedbackNotConfiguredError:
+                    logger.warning(
+                        "Feedback submission unavailable: WEB3FORMS_ACCESS_KEY is not set."
+                    )
+                    return get_text_chunk_stream(
+                        MSG_FEEDBACK_NOT_CONFIGURED.format(email=email)
+                    )
+                except (FeedbackValidationError, FeedbackSubmissionError) as exc:
+                    logger.warning("Feedback submission failed: %s", exc)
+                    return get_text_chunk_stream(MSG_FEEDBACK_SEND_FAILED.format(email=email))
+
+                return get_text_chunk_stream(MSG_FEEDBACK_THANKS.format(email=email))
 
     retrieval_query = message
     if recent_user_turns:

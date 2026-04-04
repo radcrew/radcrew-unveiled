@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
+from app.chat.huggingface.tool_routing import ParsedToolCall
 from app.main import app
 from app.knowledge.models import KnowledgeChunk
 
@@ -50,8 +51,11 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
     assert r.json() == {"error": "Invalid request payload."}
 
 
+@patch("app.chat.service.route_tool_calls", return_value=[])
 @patch("app.chat.service.retrieve_relevant_chunks", return_value=[])
-def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, client: TestClient) -> None:
+def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
+    _mock_retrieve: object, _mock_route: object, client: TestClient
+) -> None:
     r = client.post("/chat", json={"message": "hello there"})
     assert r.status_code == 200
     assert r.text.count('"type": "chunk"') > 1
@@ -62,7 +66,9 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(_mock: object, c
 @patch("app.chat.service.generate_answer", return_value=iter(["Your name is Macho."]))
 @patch("app.chat.service.get_settings")
 @patch("app.chat.service.retrieve_relevant_chunks", return_value=[])
+@patch("app.chat.service.route_tool_calls", return_value=[])
 def test_chat_with_history_does_not_force_retrieval_fallback(
+    _mock_route: object,
     _mock_retrieve: object,
     mock_settings: MagicMock,
     _mock_generate: object,
@@ -126,4 +132,82 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     streamed_answer = _stream_content(r.text)
     assert "HUGGINGFACE_API_KEY" in streamed_answer
     assert "backend/.env" in streamed_answer
+    assert '"type": "done"' in r.text
+
+
+@patch("app.chat.service.generate_answer")
+@patch("app.chat.service.retrieve_relevant_chunks")
+@patch("app.chat.service.submit_feedback_via_web3forms")
+@patch("app.chat.service.route_tool_calls")
+@patch("app.chat.service.get_settings")
+def test_chat_company_advice_skips_retrieval_and_streams_thanks(
+    mock_settings: MagicMock,
+    mock_route: MagicMock,
+    mock_submit: MagicMock,
+    mock_retrieve: MagicMock,
+    mock_generate: MagicMock,
+    client: TestClient,
+) -> None:
+    mock_route.return_value = [
+        ParsedToolCall(
+            id="c1",
+            name="send_company_advice",
+            arguments='{"message": "Great product idea", "subject": "Idea"}',
+        )
+    ]
+    cfg = MagicMock()
+    cfg.HUGGINGFACE_API_KEY = "hf_test_token"
+    cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
+    cfg.HUGGINGFACE_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+    cfg.HUGGINGFACE_EMBEDDING_PROVIDER = "hf-inference"
+    cfg.WEB3FORMS_ACCESS_KEY = "wf_key"
+    cfg.COMPANY_FEEDBACK_EMAIL = "code@radcrew.org"
+    mock_settings.return_value = cfg
+
+    r = client.post(
+        "/chat",
+        json={"message": "Please send this feedback to the company."},
+    )
+    assert r.status_code == 200
+    mock_retrieve.assert_not_called()
+    mock_generate.assert_not_called()
+    mock_submit.assert_called_once()
+    streamed = _stream_content(r.text)
+    assert "Thanks" in streamed and "code@radcrew.org" in streamed
+    assert '"type": "done"' in r.text
+
+
+@patch("app.chat.service.retrieve_relevant_chunks")
+@patch("app.chat.service.route_tool_calls")
+@patch("app.chat.service.get_settings")
+def test_chat_company_advice_without_web3_key_streams_unavailable_copy(
+    mock_settings: MagicMock,
+    mock_route: MagicMock,
+    mock_retrieve: MagicMock,
+    client: TestClient,
+) -> None:
+    mock_route.return_value = [
+        ParsedToolCall(
+            id="c1",
+            name="send_company_advice",
+            arguments='{"message": "Feedback body"}',
+        )
+    ]
+    cfg = MagicMock()
+    cfg.HUGGINGFACE_API_KEY = "hf_test_token"
+    cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
+    cfg.HUGGINGFACE_EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+    cfg.HUGGINGFACE_EMBEDDING_PROVIDER = "hf-inference"
+    cfg.WEB3FORMS_ACCESS_KEY = None
+    cfg.COMPANY_FEEDBACK_EMAIL = "code@radcrew.org"
+    mock_settings.return_value = cfg
+
+    r = client.post("/chat", json={"message": "Send my feedback to the team."})
+    assert r.status_code == 200
+    mock_retrieve.assert_not_called()
+    streamed = _stream_content(r.text)
+    assert "not configured" in streamed.lower() or "cannot be sent" in streamed.lower()
+    assert "code@radcrew.org" in streamed
     assert '"type": "done"' in r.text
