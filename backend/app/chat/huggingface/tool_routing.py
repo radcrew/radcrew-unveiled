@@ -15,7 +15,6 @@ from huggingface_hub.inference._generated.types.chat_completion import (
 
 from app.chat.huggingface.common import (
     DETERMINISTIC_GENERATION_SEED,
-    log_hf_error,
     providers_to_try,
     safe_get,
 )
@@ -275,10 +274,7 @@ def route_tool_calls(
             )
             return parse_tool_calls_from_completion(resp)
         except Exception as err:
-            if isinstance(err, (HfHubHTTPError, HFValidationError)):
-                log_hf_error("chatCompletionTools", str(provider), err)
-            else:
-                logger.error("[HF chatCompletionTools provider=%s] %s", provider, err)
+            logger.error("[HF chatCompletionTools provider=%s] %s", provider, err)
 
     # JSON fallback: same providers; try json_object response format first, then plain.
     fallback_msgs = _json_fallback_messages(messages)
@@ -297,18 +293,11 @@ def route_tool_calls(
                 if parsed is not None:
                     return parsed
             except Exception as err:
-                if isinstance(err, (HfHubHTTPError, HFValidationError)):
-                    log_hf_error(
-                        f"chatCompletionJsonFallback({'json_object' if use_json_fmt else 'plain'})",
-                        str(provider),
-                        err,
-                    )
-                else:
-                    logger.error(
-                        "[HF chatCompletionJsonFallback provider=%s json_fmt=%s] %s",
-                        provider,
-                        use_json_fmt,
-                        err,
-                    )
+                logger.error(
+                    "[HF chatCompletionJsonFallback provider=%s json_fmt=%s] %s",
+                    provider,
+                    use_json_fmt,
+                    err,
+                )
 
     return []

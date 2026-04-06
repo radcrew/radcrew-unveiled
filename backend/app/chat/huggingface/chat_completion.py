@@ -5,6 +5,7 @@ from typing import Any
 
 from huggingface_hub import InferenceClient
 from app.chat.huggingface.common import DETERMINISTIC_GENERATION_SEED, safe_get
+from app.config import get_settings
 
 
 def extract_stream_content(chunk: Any) -> str:
@@ -19,12 +20,17 @@ def extract_stream_content(chunk: Any) -> str:
 
 
 def stream_chat_completion(
-    model: str,
-    access_token: str,
     prompt: str,
     provider: str,
 ) -> Iterator[str]:
-    client = InferenceClient(model=model, token=access_token, provider=provider)  # type: ignore[arg-type]
+    settings = get_settings()
+
+    client = InferenceClient(
+        model=settings.HUGGINGFACE_MODEL,
+        token=settings.HUGGINGFACE_API_KEY,
+        provider=provider
+    )  # type: ignore[arg-type]
+
     stream = client.chat_completion(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=512,
@@ -33,6 +39,7 @@ def stream_chat_completion(
         seed=DETERMINISTIC_GENERATION_SEED,
         stream=True,
     )
+
     for chunk in stream:
         content = extract_stream_content(chunk)
         if content:

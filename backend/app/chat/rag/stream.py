@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from app.config import get_settings
-
 from app.chat.cache.response import (
     get_cached_response,
     prompt_cache_key,
