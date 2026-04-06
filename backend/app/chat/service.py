@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from app.chat.advice.tool_branch import try_stream_company_advice_feedback
+from app.chat.feedback.tool_branch import try_feedback_tool_call
 from app.chat.rag.stream import stream_rag_chat_answer
 from app.config import get_settings
 from app.knowledge.models import KnowledgeChunk
@@ -20,8 +20,8 @@ def generate_chat_stream(
     history = body.history or []
 
     if settings.HUGGINGFACE_API_KEY:
-        feedback_stream = try_stream_company_advice_feedback(settings, message, history)
-        if feedback_stream is not None:
-            return feedback_stream
+        response_stream = try_feedback_tool_call(settings, message, history)
+        if response_stream is not None:
+            return response_stream
 
     return stream_rag_chat_answer(body, knowledge_chunks, settings)

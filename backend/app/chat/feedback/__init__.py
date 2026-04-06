@@ -1,6 +1,9 @@
-"""Feedback delivery (Web3Forms, etc.)."""
+"""Chat feedback: LLM tool branch and Web3Forms delivery."""
 
-from app.feedback.web3forms import (
+from __future__ import annotations
+
+from app.chat.feedback.tool_branch import try_feedback_tool_call
+from app.chat.feedback.web3forms import (
     FeedbackError,
     FeedbackNotConfiguredError,
     FeedbackSubmissionError,
@@ -14,4 +17,5 @@ __all__ = [
     "FeedbackSubmissionError",
     "FeedbackValidationError",
     "submit_feedback_via_web3forms",
+    "try_feedback_tool_call",
 ]

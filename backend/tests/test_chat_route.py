@@ -51,7 +51,7 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
     assert r.json() == {"error": "Invalid request payload."}
 
 
-@patch("app.chat.advice.tool_branch.route_tool_calls", return_value=[])
+@patch("app.chat.feedback.tool_branch.route_tool_calls", return_value=[])
 @patch("app.chat.rag.stream.retrieve_relevant_chunks", return_value=[])
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
     _mock_retrieve: object, _mock_route: object, client: TestClient
@@ -66,7 +66,7 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
 @patch("app.chat.rag.stream.generate_answer", return_value=iter(["Your name is Macho."]))
 @patch("app.chat.service.get_settings")
 @patch("app.chat.rag.stream.retrieve_relevant_chunks", return_value=[])
-@patch("app.chat.advice.tool_branch.route_tool_calls", return_value=[])
+@patch("app.chat.feedback.tool_branch.route_tool_calls", return_value=[])
 def test_chat_with_history_does_not_force_retrieval_fallback(
     _mock_route: object,
     _mock_retrieve: object,
@@ -137,8 +137,8 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
 
 @patch("app.chat.rag.stream.generate_answer")
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
-@patch("app.chat.advice.tool_branch.submit_feedback_via_web3forms")
-@patch("app.chat.advice.tool_branch.route_tool_calls")
+@patch("app.chat.feedback.tool_branch.submit_feedback_via_web3forms")
+@patch("app.chat.feedback.tool_branch.route_tool_calls")
 @patch("app.chat.service.get_settings")
 def test_chat_company_advice_skips_retrieval_and_streams_thanks(
     mock_settings: MagicMock,
@@ -179,7 +179,7 @@ def test_chat_company_advice_skips_retrieval_and_streams_thanks(
 
 
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
-@patch("app.chat.advice.tool_branch.route_tool_calls")
+@patch("app.chat.feedback.tool_branch.route_tool_calls")
 @patch("app.chat.service.get_settings")
 def test_chat_company_advice_without_web3_key_streams_unavailable_copy(
     mock_settings: MagicMock,

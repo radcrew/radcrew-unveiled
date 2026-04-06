@@ -1,4 +1,4 @@
-"""Company-advice tool routing + Web3Forms submission (runs before RAG when HF key is set)."""
+"""LLM tool routing for user feedback + Web3Forms submission (runs before RAG when HF key is set)."""
 
 from __future__ import annotations
 
@@ -8,6 +8,12 @@ from collections.abc import Iterator
 from typing import Any
 
 from app.chat.cache.response import get_text_chunk_stream
+from app.chat.feedback.web3forms import (
+    FeedbackNotConfiguredError,
+    FeedbackSubmissionError,
+    FeedbackValidationError,
+    submit_feedback_via_web3forms,
+)
 from app.chat.huggingface.tool_routing import (
     build_company_advice_routing_messages,
     route_tool_calls,
@@ -18,24 +24,18 @@ from app.chat.messages import (
     MSG_FEEDBACK_THANKS,
 )
 from app.config import Settings
-from app.feedback.web3forms import (
-    FeedbackNotConfiguredError,
-    FeedbackSubmissionError,
-    FeedbackValidationError,
-    submit_feedback_via_web3forms,
-)
 from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
 
 
-def try_stream_company_advice_feedback(
+def try_feedback_tool_call(
     settings: Settings,
     message: str,
     history: list[ChatHistoryMessage],
 ) -> Iterator[str] | None:
     """
-    If the model returns ``send_company_advice``, submit via Web3Forms and stream a reply.
+    If the model returns ``send_company_advice``, submit the user's message via Web3Forms and stream a reply.
 
     Returns ``None`` when the normal RAG path should run instead.
     """
