@@ -11,7 +11,7 @@ from app.chat.rag.retrieval import build_knowledge_chunks
 from app.config import get_settings
 from app.knowledge import get_static_site_documents
 from app.knowledge.contentful_loader import get_contentful_documents
-from app.knowledge.github_loader import get_github_markdown_documents
+from app.knowledge.github_loader import get_resume_documents
 from app.knowledge.models import KnowledgeChunk
 
 
@@ -29,7 +29,7 @@ def create_lifespan(
                 environment=settings.CONTENTFUL_ENVIRONMENT,
                 content_types_csv=settings.CONTENTFUL_RAG_CONTENT_TYPES,
             ),
-            *get_github_markdown_documents(
+            *get_resume_documents(
                 repo_url=settings.GITHUB_KB_REPO_URL,
                 token=settings.GITHUB_KB_TOKEN,
                 branch=settings.GITHUB_KB_BRANCH,

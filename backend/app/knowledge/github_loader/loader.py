@@ -17,7 +17,7 @@ from app.knowledge.models import KnowledgeDocument
 logger = logging.getLogger(__name__)
 
 
-def get_github_markdown_documents(
+def get_resume_documents(
     *,
     repo_url: str | None,
     token: str | None,

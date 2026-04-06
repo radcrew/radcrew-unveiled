@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 from urllib.error import HTTPError
 
-from app.knowledge.github_loader.loader import get_github_markdown_documents
+from app.knowledge.github_loader.loader import get_resume_documents
 
 
 def test_github_loader_returns_markdown_documents(monkeypatch):
@@ -26,7 +26,7 @@ def test_github_loader_returns_markdown_documents(monkeypatch):
 
     monkeypatch.setattr("app.knowledge.github_loader.loader.get_json", fake_get_json)
 
-    docs = get_github_markdown_documents(
+    docs = get_resume_documents(
         repo_url="https://github.com/example-org/example-repo",
         token="ghp_test_token",
         branch="main",
@@ -54,7 +54,7 @@ def test_github_loader_uses_first_line_heading_as_title(monkeypatch):
 
     monkeypatch.setattr("app.knowledge.github_loader.loader.get_json", fake_get_json)
 
-    docs = get_github_markdown_documents(
+    docs = get_resume_documents(
         repo_url="https://github.com/example-org/example-repo",
         token="ghp_test_token",
         branch="main",
@@ -71,7 +71,7 @@ def test_github_loader_returns_empty_when_repo_url_missing(monkeypatch):
 
     monkeypatch.setattr("app.knowledge.github_loader.loader.get_json", fail_if_called)
 
-    docs = get_github_markdown_documents(
+    docs = get_resume_documents(
         repo_url=None,
         token="ghp_unused_token",
     )
@@ -91,7 +91,7 @@ def test_github_loader_returns_empty_on_api_error(monkeypatch):
 
     monkeypatch.setattr("app.knowledge.github_loader.loader.get_json", failing_get_json)
 
-    docs = get_github_markdown_documents(
+    docs = get_resume_documents(
         repo_url="https://github.com/example-org/example-repo",
         token=None,
         branch="main",
