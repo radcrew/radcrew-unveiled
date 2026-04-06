@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from app.config import get_settings
+
 from app.chat.cache.response import (
     get_cached_response,
     get_text_chunk_stream,
@@ -12,10 +14,9 @@ from app.chat.cache.response import (
 )
 from app.chat.huggingface import generate_answer
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
-from app.chat.rag.models import EmbeddingInferenceConfig
 from app.chat.rag.prompt import build_chat_prompt
 from app.chat.rag.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
-from app.config import Settings
+from app.config import get_settings
 from app.knowledge.models import KnowledgeChunk
 from app.schemas import ChatRequest
 
@@ -23,8 +24,8 @@ from app.schemas import ChatRequest
 def stream_rag_chat_answer(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
-    settings: Settings,
 ) -> Iterator[str]:
+    settings = get_settings()
     message = body.message
     history = body.history or []
     recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
@@ -34,16 +35,10 @@ def stream_rag_chat_answer(
         recent_context = "\n".join(recent_user_turns[-2:])
         retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
-    embedding = EmbeddingInferenceConfig(
-        access_token=settings.HUGGINGFACE_API_KEY,
-        model=settings.HUGGINGFACE_EMBEDDING_MODEL,
-        provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER,
-    )
     relevant_chunks = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
-        5,
-        embedding=embedding,
+        5
     )
 
     if retrieval_fallback_needed(relevant_chunks) and not history:

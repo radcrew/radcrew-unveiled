@@ -1,12 +1,11 @@
 """LLM tool routing for user feedback + Web3Forms submission (runs before RAG when HF key is set)."""
 
 from __future__ import annotations
-
 import json
 import logging
 from collections.abc import Iterator
 from typing import Any
-
+from app.config import get_settings
 from app.chat.cache.response import get_text_chunk_stream
 from app.chat.feedback.web3forms import (
     FeedbackNotConfiguredError,
@@ -23,14 +22,12 @@ from app.chat.messages import (
     MSG_FEEDBACK_SEND_FAILED,
     MSG_FEEDBACK_THANKS,
 )
-from app.config import Settings
 from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
 
 
 def try_feedback_tool_call(
-    settings: Settings,
     message: str,
     history: list[ChatHistoryMessage],
 ) -> Iterator[str] | None:
@@ -39,7 +36,7 @@ def try_feedback_tool_call(
 
     Returns ``None`` when the normal RAG path should run instead.
     """
-
+    settings = get_settings()
     if not settings.HUGGINGFACE_API_KEY:
         return None;
 
@@ -78,7 +75,6 @@ def try_feedback_tool_call(
         submit_feedback_via_web3forms(
             body_text,
             subject,
-            settings=settings,
         )
     except FeedbackNotConfiguredError:
         logger.warning(

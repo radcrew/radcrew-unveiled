@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from urllib import error, request
 
-from app.config import Settings, get_settings
+from app.config import get_settings
 
 WEB3FORMS_SUBMIT_URL = "https://api.web3forms.com/submit"
 
@@ -88,14 +88,14 @@ def _read_response_body(resp: object) -> bytes:
 def submit_feedback_via_web3forms(
     body: str,
     subject: str | None = None,
-    *,
-    settings: Settings | None = None,
 ) -> None:
     """
     POST JSON to Web3Forms. Raises FeedbackNotConfiguredError if the access key is unset;
     FeedbackValidationError if body/subject are invalid; FeedbackSubmissionError on HTTP
     errors, non-success API payloads, or network failures.
     """
+    settings = get_settings()
+
     cfg = settings if settings is not None else get_settings()
     access_key = cfg.WEB3FORMS_ACCESS_KEY
     if not access_key or not str(access_key).strip():
