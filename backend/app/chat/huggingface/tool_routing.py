@@ -1,4 +1,4 @@
-"""Non-stream chat completion with tool calling and optional JSON fallback."""
+"""Non-stream chat completion to route ``send_feedback`` intent; optional JSON fallback."""
 
 from __future__ import annotations
 
@@ -47,8 +47,8 @@ def build_feedback_routing_messages(
     return msgs
 
 
-# Tool schema for user feedback submission (Web3Forms payload fields).
-FEEDBACK_SUBMISSION_TOOLS: list[dict[str, Any]] = [
+# OpenAPI-style function tool exposed to the router (only ``send_feedback`` in this app).
+_SEND_FEEDBACK_TOOL: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
@@ -201,17 +201,16 @@ def parse_tool_calls_from_json_text(text: str) -> list[ParsedToolCall] | None:
     return out
 
 
-def _chat_completion_tools_once(
+def _chat_completion_send_feedback_route_once(
     model: str,
     access_token: str,
     messages: list[dict[str, Any]],
     provider: str,
-    tools: list[dict[str, Any]],
 ) -> Any:
     client = InferenceClient(model=model, token=access_token, provider=provider)  # type: ignore[arg-type]
     return client.chat_completion(
         messages=messages,
-        tools=tools,
+        tools=_SEND_FEEDBACK_TOOL,
         tool_choice="auto",
         stream=False,
         max_tokens=512,
@@ -252,24 +251,22 @@ def route_tool_calls(
     access_token: str,
     messages: list[dict[str, Any]],
     provider_policy: str = "hf-inference",
-    *,
-    tools: list[dict[str, Any]] | None = None,
 ) -> list[ParsedToolCall]:
     """
-    Run non-stream ``chat_completion`` with ``tools`` and ``tool_choice="auto"``,
-    parse ``choices[0].message.tool_calls``, and return structured calls.
+    Run non-stream ``chat_completion`` with the ``send_feedback`` tool and
+    ``tool_choice="auto"``, parse ``choices[0].message.tool_calls``, and return
+    structured calls.
 
-    If every provider fails the tools request (HTTP/validation errors), runs an
-    optional JSON-only completion (with and without ``response_format: json_object``)
+    If every provider fails that request (HTTP/validation errors), runs a
+    JSON-only completion (with and without ``response_format: json_object``)
     and parses ``{"tool_calls": [...]}`` from the assistant message content.
     """
-    tool_list = tools if tools is not None else FEEDBACK_SUBMISSION_TOOLS
     providers = providers_to_try(provider_policy)
 
     for provider in providers:
         try:
-            resp = _chat_completion_tools_once(
-                model, access_token, messages, provider, tool_list
+            resp = _chat_completion_send_feedback_route_once(
+                model, access_token, messages, provider
             )
             return parse_tool_calls_from_completion(resp)
         except Exception as err:
