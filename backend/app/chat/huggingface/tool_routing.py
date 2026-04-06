@@ -27,15 +27,15 @@ logger = logging.getLogger(__name__)
 # a single exposed tool is often invoked on every turn (especially with user-only transcripts).
 TOOL_ROUTING_SYSTEM_MESSAGE = (
     "You are an intent router for a chat assistant. One optional tool exists: "
-    "send_company_advice. Your default is to call NO tools. "
-    "Call send_company_advice only when the user's latest message clearly means they want to "
+    "send_feedback. Your default is to call NO tools. "
+    "Call send_feedback only when the user's latest message clearly means they want to "
     "submit feedback, suggestions, or a bug report to the company—e.g. they explicitly ask to "
-    "send feedback, email the team with feedback, or give product feedback meant for staff. "
+    "send feedback, email the team with feedback, or share product feedback meant for staff. "
     "Do not call it for greetings, general questions, small talk, or normal FAQ-style questions."
 )
 
 
-def build_company_advice_routing_messages(
+def build_feedback_routing_messages(
     message: str,
     history: list[ChatHistoryMessage],
 ) -> list[dict[str, Any]]:
@@ -49,16 +49,16 @@ def build_company_advice_routing_messages(
     return msgs
 
 
-# Tool schema for routing company feedback submission (Web3Forms payload fields).
-COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [
+# Tool schema for user feedback submission (Web3Forms payload fields).
+FEEDBACK_SUBMISSION_TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
-            "name": "send_company_advice",
+            "name": "send_feedback",
             "description": (
-                "Submit structured company or product feedback on behalf of the user. "
-                "Call ONLY when they clearly intend to send feedback to the company—not for "
-                "ordinary questions or conversation."
+                "Submit structured feedback to the team on behalf of the user. "
+                "Call ONLY when they clearly intend to send feedback—not for ordinary questions "
+                "or conversation."
             ),
             "parameters": {
                 "type": "object",
@@ -80,10 +80,10 @@ COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [
 
 _JSON_FALLBACK_SUFFIX = (
     "Based on the conversation and the routing rules in the system message, decide whether "
-    "the user's latest message clearly intends to submit company feedback via send_company_advice. "
+    "the user's latest message clearly intends to submit feedback via send_feedback. "
     'Reply with ONLY a single JSON object (no markdown fences) of the form: '
     '{"tool_calls":[]} when no tool call is appropriate (this should be the usual case), or '
-    '{"tool_calls":[{"name":"send_company_advice","arguments":{"message":"<text>",'
+    '{"tool_calls":[{"name":"send_feedback","arguments":{"message":"<text>",'
     '"subject":"<optional>"}}]} only when they clearly want to send feedback to the company.'
 )
 
@@ -265,7 +265,7 @@ def route_tool_calls(
     optional JSON-only completion (with and without ``response_format: json_object``)
     and parses ``{"tool_calls": [...]}`` from the assistant message content.
     """
-    tool_list = tools if tools is not None else COMPANY_ADVICE_TOOLS
+    tool_list = tools if tools is not None else FEEDBACK_SUBMISSION_TOOLS
     providers = providers_to_try(provider_policy)
 
     for provider in providers:

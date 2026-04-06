@@ -15,7 +15,7 @@ from app.chat.feedback.web3forms import (
     submit_feedback_via_web3forms,
 )
 from app.chat.huggingface.tool_routing import (
-    build_company_advice_routing_messages,
+    build_feedback_routing_messages,
     route_tool_calls,
 )
 from app.chat.messages import (
@@ -35,12 +35,12 @@ def try_feedback_tool_call(
     history: list[ChatHistoryMessage],
 ) -> Iterator[str] | None:
     """
-    If the model returns ``send_company_advice``, submit the user's message via Web3Forms and stream a reply.
+    If the model returns ``send_feedback``, submit the user's message via Web3Forms and stream a reply.
 
     Returns ``None`` when the normal RAG path should run instead.
     """
     try:
-        tool_msgs = build_company_advice_routing_messages(message, history)
+        tool_msgs = build_feedback_routing_messages(message, history)
         routed = route_tool_calls(
             settings.HUGGINGFACE_MODEL,
             settings.HUGGINGFACE_API_KEY,
@@ -51,16 +51,16 @@ def try_feedback_tool_call(
         logger.exception("[chat] tool routing failed: %s", exc)
         return None
 
-    advice_call = next((c for c in routed if c.name == "send_company_advice"), None)
-    if advice_call is None:
+    feedback_call = next((c for c in routed if c.name == "send_feedback"), None)
+    if feedback_call is None:
         return None
 
     args: dict[str, Any] | None = None
     try:
-        parsed = json.loads(advice_call.arguments)
+        parsed = json.loads(feedback_call.arguments)
         args = parsed if isinstance(parsed, dict) else None
     except json.JSONDecodeError:
-        logger.warning("[chat] could not parse send_company_advice arguments as JSON")
+        logger.warning("[chat] could not parse send_feedback arguments as JSON")
 
     if args is None or not isinstance(args.get("message"), str):
         return None

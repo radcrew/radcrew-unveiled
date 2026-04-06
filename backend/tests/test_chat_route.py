@@ -140,7 +140,7 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
 @patch("app.chat.feedback.tool_branch.submit_feedback_via_web3forms")
 @patch("app.chat.feedback.tool_branch.route_tool_calls")
 @patch("app.chat.service.get_settings")
-def test_chat_company_advice_skips_retrieval_and_streams_thanks(
+def test_chat_feedback_tool_skips_retrieval_and_streams_thanks(
     mock_settings: MagicMock,
     mock_route: MagicMock,
     mock_submit: MagicMock,
@@ -151,7 +151,7 @@ def test_chat_company_advice_skips_retrieval_and_streams_thanks(
     mock_route.return_value = [
         ParsedToolCall(
             id="c1",
-            name="send_company_advice",
+            name="send_feedback",
             arguments='{"message": "Great product idea", "subject": "Idea"}',
         )
     ]
@@ -181,7 +181,7 @@ def test_chat_company_advice_skips_retrieval_and_streams_thanks(
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
 @patch("app.chat.feedback.tool_branch.route_tool_calls")
 @patch("app.chat.service.get_settings")
-def test_chat_company_advice_without_web3_key_streams_unavailable_copy(
+def test_chat_feedback_tool_without_web3_key_streams_unavailable_copy(
     mock_settings: MagicMock,
     mock_route: MagicMock,
     mock_retrieve: MagicMock,
@@ -190,7 +190,7 @@ def test_chat_company_advice_without_web3_key_streams_unavailable_copy(
     mock_route.return_value = [
         ParsedToolCall(
             id="c1",
-            name="send_company_advice",
+            name="send_feedback",
             arguments='{"message": "Feedback body"}',
         )
     ]
