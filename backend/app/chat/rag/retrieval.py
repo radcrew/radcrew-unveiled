@@ -1,12 +1,10 @@
 """Knowledge indexing (one unit per document) and hybrid retrieval (lexical + semantic embeddings)."""
 
 from __future__ import annotations
-
 import logging
 import re
-
 from huggingface_hub import InferenceClient
-
+from app.config import get_settings
 from app.chat.rag.models import EmbeddingInferenceConfig
 from app.knowledge.models import KnowledgeChunk, KnowledgeDocument
 
@@ -24,23 +22,25 @@ def tokenize(text: str) -> list[str]:
 
 
 def _get_semantic_scores(
-    *,
     chunks: list[KnowledgeChunk],
     query: str,
-    embedding: EmbeddingInferenceConfig,
 ) -> list[float]:
+    settings = get_settings()
+
+    token = settings.HUGGINGFACE_API_KEY
+    model = settings.HUGGINGFACE_EMBEDDING_MODEL
+    provider=settings.HUGGINGFACE_EMBEDDING_PROVIDER
+
     if not chunks:
         return []
 
-    token = embedding.access_token
-    model = embedding.model
     if not token or not model:
-        return []
+        return [0.0] * len(chunks)
 
     client = InferenceClient(
         model=model,
         token=token,
-        provider=embedding.provider,  # type: ignore[arg-type]
+        provider=provider,  # type: ignore[arg-type]
     )
 
     candidates = [f"{chunk.title}\n{chunk.text}" for chunk in chunks]
@@ -80,23 +80,17 @@ def retrieve_relevant_chunks(
     chunks: list[KnowledgeChunk],
     query: str,
     limit: int = 5,
-    *,
-    embedding: EmbeddingInferenceConfig | None = None,
 ) -> list[KnowledgeChunk]:
     query_tokens = set(tokenize(query))
     if len(query_tokens) == 0:
         return []
 
-    semantic_scores = [0.0] * len(chunks)
-    if embedding is not None and embedding.access_token and embedding.model:
-        try:
-            semantic_scores = _get_semantic_scores(
-                chunks=chunks,
-                query=query,
-                embedding=embedding,
-            )
-        except Exception as exc:
-            logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
+    semantic_scores = []
+
+    try:
+        semantic_scores = _get_semantic_scores(chunks, query)
+    except Exception as exc:
+        logger.warning("Semantic retrieval unavailable, using lexical fallback: %s", exc)
 
     relevant_chunks: list[KnowledgeChunk] = []
     for idx, chunk in enumerate(chunks):
