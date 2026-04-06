@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from app.chat.cache.response import (
     RESPONSE_CACHE_MAX_SIZE,
-    STREAM_TEXT_CHUNK_SIZE,
     get_cached_response,
     prompt_cache_key,
     set_cached_response,
@@ -13,7 +12,6 @@ from app.chat.cache.response import (
 
 __all__ = [
     "RESPONSE_CACHE_MAX_SIZE",
-    "STREAM_TEXT_CHUNK_SIZE",
     "get_cached_response",
     "prompt_cache_key",
     "set_cached_response",
