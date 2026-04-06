@@ -7,7 +7,6 @@ from collections import OrderedDict
 from collections.abc import Iterator
 from threading import Lock
 
-STREAM_TEXT_CHUNK_SIZE = 2
 RESPONSE_CACHE_MAX_SIZE = 256
 
 _response_cache: OrderedDict[str, str] = OrderedDict()
@@ -48,9 +47,3 @@ def stream_answer_with_cache(
             yield chunk
     set_cached_response(cache_key, "".join(parts))
 
-
-def get_text_chunk_stream(
-    text: str, chunk_size: int = STREAM_TEXT_CHUNK_SIZE
-) -> Iterator[str]:
-    for i in range(0, len(text), chunk_size):
-        yield text[i : i + chunk_size]

@@ -6,7 +6,7 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 from app.config import get_settings
-from app.chat.cache.response import get_text_chunk_stream
+from app.chat.utils import get_text_chunk_stream
 from app.chat.feedback.web3forms import (
     FeedbackNotConfiguredError,
     FeedbackSubmissionError,

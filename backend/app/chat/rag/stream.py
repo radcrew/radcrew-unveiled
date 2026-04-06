@@ -8,10 +8,10 @@ from app.config import get_settings
 
 from app.chat.cache.response import (
     get_cached_response,
-    get_text_chunk_stream,
     prompt_cache_key,
     stream_answer_with_cache,
 )
+from app.chat.utils import get_text_chunk_stream
 from app.chat.huggingface import generate_answer
 from app.chat.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
 from app.chat.rag.prompt import build_chat_prompt
