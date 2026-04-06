@@ -19,9 +19,8 @@ def generate_chat_stream(
     message = body.message
     history = body.history or []
 
-    if settings.HUGGINGFACE_API_KEY:
-        response_stream = try_feedback_tool_call(settings, message, history)
-        if response_stream is not None:
-            return response_stream
+    response_stream = try_feedback_tool_call(settings, message, history)
+    if response_stream is not None:
+        return response_stream
 
     return stream_rag_chat_answer(body, knowledge_chunks, settings)

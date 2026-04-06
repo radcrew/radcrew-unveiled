@@ -39,6 +39,10 @@ def try_feedback_tool_call(
 
     Returns ``None`` when the normal RAG path should run instead.
     """
+
+    if not settings.HUGGINGFACE_API_KEY:
+        return None;
+
     try:
         tool_msgs = build_feedback_routing_messages(message, history)
         routed = route_tool_calls(
