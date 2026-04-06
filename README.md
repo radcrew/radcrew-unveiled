@@ -4,8 +4,8 @@ Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`, FastAPI +
 
 ## Prerequisites
 
-- **Node.js** (for the frontend; npm workspaces)
-- **Python 3.11+** (for the chat API)
+- **Node.js** — see [frontend/README.md](frontend/README.md)
+- **Python 3.11+** — see [backend/README.md](backend/README.md)
 
 ## Install
 
@@ -15,31 +15,8 @@ From the repository root:
 npm install
 ```
 
-Create a virtual environment for the API (recommended), then install Python dependencies:
-
-```bash
-cd backend
-python -m venv .venv
-```
-
-Activate the venv — on Windows (PowerShell):
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-On macOS/Linux:
-
-```bash
-source .venv/bin/activate
-```
-
-Then:
-
-```bash
-pip install -r requirements.txt
-cd ..
-```
+- **Frontend** (Vite, env vars, build, tests, lint): **[frontend/README.md](frontend/README.md)**
+- **Backend** (Python venv, `pip install`, API env): **[backend/README.md](backend/README.md)**
 
 ## Dev (frontend + API)
 
@@ -52,34 +29,7 @@ npm run dev
 - **Frontend only:** `npm run dev:frontend`
 - **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend`)
 
-- Env: copy [`frontend/.env.example`](frontend/.env.example) to `frontend/.env` and set chat API URL as needed.
-- Env: copy [`backend/.env.example`](backend/.env.example) to `backend/.env` for the API (Hugging Face token, etc.).
-
-### API env vars
-
-- `HUGGINGFACE_API_KEY`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)); you can use `HF_TOKEN` instead if you already have that set
-- `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
-- `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
-- `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for semantic retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
-- `HUGGINGFACE_EMBEDDING_PROVIDER`: provider for embedding inference (default `hf-inference`)
-- `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
-- `GITHUB_KB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
-- `GITHUB_KB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_KB_PRIVATE_REPO=true`)
-- `GITHUB_KB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_KB_REPO_URL` is set; example: `main`)
-- `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
-- `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
-- `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN`, `CONTENTFUL_ENVIRONMENT`: Content Delivery API credentials (mirror the frontend `VITE_CONTENTFUL_*` values in `backend/.env` so the API can ingest entries at startup)
-- `CONTENTFUL_RAG_CONTENT_TYPES`: comma-separated Contentful content type ids to include in RAG (default `engineers`)
-
-### Private GitHub repo knowledge setup
-
-1. Generate a GitHub personal access token (classic or fine-grained) that can read repository contents.
-2. In `backend/.env`, set:
-   - `GITHUB_KB_REPO_URL=https://github.com/<owner>/<repo>`
-   - `GITHUB_KB_PRIVATE_REPO=true`
-   - `GITHUB_KB_TOKEN=<your_token>`
-3. Set `GITHUB_KB_BRANCH` (e.g. `main`) and optionally `GITHUB_KB_PATH` if Markdown lives under a subdirectory.
-4. Restart the backend (`npm run dev:backend` or `npm run dev`) so startup ingestion reloads from GitHub.
+Environment files live in `frontend/.env` and `backend/.env` (copy from each package’s `.env.example`). Details: [frontend/README.md](frontend/README.md#configuration), [backend/README.md](backend/README.md#configuration).
 
 ## Chatbot flow
 
@@ -95,23 +45,20 @@ npm test
 npm run test:backend
 ```
 
-The Python suite runs from `backend` (pytest).
+- Frontend (Vitest): [frontend/README.md](frontend/README.md#tests)
+- Backend (pytest): [backend/README.md](backend/README.md#tests)
 
 ## Lint
-
-Run from the repository root:
 
 ```bash
 npm run lint
 ```
 
-## Production API
+See [frontend/README.md](frontend/README.md#lint).
 
-There is no separate compile step for the Python service beyond installing dependencies. Run Uvicorn (or your process manager) against `app.main:app` with working directory `backend`, for example:
+## Production
 
-```bash
-cd backend
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8787
-```
+- **Frontend build / preview:** [frontend/README.md](frontend/README.md#build-and-preview)
+- **API (Uvicorn):** [backend/README.md](backend/README.md#production)
 
 `npm run build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
