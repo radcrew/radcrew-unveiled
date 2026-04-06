@@ -1,4 +1,4 @@
-from app.chat.prompt import build_chat_prompt
+from app.chat.rag.prompt import build_chat_prompt
 from app.knowledge.models import KnowledgeChunk
 
 

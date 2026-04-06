@@ -7,7 +7,7 @@ import re
 
 from huggingface_hub import InferenceClient
 
-from app.chat.models import EmbeddingInferenceConfig
+from app.chat.rag.models import EmbeddingInferenceConfig
 from app.knowledge.models import KnowledgeChunk, KnowledgeDocument
 
 TOKEN_RE = re.compile(r"[a-z0-9]+", re.IGNORECASE)

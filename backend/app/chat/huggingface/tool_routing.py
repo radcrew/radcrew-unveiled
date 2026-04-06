@@ -19,6 +19,7 @@ from app.chat.huggingface.common import (
     providers_to_try,
     safe_get,
 )
+from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,21 @@ TOOL_ROUTING_SYSTEM_MESSAGE = (
     "send feedback, email the team with feedback, or give product feedback meant for staff. "
     "Do not call it for greetings, general questions, small talk, or normal FAQ-style questions."
 )
+
+
+def build_company_advice_routing_messages(
+    message: str,
+    history: list[ChatHistoryMessage],
+) -> list[dict[str, Any]]:
+    """System router, then full chat history (both roles), then the latest user message."""
+    msgs: list[dict[str, Any]] = [
+        {"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE},
+    ]
+    for m in history:
+        msgs.append({"role": m.role, "content": m.content})
+    msgs.append({"role": "user", "content": message})
+    return msgs
+
 
 # Tool schema for routing company feedback submission (Web3Forms payload fields).
 COMPANY_ADVICE_TOOLS: list[dict[str, Any]] = [

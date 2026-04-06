@@ -1,4 +1,4 @@
-from app.chat.retrieval import (
+from app.chat.rag.retrieval import (
     RETRIEVAL_FALLBACK_SCORE_THRESHOLD,
     build_knowledge_chunks,
     retrieval_fallback_needed,

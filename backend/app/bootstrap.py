@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.chat.retrieval import build_knowledge_chunks
+from app.chat.rag.retrieval import build_knowledge_chunks
 from app.config import get_settings
 from app.knowledge import get_static_site_documents
 from app.knowledge.contentful_loader import get_contentful_documents
