@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from huggingface_hub import InferenceClient
-from huggingface_hub.errors import HFValidationError, HfHubHTTPError
 from huggingface_hub.inference._generated.types.chat_completion import (
     ChatCompletionInputResponseFormatJSONObject,
 )
