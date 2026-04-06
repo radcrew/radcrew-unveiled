@@ -208,6 +208,6 @@ def test_chat_feedback_tool_without_web3_key_streams_unavailable_copy(
     assert r.status_code == 200
     mock_retrieve.assert_not_called()
     streamed = _stream_content(r.text)
-    assert "not configured" in streamed.lower() or "cannot be sent" in streamed.lower()
+    assert "couldn't send" in streamed.lower() or "try again" in streamed.lower()
     assert "code@radcrew.org" in streamed
     assert '"type": "done"' in r.text

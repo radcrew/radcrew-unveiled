@@ -15,19 +15,7 @@ MAX_SUBJECT_CHARS = 200
 
 
 class FeedbackError(Exception):
-    """Base error for feedback submission."""
-
-
-class FeedbackNotConfiguredError(FeedbackError):
-    """Web3Forms access key is missing or empty."""
-
-
-class FeedbackValidationError(FeedbackError):
-    """Feedback body or subject failed validation."""
-
-
-class FeedbackSubmissionError(FeedbackError):
-    """Network, HTTP, or API-level failure after a request was attempted."""
+    """Feedback submission failed (config, validation, network, or API)."""
 
 
 def _normalize_optional_subject(subject: str | None) -> str | None:
@@ -39,12 +27,12 @@ def _normalize_optional_subject(subject: str | None) -> str | None:
 
 def _validate_message(text: str) -> str:
     if not isinstance(text, str):
-        raise FeedbackValidationError("Feedback message must be a string.")
+        raise FeedbackError("Feedback message must be a string.")
     stripped = text.strip()
     if not stripped:
-        raise FeedbackValidationError("Feedback message cannot be empty.")
+        raise FeedbackError("Feedback message cannot be empty.")
     if len(stripped) > MAX_MESSAGE_CHARS:
-        raise FeedbackValidationError(
+        raise FeedbackError(
             f"Feedback message is too long (max {MAX_MESSAGE_CHARS} characters)."
         )
     return stripped
@@ -55,7 +43,7 @@ def _validate_subject(subject: str | None) -> str | None:
     if normalized is None:
         return None
     if len(normalized) > MAX_SUBJECT_CHARS:
-        raise FeedbackValidationError(
+        raise FeedbackError(
             f"Subject is too long (max {MAX_SUBJECT_CHARS} characters)."
         )
     return normalized
@@ -90,16 +78,15 @@ def submit_feedback_via_web3forms(
     subject: str | None = None,
 ) -> None:
     """
-    POST JSON to Web3Forms. Raises FeedbackNotConfiguredError if the access key is unset;
-    FeedbackValidationError if body/subject are invalid; FeedbackSubmissionError on HTTP
-    errors, non-success API payloads, or network failures.
+    POST JSON to Web3Forms. Raises FeedbackError if configuration, validation,
+    HTTP, API, or network handling fails.
     """
     settings = get_settings()
 
     cfg = settings if settings is not None else get_settings()
     access_key = cfg.WEB3FORMS_ACCESS_KEY
     if not access_key or not str(access_key).strip():
-        raise FeedbackNotConfiguredError("Feedback submission is not configured (missing access key).")
+        raise FeedbackError("Feedback submission is not configured (missing access key).")
 
     message = _validate_message(body)
     subject_clean = _validate_subject(subject)
@@ -136,22 +123,22 @@ def submit_feedback_via_web3forms(
     except error.URLError as e:
         reason = e.reason
         detail = str(reason) if reason else str(e)
-        raise FeedbackSubmissionError(f"Could not reach feedback service: {detail}") from e
+        raise FeedbackError(f"Could not reach feedback service: {detail}") from e
 
 
 def _ensure_success_payload(raw: bytes) -> None:
     if not raw:
-        raise FeedbackSubmissionError("Empty response from feedback service.")
+        raise FeedbackError("Empty response from feedback service.")
     try:
         parsed = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
-        raise FeedbackSubmissionError("Invalid JSON response from feedback service.") from e
+        raise FeedbackError("Invalid JSON response from feedback service.") from e
     if not isinstance(parsed, dict):
-        raise FeedbackSubmissionError("Unexpected response from feedback service.")
+        raise FeedbackError("Unexpected response from feedback service.")
     if parsed.get("success") is True:
         return
     msg = _message_from_api_payload(parsed) or "Feedback could not be sent."
-    raise FeedbackSubmissionError(msg)
+    raise FeedbackError(msg)
 
 
 def _raise_submission_error(status: int, raw: bytes) -> None:
@@ -165,4 +152,4 @@ def _raise_submission_error(status: int, raw: bytes) -> None:
             pass
     if not msg:
         msg = f"Feedback service returned HTTP {status}."
-    raise FeedbackSubmissionError(msg)
+    raise FeedbackError(msg)

@@ -14,10 +14,6 @@ MSG_AI_UNAVAILABLE = (
     "The AI service is temporarily unavailable. Please try again in a moment or "
     "email code@radcrew.org."
 )
-MSG_FEEDBACK_NOT_CONFIGURED = (
-    "Feedback cannot be sent from the assistant right now because the feedback service "
-    "is not configured. You can email {email} instead."
-)
 MSG_FEEDBACK_SEND_FAILED = (
     "We couldn't send your feedback right now. Please try again later or email {email}."
 )

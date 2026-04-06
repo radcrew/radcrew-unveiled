@@ -7,21 +7,12 @@ from collections.abc import Iterator
 from typing import Any
 from app.config import get_settings
 from app.chat.utils import get_text_chunk_stream
-from app.chat.feedback.web3forms import (
-    FeedbackNotConfiguredError,
-    FeedbackSubmissionError,
-    FeedbackValidationError,
-    submit_feedback_via_web3forms,
-)
+from app.chat.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
 from app.chat.huggingface.tool_routing import (
     build_feedback_routing_messages,
     route_tool_calls,
 )
-from app.chat.messages import (
-    MSG_FEEDBACK_NOT_CONFIGURED,
-    MSG_FEEDBACK_SEND_FAILED,
-    MSG_FEEDBACK_THANKS,
-)
+from app.chat.messages import MSG_FEEDBACK_SEND_FAILED, MSG_FEEDBACK_THANKS
 from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
@@ -76,12 +67,7 @@ def try_feedback_tool_call(
             body_text,
             subject,
         )
-    except FeedbackNotConfiguredError:
-        logger.warning(
-            "Feedback submission unavailable: WEB3FORMS_ACCESS_KEY is not set."
-        )
-        return get_text_chunk_stream(MSG_FEEDBACK_NOT_CONFIGURED.format(email=email))
-    except (FeedbackValidationError, FeedbackSubmissionError) as exc:
+    except FeedbackError as exc:
         logger.warning("Feedback submission failed: %s", exc)
         return get_text_chunk_stream(MSG_FEEDBACK_SEND_FAILED.format(email=email))
 
