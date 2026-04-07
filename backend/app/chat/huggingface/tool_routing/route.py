@@ -1,4 +1,4 @@
-"""Orchestrate provider retries and JSON fallback for feedback tool routing."""
+"""Orchestrate provider retries for JSON-based feedback intent routing."""
 
 from __future__ import annotations
 
@@ -8,16 +8,8 @@ from typing import Any
 from app.config import get_settings
 from app.chat.huggingface.common import providers_to_try
 
-from .completion import (
-    json_fallback_completion,
-    json_fallback_messages,
-    tool_router_completion,
-)
-from .parse import (
-    extract_message_content,
-    parse_tool_calls_from_completion,
-    parse_tool_calls_from_json_text,
-)
+from .completion import json_fallback_completion, json_fallback_messages
+from .parse import extract_message_content, parse_tool_calls_from_json_text
 from .types import ParsedToolCall
 
 logger = logging.getLogger(__name__)
@@ -25,32 +17,15 @@ logger = logging.getLogger(__name__)
 
 def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
     """
-    Run non-stream ``chat_completion`` with the ``send_feedback`` tool and
-    ``tool_choice="auto"``, parse ``choices[0].message.tool_calls``, and return
-    structured calls.
-
-    If every provider fails that request (HTTP/validation errors), runs a
-    JSON-only completion (with and without ``response_format: json_object``)
-    and parses ``{"tool_calls": [...]}`` from the assistant message content.
+    Run non-stream ``chat_completion`` (JSON-in-message routing only): append routing
+    instructions, then try ``response_format: json_object`` and plain completion per
+    provider. Parse ``{"tool_calls": [...]}`` from the assistant message content.
     """
     settings = get_settings()
     model = settings.HUGGINGFACE_MODEL
     access_token = settings.HUGGINGFACE_API_KEY
     providers = providers_to_try(settings.HUGGINGFACE_PROVIDER)
 
-    for provider in providers:
-        try:
-            resp = tool_router_completion(
-                model,
-                access_token,
-                messages,
-                provider,
-            )
-            return parse_tool_calls_from_completion(resp)
-        except Exception as err:
-            logger.error("[HF chatCompletionTools provider=%s] %s", provider, err)
-
-    # JSON fallback: same providers; try json_object response format first, then plain.
     fallback_msgs = json_fallback_messages(messages)
     for provider in providers:
         for use_json_fmt in (True, False):
@@ -60,7 +35,7 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                     access_token,
                     fallback_msgs,
                     provider,
-                    use_json_object_format=use_json_fmt,
+                    use_json_fmt,
                 )
                 content = extract_message_content(resp)
                 parsed = parse_tool_calls_from_json_text(content)
@@ -68,7 +43,7 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                     return parsed
             except Exception as err:
                 logger.error(
-                    "[HF chatCompletionJsonFallback provider=%s json_fmt=%s] %s",
+                    "[HF feedback routing provider=%s json_fmt=%s] %s",
                     provider,
                     use_json_fmt,
                     err,

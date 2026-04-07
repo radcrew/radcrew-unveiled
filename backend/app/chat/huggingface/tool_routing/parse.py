@@ -1,4 +1,4 @@
-"""Parse native tool calls or JSON fallback text into ``ParsedToolCall`` rows."""
+"""Parse JSON ``tool_calls`` payloads from model message content."""
 
 from __future__ import annotations
 
@@ -23,36 +23,6 @@ def _first_message(resp: Any) -> Any:
     if not ch:
         return None
     return safe_get(ch[0], "message")
-
-
-def parse_tool_calls_from_completion(resp: Any) -> list[ParsedToolCall]:
-    """Parse ``choices[0].message.tool_calls`` from a chat completion response."""
-    msg = _first_message(resp)
-    if msg is None:
-        return []
-    raw_calls = safe_get(msg, "tool_calls")
-    if not raw_calls:
-        return []
-    out: list[ParsedToolCall] = []
-    for tc in raw_calls:
-        tc_id = safe_get(tc, "id")
-        fn = safe_get(tc, "function")
-        name = safe_get(fn, "name") if fn is not None else None
-        args = safe_get(fn, "arguments") if fn is not None else None
-        if isinstance(args, str):
-            arg_str = args
-        elif args is None:
-            arg_str = "{}"
-        else:
-            arg_str = json.dumps(args)
-        out.append(
-            ParsedToolCall(
-                id=str(tc_id) if tc_id is not None else "",
-                name=str(name) if name is not None else "",
-                arguments=arg_str,
-            )
-        )
-    return out
 
 
 def extract_message_content(resp: Any) -> str:

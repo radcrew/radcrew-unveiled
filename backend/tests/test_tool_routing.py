@@ -2,42 +2,10 @@ from unittest.mock import MagicMock, patch
 
 from app.chat.huggingface.tool_routing import (
     ParsedToolCall,
-    parse_tool_calls_from_completion,
     parse_tool_calls_from_json_text,
     route_send_feedback_call,
     route_tool_calls,
 )
-
-
-def test_parse_tool_calls_from_completion_dict() -> None:
-    resp = {
-        "choices": [
-            {
-                "message": {
-                    "role": "assistant",
-                    "content": None,
-                    "tool_calls": [
-                        {
-                            "id": "call_1",
-                            "type": "function",
-                            "function": {
-                                "name": "send_feedback",
-                                "arguments": '{"message": "hi", "subject": "s"}',
-                            },
-                        }
-                    ],
-                }
-            }
-        ]
-    }
-    got = parse_tool_calls_from_completion(resp)
-    assert got == [
-        ParsedToolCall(
-            id="call_1",
-            name="send_feedback",
-            arguments='{"message": "hi", "subject": "s"}',
-        )
-    ]
 
 
 def test_parse_tool_calls_from_json_text_valid() -> None:
@@ -76,7 +44,7 @@ def test_route_send_feedback_call_returns_none_when_absent(_mock: MagicMock) -> 
 
 @patch("app.chat.huggingface.tool_routing.completion.InferenceClient")
 @patch("app.chat.huggingface.tool_routing.route.get_settings")
-def test_route_tool_calls_uses_tools_and_returns_parsed(
+def test_route_tool_calls_parses_json_from_message_content(
     mock_get_settings: MagicMock, mock_cls: MagicMock
 ) -> None:
     cfg = MagicMock()
@@ -90,15 +58,7 @@ def test_route_tool_calls_uses_tools_and_returns_parsed(
         "choices": [
             {
                 "message": {
-                    "tool_calls": [
-                        {
-                            "id": "c1",
-                            "function": {
-                                "name": "send_feedback",
-                                "arguments": '{"message":"m"}',
-                            },
-                        }
-                    ],
+                    "content": '{"tool_calls":[{"name":"send_feedback","arguments":{"message":"m"}}]}',
                 }
             }
         ]
@@ -107,15 +67,15 @@ def test_route_tool_calls_uses_tools_and_returns_parsed(
     got = route_tool_calls(msgs)
     assert len(got) == 1
     assert got[0].name == "send_feedback"
+    assert "m" in got[0].arguments
     call_kw = mock_inst.chat_completion.call_args.kwargs
-    assert call_kw.get("tools") is not None
-    assert call_kw.get("tool_choice") == "auto"
+    assert call_kw.get("tools") is None
     assert call_kw.get("stream") is False
 
 
 @patch("app.chat.huggingface.tool_routing.completion.InferenceClient")
 @patch("app.chat.huggingface.tool_routing.route.get_settings")
-def test_route_tool_calls_json_fallback_when_tools_raises(
+def test_route_tool_calls_returns_empty_when_json_unusable(
     mock_get_settings: MagicMock, mock_cls: MagicMock
 ) -> None:
     cfg = MagicMock()
@@ -125,22 +85,8 @@ def test_route_tool_calls_json_fallback_when_tools_raises(
     mock_get_settings.return_value = cfg
     mock_inst = MagicMock()
     mock_cls.return_value = mock_inst
-
-    def side_effect(*_a: object, **kw: object) -> dict[str, object]:
-        if kw.get("tools"):
-            raise RuntimeError("tools not supported")
-        return {
-            "choices": [
-                {
-                    "message": {
-                        "content": '{"tool_calls":[{"name":"send_feedback","arguments":{"message":"fb"}}]}',
-                    }
-                }
-            ]
-        }
-
-    mock_inst.chat_completion.side_effect = side_effect
-    got = route_tool_calls([{"role": "user", "content": "please submit feedback"}])
-    assert len(got) == 1
-    assert got[0].name == "send_feedback"
-    assert "fb" in got[0].arguments
+    mock_inst.chat_completion.return_value = {
+        "choices": [{"message": {"content": "not valid json for routing"}}]
+    }
+    got = route_tool_calls([{"role": "user", "content": "hello"}])
+    assert got == []

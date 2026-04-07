@@ -13,11 +13,12 @@ def build_feedback_routing_messages(
     message: str,
     history: list[ChatHistoryMessage],
 ) -> list[dict[str, Any]]:
-    """System router, then full chat history (both roles), then the latest user message."""
+    
     msgs: list[dict[str, Any]] = [
         {"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE},
     ]
     for m in history:
         msgs.append({"role": m.role, "content": m.content})
     msgs.append({"role": "user", "content": message})
+    
     return msgs
