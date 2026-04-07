@@ -10,7 +10,7 @@ from app.chat.utils import get_text_chunk_stream
 from app.chat.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
 from app.chat.huggingface.tool_routing import (
     build_feedback_routing_messages,
-    route_tool_calls,
+    route_send_feedback_call,
 )
 from app.chat.messages import MSG_FEEDBACK_SEND_FAILED, MSG_FEEDBACK_THANKS
 from app.schemas import ChatHistoryMessage
@@ -28,16 +28,15 @@ def try_feedback_tool_call(
     """
     settings = get_settings()
     if not settings.HUGGINGFACE_API_KEY:
-        return None;
+        return None
 
     try:
         routing_msgs = build_feedback_routing_messages(message, history)
-        routed = route_tool_calls(routing_msgs)
+        feedback_call = route_send_feedback_call(routing_msgs)
     except Exception as exc:
         logger.exception("[chat] tool routing failed: %s", exc)
         return None
 
-    feedback_call = next((c for c in routed if c.name == "send_feedback"), None)
     if feedback_call is None:
         return None
 

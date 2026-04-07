@@ -51,7 +51,7 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
     assert r.json() == {"error": "Invalid request payload."}
 
 
-@patch("app.chat.feedback.tool_branch.route_tool_calls", return_value=[])
+@patch("app.chat.feedback.tool_branch.route_send_feedback_call", return_value=None)
 @patch("app.chat.rag.stream.retrieve_relevant_chunks", return_value=[])
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
     _mock_retrieve: object, _mock_route: object, client: TestClient
@@ -64,9 +64,9 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
 
 
 @patch("app.chat.rag.stream.generate_answer", return_value=iter(["Your name is Macho."]))
-@patch("app.chat.service.get_settings")
+@patch("app.chat.rag.stream.get_settings")
 @patch("app.chat.rag.stream.retrieve_relevant_chunks", return_value=[])
-@patch("app.chat.feedback.tool_branch.route_tool_calls", return_value=[])
+@patch("app.chat.feedback.tool_branch.route_send_feedback_call", return_value=None)
 def test_chat_with_history_does_not_force_retrieval_fallback(
     _mock_route: object,
     _mock_retrieve: object,
@@ -105,7 +105,7 @@ def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, cli
     assert '"type": "done"' in r.text
 
 
-@patch("app.chat.service.get_settings")
+@patch("app.chat.rag.stream.get_settings")
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
 def test_chat_missing_hf_key_returns_200_with_config_message(
     mock_retrieve: MagicMock,
@@ -138,23 +138,23 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
 @patch("app.chat.rag.stream.generate_answer")
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
 @patch("app.chat.feedback.tool_branch.submit_feedback_via_web3forms")
-@patch("app.chat.feedback.tool_branch.route_tool_calls")
-@patch("app.chat.service.get_settings")
+@patch("app.chat.feedback.tool_branch.route_send_feedback_call")
+@patch("app.chat.feedback.web3forms.get_settings")
+@patch("app.chat.feedback.tool_branch.get_settings")
 def test_chat_feedback_tool_skips_retrieval_and_streams_thanks(
-    mock_settings: MagicMock,
+    mock_settings_branch: MagicMock,
+    mock_settings_web3: MagicMock,
     mock_route: MagicMock,
     mock_submit: MagicMock,
     mock_retrieve: MagicMock,
     mock_generate: MagicMock,
     client: TestClient,
 ) -> None:
-    mock_route.return_value = [
-        ParsedToolCall(
-            id="c1",
-            name="send_feedback",
-            arguments='{"message": "Great product idea", "subject": "Idea"}',
-        )
-    ]
+    mock_route.return_value = ParsedToolCall(
+        id="c1",
+        name="send_feedback",
+        arguments='{"message": "Great product idea", "subject": "Idea"}',
+    )
     cfg = MagicMock()
     cfg.HUGGINGFACE_API_KEY = "hf_test_token"
     cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
@@ -163,7 +163,8 @@ def test_chat_feedback_tool_skips_retrieval_and_streams_thanks(
     cfg.HUGGINGFACE_EMBEDDING_PROVIDER = "hf-inference"
     cfg.WEB3FORMS_ACCESS_KEY = "wf_key"
     cfg.COMPANY_FEEDBACK_EMAIL = "code@radcrew.org"
-    mock_settings.return_value = cfg
+    mock_settings_branch.return_value = cfg
+    mock_settings_web3.return_value = cfg
 
     r = client.post(
         "/chat",
@@ -179,21 +180,21 @@ def test_chat_feedback_tool_skips_retrieval_and_streams_thanks(
 
 
 @patch("app.chat.rag.stream.retrieve_relevant_chunks")
-@patch("app.chat.feedback.tool_branch.route_tool_calls")
-@patch("app.chat.service.get_settings")
+@patch("app.chat.feedback.tool_branch.route_send_feedback_call")
+@patch("app.chat.feedback.web3forms.get_settings")
+@patch("app.chat.feedback.tool_branch.get_settings")
 def test_chat_feedback_tool_without_web3_key_streams_unavailable_copy(
-    mock_settings: MagicMock,
+    mock_settings_branch: MagicMock,
+    mock_settings_web3: MagicMock,
     mock_route: MagicMock,
     mock_retrieve: MagicMock,
     client: TestClient,
 ) -> None:
-    mock_route.return_value = [
-        ParsedToolCall(
-            id="c1",
-            name="send_feedback",
-            arguments='{"message": "Feedback body"}',
-        )
-    ]
+    mock_route.return_value = ParsedToolCall(
+        id="c1",
+        name="send_feedback",
+        arguments='{"message": "Feedback body"}',
+    )
     cfg = MagicMock()
     cfg.HUGGINGFACE_API_KEY = "hf_test_token"
     cfg.HUGGINGFACE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
@@ -202,7 +203,8 @@ def test_chat_feedback_tool_without_web3_key_streams_unavailable_copy(
     cfg.HUGGINGFACE_EMBEDDING_PROVIDER = "hf-inference"
     cfg.WEB3FORMS_ACCESS_KEY = None
     cfg.COMPANY_FEEDBACK_EMAIL = "code@radcrew.org"
-    mock_settings.return_value = cfg
+    mock_settings_branch.return_value = cfg
+    mock_settings_web3.return_value = cfg
 
     r = client.post("/chat", json={"message": "Send my feedback to the team."})
     assert r.status_code == 200

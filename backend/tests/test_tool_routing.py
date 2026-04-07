@@ -4,6 +4,7 @@ from app.chat.huggingface.tool_routing import (
     ParsedToolCall,
     parse_tool_calls_from_completion,
     parse_tool_calls_from_json_text,
+    route_send_feedback_call,
     route_tool_calls,
 )
 
@@ -54,6 +55,23 @@ def test_parse_tool_calls_from_json_text_empty() -> None:
 
 def test_parse_tool_calls_from_json_text_invalid() -> None:
     assert parse_tool_calls_from_json_text("not json") is None
+
+
+@patch("app.chat.huggingface.tool_routing.route_tool_calls")
+def test_route_send_feedback_call_picks_send_feedback(mock_route: MagicMock) -> None:
+    mock_route.return_value = [
+        ParsedToolCall(id="a", name="other", arguments="{}"),
+        ParsedToolCall(id="b", name="send_feedback", arguments='{"message":"x"}'),
+    ]
+    got = route_send_feedback_call([])
+    assert got is not None
+    assert got.name == "send_feedback"
+    assert "x" in got.arguments
+
+
+@patch("app.chat.huggingface.tool_routing.route_tool_calls", return_value=[])
+def test_route_send_feedback_call_returns_none_when_absent(_mock: MagicMock) -> None:
+    assert route_send_feedback_call([]) is None
 
 
 @patch("app.chat.huggingface.tool_routing.InferenceClient")

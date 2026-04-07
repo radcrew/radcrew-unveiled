@@ -5,6 +5,7 @@ from app.chat.huggingface.tool_routing import (
     ParsedToolCall,
     parse_tool_calls_from_completion,
     parse_tool_calls_from_json_text,
+    route_send_feedback_call,
     route_tool_calls,
 )
 
@@ -13,5 +14,6 @@ __all__ = [
     "generate_answer",
     "parse_tool_calls_from_completion",
     "parse_tool_calls_from_json_text",
+    "route_send_feedback_call",
     "route_tool_calls",
 ]

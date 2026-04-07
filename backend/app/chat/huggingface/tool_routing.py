@@ -299,3 +299,10 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                 )
 
     return []
+
+
+def route_send_feedback_call(messages: list[dict[str, Any]]) -> ParsedToolCall | None:
+    return next(
+        (call for call in route_tool_calls(messages) if call.name == "send_feedback"),
+        None
+    )
