@@ -202,7 +202,7 @@ def parse_tool_calls_from_json_text(text: str) -> list[ParsedToolCall] | None:
     return out
 
 
-def _chat_completion_send_feedback_route_once(
+def _tool_router_completion(
     model: str,
     access_token: str,
     messages: list[dict[str, Any]],
@@ -264,8 +264,11 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
 
     for provider in providers:
         try:
-            resp = _chat_completion_send_feedback_route_once(
-                model, access_token, messages, provider
+            resp = _tool_router_completion(
+                model,
+                access_token,
+                messages,
+                provider
             )
             return parse_tool_calls_from_completion(resp)
         except Exception as err:

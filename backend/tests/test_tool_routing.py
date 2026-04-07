@@ -57,7 +57,15 @@ def test_parse_tool_calls_from_json_text_invalid() -> None:
 
 
 @patch("app.chat.huggingface.tool_routing.InferenceClient")
-def test_route_tool_calls_uses_tools_and_returns_parsed(mock_cls: MagicMock) -> None:
+@patch("app.chat.huggingface.tool_routing.get_settings")
+def test_route_tool_calls_uses_tools_and_returns_parsed(
+    mock_get_settings: MagicMock, mock_cls: MagicMock
+) -> None:
+    cfg = MagicMock()
+    cfg.HUGGINGFACE_MODEL = "m"
+    cfg.HUGGINGFACE_API_KEY = "tok"
+    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
+    mock_get_settings.return_value = cfg
     mock_inst = MagicMock()
     mock_cls.return_value = mock_inst
     mock_inst.chat_completion.return_value = {
@@ -78,7 +86,7 @@ def test_route_tool_calls_uses_tools_and_returns_parsed(mock_cls: MagicMock) -> 
         ]
     }
     msgs = [{"role": "user", "content": "send feedback: great"}]
-    got = route_tool_calls("m", "tok", msgs, "hf-inference")
+    got = route_tool_calls(msgs)
     assert len(got) == 1
     assert got[0].name == "send_feedback"
     call_kw = mock_inst.chat_completion.call_args.kwargs
@@ -88,7 +96,15 @@ def test_route_tool_calls_uses_tools_and_returns_parsed(mock_cls: MagicMock) -> 
 
 
 @patch("app.chat.huggingface.tool_routing.InferenceClient")
-def test_route_tool_calls_json_fallback_when_tools_raises(mock_cls: MagicMock) -> None:
+@patch("app.chat.huggingface.tool_routing.get_settings")
+def test_route_tool_calls_json_fallback_when_tools_raises(
+    mock_get_settings: MagicMock, mock_cls: MagicMock
+) -> None:
+    cfg = MagicMock()
+    cfg.HUGGINGFACE_MODEL = "m"
+    cfg.HUGGINGFACE_API_KEY = "tok"
+    cfg.HUGGINGFACE_PROVIDER = "hf-inference"
+    mock_get_settings.return_value = cfg
     mock_inst = MagicMock()
     mock_cls.return_value = mock_inst
 
@@ -106,7 +122,7 @@ def test_route_tool_calls_json_fallback_when_tools_raises(mock_cls: MagicMock) -
         }
 
     mock_inst.chat_completion.side_effect = side_effect
-    got = route_tool_calls("m", "tok", [{"role": "user", "content": "please submit feedback"}], "hf-inference")
+    got = route_tool_calls([{"role": "user", "content": "please submit feedback"}])
     assert len(got) == 1
     assert got[0].name == "send_feedback"
     assert "fb" in got[0].arguments
