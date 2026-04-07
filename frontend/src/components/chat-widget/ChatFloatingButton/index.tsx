@@ -9,11 +9,11 @@ interface ChatFloatingButtonProps {
 export const ChatFloatingButton = ({ onOpen }: ChatFloatingButtonProps) => (
   <Button
     type="button"
-    size="icon"
     className={styles.button}
     aria-label="Open FAQ chat"
     onClick={onOpen}
   >
     <MessageCircle className={styles.icon} strokeWidth={1.75} />
+    <span className={styles.placeholder}>Ask RadCrew assistant about projects, team, or contact...</span>
   </Button>
 );
