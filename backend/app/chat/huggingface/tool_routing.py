@@ -12,6 +12,7 @@ from huggingface_hub.inference._generated.types.chat_completion import (
     ChatCompletionInputResponseFormatJSONObject,
 )
 
+from app.config import get_settings
 from app.chat.huggingface.common import (
     DETERMINISTIC_GENERATION_SEED,
     providers_to_try,
@@ -246,12 +247,7 @@ def _chat_completion_json_fallback_once(
     return client.chat_completion(**kwargs)
 
 
-def route_tool_calls(
-    model: str,
-    access_token: str,
-    messages: list[dict[str, Any]],
-    provider_policy: str = "hf-inference",
-) -> list[ParsedToolCall]:
+def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
     """
     Run non-stream ``chat_completion`` with the ``send_feedback`` tool and
     ``tool_choice="auto"``, parse ``choices[0].message.tool_calls``, and return
@@ -261,7 +257,10 @@ def route_tool_calls(
     JSON-only completion (with and without ``response_format: json_object``)
     and parses ``{"tool_calls": [...]}`` from the assistant message content.
     """
-    providers = providers_to_try(provider_policy)
+    settings = get_settings()
+    model = settings.HUGGINGFACE_MODEL
+    access_token = settings.HUGGINGFACE_API_KEY
+    providers = providers_to_try(settings.HUGGINGFACE_PROVIDER)
 
     for provider in providers:
         try:

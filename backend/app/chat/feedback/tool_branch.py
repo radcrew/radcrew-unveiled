@@ -24,7 +24,6 @@ def try_feedback_tool_call(
 ) -> Iterator[str] | None:
     """
     If the model returns ``send_feedback``, submit the user's message via Web3Forms and stream a reply.
-
     Returns ``None`` when the normal RAG path should run instead.
     """
     settings = get_settings()
@@ -32,13 +31,8 @@ def try_feedback_tool_call(
         return None;
 
     try:
-        tool_msgs = build_feedback_routing_messages(message, history)
-        routed = route_tool_calls(
-            settings.HUGGINGFACE_MODEL,
-            settings.HUGGINGFACE_API_KEY,
-            tool_msgs,
-            settings.HUGGINGFACE_PROVIDER,
-        )
+        routing_msgs = build_feedback_routing_messages(message, history)
+        routed = route_tool_calls(routing_msgs)
     except Exception as exc:
         logger.exception("[chat] tool routing failed: %s", exc)
         return None
