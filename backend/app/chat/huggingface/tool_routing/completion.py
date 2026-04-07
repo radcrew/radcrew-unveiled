@@ -24,7 +24,6 @@ def feedback_route_completion(
     access_token: str,
     messages: list[dict[str, Any]],
     provider: str,
-    *,
     use_json_object_format: bool,
 ) -> Any:
     client = InferenceClient(model=model, token=access_token, provider=provider)  # type: ignore[arg-type]

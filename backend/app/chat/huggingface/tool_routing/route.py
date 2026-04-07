@@ -35,7 +35,7 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                     access_token,
                     messages_for_route,
                     provider,
-                    use_json_object_format=use_json_object_format,
+                    use_json_object_format,
                 )
                 content = extract_message_content(resp)
                 parsed = parse_tool_calls_from_route_reply(content)

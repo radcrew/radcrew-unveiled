@@ -13,22 +13,15 @@ from .types import ParsedToolCall
 logger = logging.getLogger(__name__)
 
 
-def _choices(resp: Any) -> list[Any]:
-    ch = safe_get(resp, "choices")
-    return ch if isinstance(ch, list) else []
-
-
-def _first_message(resp: Any) -> Any:
-    ch = _choices(resp)
-    if not ch:
-        return None
-    return safe_get(ch[0], "message")
-
-
 def extract_message_content(resp: Any) -> str:
-    msg = _first_message(resp)
+    ch = safe_get(resp, "choices")
+    if not isinstance(ch, list) or not ch:
+        return ""
+
+    msg = safe_get(ch[0], "message")
     if msg is None:
         return ""
+
     content = safe_get(msg, "content")
     return content if isinstance(content, str) else ""
 
@@ -37,11 +30,11 @@ def _strip_json_fences(text: str) -> str:
     t = text.strip()
     if not t.startswith("```"):
         return t
-    lines = t.split("\n")
-    if lines and lines[0].startswith("```"):
-        lines = lines[1:]
+
+    lines = t.splitlines()[1:]
     if lines and lines[-1].strip() == "```":
         lines = lines[:-1]
+    
     return "\n".join(lines).strip()
 
 
@@ -55,16 +48,20 @@ def parse_tool_calls_from_route_reply(text: str) -> list[ParsedToolCall] | None:
     raw = _strip_json_fences(text)
     if not raw:
         return None
+    
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
         logger.warning("[feedback routing] could not parse model reply as JSON")
         return None
+    
     if not isinstance(data, dict):
         return None
+    
     calls = data.get("tool_calls")
     if not isinstance(calls, list):
         return None
+    
     out: list[ParsedToolCall] = []
     for i, item in enumerate(calls):
         if not isinstance(item, dict):
