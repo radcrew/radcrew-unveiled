@@ -9,17 +9,25 @@ from app.config import get_settings
 from app.chat.huggingface.common import providers_to_try
 
 from .completion import feedback_route_completion, feedback_route_messages
-from .parse import extract_message_content, parse_tool_calls_from_route_reply
+from .parse import (
+    RouteReplyUnparseable,
+    extract_message_content,
+    parse_tool_call_from_route_reply,
+)
 from .types import ParsedToolCall
 
 logger = logging.getLogger(__name__)
 
 
-def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
+def route_send_feedback_call(messages: list[dict[str, Any]]) -> ParsedToolCall | None:
     """
     Run non-stream ``chat_completion`` for routing: append the structured-reply instruction,
     then per provider try ``response_format: json_object`` and a plain completion. Parse
-    ``{"tool_calls": [...]}`` from the assistant message content.
+    ``{"tool_call": null | {...}}`` from the assistant message.
+
+    Returns ``ParsedToolCall`` only when the model emitted ``send_feedback``; ``None``
+    when there is no feedback tool (including ``tool_call``: null, another tool name, or
+    no usable reply after all attempts).
     """
     settings = get_settings()
     model = settings.HUGGINGFACE_MODEL
@@ -38,9 +46,15 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                     use_json_object_format,
                 )
                 content = extract_message_content(resp)
-                parsed = parse_tool_calls_from_route_reply(content)
-                if parsed is not None:
-                    return parsed
+
+                try:
+                    call = parse_tool_call_from_route_reply(content)
+                except RouteReplyUnparseable:
+                    continue
+
+                if call is not None and call.name == "send_feedback":
+                    return call
+                return None
             except Exception as err:
                 logger.error(
                     "[HF feedback routing provider=%s json_object_format=%s] %s",
@@ -49,11 +63,4 @@ def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
                     err,
                 )
 
-    return []
-
-
-def route_send_feedback_call(messages: list[dict[str, Any]]) -> ParsedToolCall | None:
-    return next(
-        (call for call in route_tool_calls(messages) if call.name == "send_feedback"),
-        None,
-    )
+    return None

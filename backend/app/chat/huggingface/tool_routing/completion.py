@@ -15,7 +15,7 @@ from .constants import _FEEDBACK_ROUTE_REPLY_SUFFIX
 
 
 def feedback_route_messages(base: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Append the user instruction that asks for a ``tool_calls`` JSON object."""
+    """Append the user instruction that asks for a ``tool_call`` JSON object."""
     return [*base, {"role": "user", "content": _FEEDBACK_ROUTE_REPLY_SUFFIX}]
 
 

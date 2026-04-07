@@ -15,8 +15,9 @@ TOOL_ROUTING_SYSTEM_MESSAGE = (
 _FEEDBACK_ROUTE_REPLY_SUFFIX = (
     "Based on the conversation and the routing rules in the system message, decide whether "
     "the user's latest message clearly intends to submit feedback via send_feedback. "
-    'Reply with ONLY a single JSON object (no markdown fences) of the form: '
-    '{"tool_calls":[]} when no tool call is appropriate (this should be the usual case), or '
-    '{"tool_calls":[{"name":"send_feedback","arguments":{"message":"<text>",'
-    '"subject":"<optional>"}}]} only when they clearly want to send feedback to the company.'
+    "Reply with ONLY a single JSON object (no markdown fences) of the form: "
+    '{"tool_call": null} when no tool call is appropriate (this should be the usual case), or '
+    '{"tool_call":{"name":"send_feedback","arguments":{"message":"<text>",'
+    '"subject":"<optional>"}}} when they clearly want to send feedback to the company. '
+    "The object must include the key \"tool_call\" exactly once."
 )
