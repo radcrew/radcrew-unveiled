@@ -45,9 +45,9 @@ def _strip_json_fences(text: str) -> str:
     return "\n".join(lines).strip()
 
 
-def parse_tool_calls_from_json_text(text: str) -> list[ParsedToolCall] | None:
+def parse_tool_calls_from_route_reply(text: str) -> list[ParsedToolCall] | None:
     """
-    Parse fallback JSON ``{"tool_calls": [...]}`` from model text.
+    Parse ``{"tool_calls": [...]}`` from the assistant message (routing completion).
 
     Returns ``None`` if the payload is not valid JSON with a ``tool_calls`` array.
     Returns an empty list when ``tool_calls`` is valid but empty.
@@ -58,7 +58,7 @@ def parse_tool_calls_from_json_text(text: str) -> list[ParsedToolCall] | None:
     try:
         data = json.loads(raw)
     except json.JSONDecodeError:
-        logger.warning("[tool routing] JSON fallback could not parse model output")
+        logger.warning("[feedback routing] could not parse model reply as JSON")
         return None
     if not isinstance(data, dict):
         return None
@@ -81,7 +81,7 @@ def parse_tool_calls_from_json_text(text: str) -> list[ParsedToolCall] | None:
             arg_str = "{}"
         out.append(
             ParsedToolCall(
-                id=f"json-fallback-{i}",
+                id=f"route-reply-{i}",
                 name=name.strip(),
                 arguments=arg_str,
             )

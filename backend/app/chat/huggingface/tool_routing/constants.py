@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-# Router system prompt: model must follow JSON shape described in ``_JSON_FALLBACK_SUFFIX``.
+# Router system prompt; the final user turn uses ``_FEEDBACK_ROUTE_REPLY_SUFFIX``.
 TOOL_ROUTING_SYSTEM_MESSAGE = (
     "You are an intent router for a chat assistant. One optional action exists: "
     "send_feedback. Your default is to indicate NO feedback submission is needed. "
@@ -12,7 +12,7 @@ TOOL_ROUTING_SYSTEM_MESSAGE = (
     "Do not use it for greetings, general questions, small talk, or normal FAQ-style questions."
 )
 
-_JSON_FALLBACK_SUFFIX = (
+_FEEDBACK_ROUTE_REPLY_SUFFIX = (
     "Based on the conversation and the routing rules in the system message, decide whether "
     "the user's latest message clearly intends to submit feedback via send_feedback. "
     'Reply with ONLY a single JSON object (no markdown fences) of the form: '

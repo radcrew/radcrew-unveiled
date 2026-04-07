@@ -1,4 +1,4 @@
-"""Orchestrate provider retries for JSON-based feedback intent routing."""
+"""Orchestrate provider retries for feedback intent routing."""
 
 from __future__ import annotations
 
@@ -8,8 +8,8 @@ from typing import Any
 from app.config import get_settings
 from app.chat.huggingface.common import providers_to_try
 
-from .completion import json_fallback_completion, json_fallback_messages
-from .parse import extract_message_content, parse_tool_calls_from_json_text
+from .completion import feedback_route_completion, feedback_route_messages
+from .parse import extract_message_content, parse_tool_calls_from_route_reply
 from .types import ParsedToolCall
 
 logger = logging.getLogger(__name__)
@@ -17,35 +17,35 @@ logger = logging.getLogger(__name__)
 
 def route_tool_calls(messages: list[dict[str, Any]]) -> list[ParsedToolCall]:
     """
-    Run non-stream ``chat_completion`` (JSON-in-message routing only): append routing
-    instructions, then try ``response_format: json_object`` and plain completion per
-    provider. Parse ``{"tool_calls": [...]}`` from the assistant message content.
+    Run non-stream ``chat_completion`` for routing: append the structured-reply instruction,
+    then per provider try ``response_format: json_object`` and a plain completion. Parse
+    ``{"tool_calls": [...]}`` from the assistant message content.
     """
     settings = get_settings()
     model = settings.HUGGINGFACE_MODEL
     access_token = settings.HUGGINGFACE_API_KEY
     providers = providers_to_try(settings.HUGGINGFACE_PROVIDER)
 
-    fallback_msgs = json_fallback_messages(messages)
+    messages_for_route = feedback_route_messages(messages)
     for provider in providers:
-        for use_json_fmt in (True, False):
+        for use_json_object_format in (True, False):
             try:
-                resp = json_fallback_completion(
+                resp = feedback_route_completion(
                     model,
                     access_token,
-                    fallback_msgs,
+                    messages_for_route,
                     provider,
-                    use_json_fmt,
+                    use_json_object_format=use_json_object_format,
                 )
                 content = extract_message_content(resp)
-                parsed = parse_tool_calls_from_json_text(content)
+                parsed = parse_tool_calls_from_route_reply(content)
                 if parsed is not None:
                     return parsed
             except Exception as err:
                 logger.error(
-                    "[HF feedback routing provider=%s json_fmt=%s] %s",
+                    "[HF feedback routing provider=%s json_object_format=%s] %s",
                     provider,
-                    use_json_fmt,
+                    use_json_object_format,
                     err,
                 )
 

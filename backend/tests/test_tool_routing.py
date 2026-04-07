@@ -2,27 +2,27 @@ from unittest.mock import MagicMock, patch
 
 from app.chat.huggingface.tool_routing import (
     ParsedToolCall,
-    parse_tool_calls_from_json_text,
+    parse_tool_calls_from_route_reply,
     route_send_feedback_call,
     route_tool_calls,
 )
 
 
-def test_parse_tool_calls_from_json_text_valid() -> None:
+def test_parse_tool_calls_from_route_reply_valid() -> None:
     text = '{"tool_calls":[{"name":"send_feedback","arguments":{"message":"x"}}]}'
-    got = parse_tool_calls_from_json_text(text)
+    got = parse_tool_calls_from_route_reply(text)
     assert got is not None
     assert len(got) == 1
     assert got[0].name == "send_feedback"
     assert '"message": "x"' in got[0].arguments or '"message":"x"' in got[0].arguments
 
 
-def test_parse_tool_calls_from_json_text_empty() -> None:
-    assert parse_tool_calls_from_json_text('{"tool_calls":[]}') == []
+def test_parse_tool_calls_from_route_reply_empty() -> None:
+    assert parse_tool_calls_from_route_reply('{"tool_calls":[]}') == []
 
 
-def test_parse_tool_calls_from_json_text_invalid() -> None:
-    assert parse_tool_calls_from_json_text("not json") is None
+def test_parse_tool_calls_from_route_reply_invalid() -> None:
+    assert parse_tool_calls_from_route_reply("not json") is None
 
 
 @patch("app.chat.huggingface.tool_routing.route.route_tool_calls")
@@ -44,7 +44,7 @@ def test_route_send_feedback_call_returns_none_when_absent(_mock: MagicMock) -> 
 
 @patch("app.chat.huggingface.tool_routing.completion.InferenceClient")
 @patch("app.chat.huggingface.tool_routing.route.get_settings")
-def test_route_tool_calls_parses_json_from_message_content(
+def test_route_tool_calls_parses_route_reply_from_message_content(
     mock_get_settings: MagicMock, mock_cls: MagicMock
 ) -> None:
     cfg = MagicMock()
@@ -75,7 +75,7 @@ def test_route_tool_calls_parses_json_from_message_content(
 
 @patch("app.chat.huggingface.tool_routing.completion.InferenceClient")
 @patch("app.chat.huggingface.tool_routing.route.get_settings")
-def test_route_tool_calls_returns_empty_when_json_unusable(
+def test_route_tool_calls_returns_empty_when_reply_unparseable(
     mock_get_settings: MagicMock, mock_cls: MagicMock
 ) -> None:
     cfg = MagicMock()
