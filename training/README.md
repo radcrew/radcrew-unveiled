@@ -82,4 +82,10 @@ python training/train_qlora.py \
 
 ## Optional: prompt parity check
 
-To assert that a dataset row’s user string matches `build_chat_prompt`, you can add `scripts/validate_prompt_parity.py` later (import `build_chat_prompt` with `PYTHONPATH=backend`), as suggested in the fine-tuning plan.
+For rows that include `question`, `context_chunks`, and optional `history` (see [DATASET.md](DATASET.md)), verify that the stored user turn (`messages[0].content` or `prompt`) matches a fresh `build_chat_prompt` rebuild:
+
+```bash
+python training/scripts/validate_prompt_parity.py path/to/dataset.jsonl
+```
+
+Use `--verbose` for a unified diff on mismatch, `--max-rows N` to scan only the first N JSON objects, and `--strict` to fail if an auditable row has no stored user content. Backend tests in `backend/tests/test_validate_prompt_parity.py` cover the same contract.
