@@ -1,0 +1,12 @@
+# GPU training stack for QLoRA SFT (keep separate from backend/requirements.txt).
+# Install in a dedicated venv; Linux or WSL recommended for bitsandbytes.
+
+torch>=2.2.0
+transformers>=4.46.0
+datasets>=3.0.0
+accelerate>=1.0.0
+peft>=0.13.0
+bitsandbytes>=0.44.0
+trl>=0.14.0
+sentencepiece>=0.2.0
+protobuf>=4.0.0
