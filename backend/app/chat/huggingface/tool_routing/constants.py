@@ -4,20 +4,14 @@ from __future__ import annotations
 
 # Router system prompt; the final user turn uses ``_FEEDBACK_ROUTE_REPLY_SUFFIX``.
 TOOL_ROUTING_SYSTEM_MESSAGE = (
-    "You are an intent router for a chat assistant. One optional action exists: "
-    "send_feedback. Your default is to indicate NO feedback submission is needed. "
-    "Use send_feedback only when the user's latest message clearly means they want to "
-    "submit feedback, suggestions, or a bug report to the company—e.g. they explicitly ask to "
-    "send feedback, email the team with feedback, or share product feedback meant for staff. "
-    "Do not use it for greetings, general questions, small talk, or normal FAQ-style questions."
+    "You route chat intents. Default: no tool. Use send_feedback only when the user clearly "
+    "wants to submit feedback, a bug report, or a message to the company—not for greetings, "
+    "FAQ, or follow-ups about your previous answer."
 )
 
 _FEEDBACK_ROUTE_REPLY_SUFFIX = (
-    "Based on the conversation and the routing rules in the system message, decide whether "
-    "the user's latest message clearly intends to submit feedback via send_feedback. "
-    "Reply with ONLY a single JSON object (no markdown fences) of the form: "
-    '{"tool_call": null} when no tool call is appropriate (this should be the usual case), or '
-    '{"tool_call":{"name":"send_feedback","arguments":{"message":"<text>",'
-    '"subject":"<optional>"}}} when they clearly want to send feedback to the company. '
-    "The object must include the key \"tool_call\" exactly once."
+    "Reply with ONLY one JSON object (no markdown fences): "
+    '{"tool_call": null} (default), or '
+    '{"tool_call":{"name":"send_feedback","arguments":{"message":"<text>","subject":"<optional>"}}}. '
+    'Include the key "tool_call" exactly once.'
 )
