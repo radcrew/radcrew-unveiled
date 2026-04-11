@@ -41,7 +41,7 @@ def chat(body: ChatRequest) -> StreamingResponse:
         answer_stream = generate_chat_stream(body, knowledge_chunks)
     except Exception:
         logger.exception("POST /chat failed")
-        answer_stream = iter((MSG_AI_UNAVAILABLE,))
+        answer_stream = iter([MSG_AI_UNAVAILABLE])
 
     def event_stream():
         for chunk in answer_stream:
