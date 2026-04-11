@@ -14,7 +14,7 @@ const ContactSection = () => {
           <div className="max-w-xl">
             <p className="kicker mb-3">Start a project</p>
             <h2 className="section-heading mb-4">Tell us what you’re building.</h2>
-            <p className="text-lg leading-relaxed text-muted-foreground">
+            <p className="section-prose max-w-none">
               Full-stack, Web3, AI, or all three—we’ll reply with next steps, rough timelines, and how the crew would
               engage.
             </p>

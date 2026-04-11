@@ -70,8 +70,8 @@ const TeamSection = () => {
                 <Card className="h-full p-8 transition-all duration-300 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 active:scale-[0.98]">
                   <div className="team-avatar">{member.initials}</div>
                   <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
-                  <p className="mb-4 text-sm text-muted-foreground">{member.shortRole}</p>
-                  <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+                  <p className="mb-4 text-base text-muted-foreground">{member.shortRole}</p>
+                  <p className="line-clamp-3 text-base leading-relaxed text-muted-foreground">
                     {member.bio || "—"}
                   </p>
                   <div className="mt-6 flex items-center gap-1 text-sm font-medium text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100">

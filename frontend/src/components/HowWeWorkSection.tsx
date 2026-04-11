@@ -54,7 +54,7 @@ const HowWeWorkSection = () => {
                     <Icon className="h-5 w-5" strokeWidth={1.5} />
                   </div>
                 </div>
-                <h3 className="mb-2 text-lg font-bold">{phase}</h3>
+                <h3 className="mb-2 text-xl font-bold">{phase}</h3>
                 <p className="muted-p flex-1">{detail}</p>
               </Card>
             </li>

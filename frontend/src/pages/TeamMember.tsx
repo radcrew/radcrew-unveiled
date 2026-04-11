@@ -79,7 +79,7 @@ const TeamMember = () => {
               {member.initials}
             </div>
 
-            <h1 className="mb-2 text-4xl font-bold leading-tight md:text-5xl">{member.name}</h1>
+            <h1 className="mb-2 text-3xl font-bold leading-tight md:text-4xl">{member.name}</h1>
             <div className="mb-8 space-y-4">
               <p className="font-medium text-accent">{member.role}</p>
               {member.website && (

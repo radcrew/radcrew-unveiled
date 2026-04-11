@@ -8,10 +8,13 @@ const HeroSection = () => {
       <div className="hero-bg" aria-hidden>
         <img src={heroTechBg} alt="" className="hero-bg-img" />
         <div
-          className="absolute inset-0 bg-gradient-to-r from-background from-[5%] via-background/95 via-[42%] to-background/55 md:via-background/88 md:to-background/25 lg:to-transparent"
+          className="absolute inset-0 bg-gradient-to-r from-background from-0% via-background/78 via-[32%] to-background/25 md:via-background/55 md:to-background/10 lg:via-background/35 lg:to-transparent"
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-background" aria-hidden />
+        <div
+          className="absolute inset-0 bg-gradient-to-b from-transparent from-[48%] via-background/25 to-background"
+          aria-hidden
+        />
       </div>
 
       <div className="hero-inner">

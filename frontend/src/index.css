@@ -93,19 +93,19 @@
   }
 
   .section-heading {
-    @apply text-3xl font-bold md:text-4xl;
+    @apply text-2xl font-bold sm:text-3xl md:text-3xl lg:text-4xl;
   }
 
   .section-prose {
-    @apply max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg lg:max-w-3xl;
+    @apply max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl lg:max-w-3xl;
   }
 
   .section-prose-tight {
-    @apply max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg;
+    @apply max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl;
   }
 
   .muted-p {
-    @apply text-sm leading-relaxed text-muted-foreground;
+    @apply text-base leading-relaxed text-muted-foreground;
   }
 
   .muted-label {
@@ -150,7 +150,7 @@
   }
 
   .hero-bg-img {
-    @apply h-full min-h-screen min-h-dvh w-full object-fill;
+    @apply h-full min-h-screen min-h-dvh w-full object-cover object-center opacity-[0.52];
   }
 
   /* Hero gradients use responsive stops — keep on the element (see HeroSection) */
@@ -160,11 +160,11 @@
   }
 
   .hero-title {
-    @apply max-w-5xl text-5xl font-bold leading-[0.95] sm:text-6xl md:text-7xl lg:text-8xl xl:max-w-6xl 2xl:max-w-7xl;
+    @apply max-w-5xl text-4xl font-bold leading-[1.02] sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl xl:max-w-6xl 2xl:max-w-7xl;
   }
 
   .hero-blurb {
-    @apply mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-muted-foreground md:text-xl xl:max-w-4xl 2xl:max-w-5xl;
+    @apply mt-8 max-w-3xl space-y-4 text-lg leading-relaxed text-muted-foreground md:text-xl lg:text-xl xl:max-w-4xl 2xl:max-w-5xl;
   }
 
   .services-shell {
@@ -257,11 +257,11 @@
   }
 
   .portfolio-title {
-    @apply mb-2 line-clamp-2 shrink-0 text-lg font-bold leading-snug md:text-xl;
+    @apply mb-2 line-clamp-2 shrink-0 text-xl font-bold leading-snug md:text-2xl;
   }
 
   .portfolio-desc {
-    @apply min-h-0 flex-1 overflow-y-auto text-sm leading-relaxed text-muted-foreground md:text-base;
+    @apply min-h-0 flex-1 overflow-y-auto text-base leading-relaxed text-muted-foreground md:text-lg;
   }
 }
 
