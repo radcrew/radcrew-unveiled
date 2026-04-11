@@ -19,7 +19,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
 
 # Match backend/app/config.py default for HUGGINGFACE_MODEL.
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+DEFAULT_BASE_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 
 # Attention + MLP projections for Qwen2 / Qwen2.5 style models.
 DEFAULT_LORA_TARGETS = ("q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj")
