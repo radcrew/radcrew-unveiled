@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const NAV_LINKS = [
   { href: "#services", label: "Services" },
@@ -28,14 +29,16 @@ const Navbar = () => {
           ))}
         </div>
 
-        <button
+        <Button
           type="button"
-          className="p-2 text-foreground transition-transform active:scale-95 md:hidden"
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Toggle menu"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
-        </button>
+        </Button>
       </div>
 
       {open && (

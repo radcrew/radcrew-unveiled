@@ -1,4 +1,5 @@
 import { Search, Hammer, Rocket, Handshake } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const steps = [
@@ -46,14 +47,16 @@ const HowWeWorkSection = () => {
         <ol className="how-step-grid">
           {steps.map(({ icon: Icon, phase, detail }, i) => (
             <li key={phase} className="relative flex min-h-0 flex-col">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className="step-num">{i + 1}</span>
-                <div className="step-icon">
-                  <Icon className="h-5 w-5" strokeWidth={1.5} />
+              <Card className="flex h-full flex-col p-6 shadow-sm">
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <span className="step-num">{i + 1}</span>
+                  <div className="step-icon">
+                    <Icon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
                 </div>
-              </div>
-              <h3 className="mb-2 text-lg font-bold">{phase}</h3>
-              <p className="muted-p flex-1">{detail}</p>
+                <h3 className="mb-2 text-lg font-bold">{phase}</h3>
+                <p className="muted-p flex-1">{detail}</p>
+              </Card>
             </li>
           ))}
         </ol>

@@ -1,4 +1,5 @@
 import { ArrowDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import heroTechBg from "@/assets/hero-tech-bg.png";
 
 const HeroSection = () => {
@@ -33,9 +34,15 @@ const HeroSection = () => {
           </p>
         </div>
         <div className="mt-12 reveal reveal-delay-3">
-          <a href="#team" className="accent-cta">
-            Meet the crew <ArrowDown size={16} />
-          </a>
+          <Button
+            variant="link"
+            asChild
+            className="h-auto gap-2 p-0 text-sm font-medium text-accent underline-offset-4 hover:text-accent hover:underline"
+          >
+            <a href="#team">
+              Meet the crew <ArrowDown size={16} />
+            </a>
+          </Button>
         </div>
       </div>
     </section>

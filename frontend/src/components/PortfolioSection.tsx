@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { cn } from "@/lib/utils";
 import { portfolioProjects } from "@/lib/portfolio-data";
 
 const PortfolioSection = () => {
@@ -40,7 +43,10 @@ const PortfolioSection = () => {
             <div className="flex">
               {portfolioProjects.map((project) => (
                 <div key={project.id} className="portfolio-slide">
-                  <article className="portfolio-card">
+                  <Card
+                    role="article"
+                    className="mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border-border p-0 shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]"
+                  >
                     <div className="portfolio-img">
                       <img
                         src={project.image}
@@ -60,7 +66,7 @@ const PortfolioSection = () => {
                       <h3 className="portfolio-title">{project.title}</h3>
                       <p className="portfolio-desc">{project.achievement}</p>
                     </div>
-                  </article>
+                  </Card>
                 </div>
               ))}
             </div>
@@ -68,25 +74,43 @@ const PortfolioSection = () => {
 
           <div className="mt-5 flex flex-col items-center gap-4 md:mt-6 md:gap-5">
             <div className="flex justify-center gap-3">
-              <button type="button" onClick={scrollPrev} className="carousel-btn" aria-label="Previous project">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="rounded-full"
+                onClick={scrollPrev}
+                aria-label="Previous project"
+              >
                 <ChevronLeft size={18} />
-              </button>
-              <button type="button" onClick={scrollNext} className="carousel-btn" aria-label="Next project">
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="rounded-full"
+                onClick={scrollNext}
+                aria-label="Next project"
+              >
                 <ChevronRight size={18} />
-              </button>
+              </Button>
             </div>
             <div className="flex justify-center gap-2" role="tablist" aria-label="Portfolio slides">
               {portfolioProjects.map((project, i) => (
-                <button
+                <Button
                   key={project.id}
                   type="button"
+                  variant="ghost"
                   role="tab"
                   aria-selected={selected === i}
                   aria-label={`Show project ${i + 1}: ${project.title}`}
                   onClick={() => scrollTo(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    selected === i ? "w-8 bg-accent" : "w-2 bg-border hover:bg-muted-foreground/40"
-                  }`}
+                  className={cn(
+                    "!h-2 min-h-0 shrink-0 rounded-full px-0 py-0 font-[inherit] shadow-none transition-all hover:bg-muted-foreground/40",
+                    selected === i
+                      ? "!w-8 bg-accent hover:bg-accent hover:opacity-100"
+                      : "!w-2 bg-border",
+                  )}
                 />
               ))}
             </div>

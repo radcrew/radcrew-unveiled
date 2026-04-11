@@ -195,10 +195,6 @@
     @apply flex min-h-0 flex-1 flex-col justify-center border-t border-border bg-gradient-to-b from-accent/[0.06] to-background section-padding py-8 sm:py-10 md:py-12;
   }
 
-  .contact-card {
-    @apply rounded-2xl border border-border bg-card p-10 md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12;
-  }
-
   .footer-shell {
     @apply shrink-0 border-t border-border section-padding py-8 md:py-10;
   }
@@ -220,32 +216,12 @@
     @apply content-max section-padding flex h-16 items-center justify-between;
   }
 
-  .accent-cta {
-    @apply inline-flex items-center gap-2 text-sm font-medium text-accent underline-offset-4 transition-all hover:underline;
-  }
-
-  .email-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground transition-opacity hover:opacity-90 active:scale-[0.98];
-  }
-
-  .carousel-btn {
-    @apply flex h-10 w-10 items-center justify-center rounded-full border border-border transition-colors hover:bg-card active:scale-95;
-  }
-
-  .service-card {
-    @apply rounded-lg border border-border bg-card p-8 transition-shadow duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5;
-  }
-
   .service-icon-wrap {
     @apply mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-accent/10 text-accent;
   }
 
   .team-grid {
     @apply grid shrink-0 gap-6 md:grid-cols-3 md:gap-8;
-  }
-
-  .team-card {
-    @apply relative rounded-lg border border-border bg-card p-8 transition-all duration-300 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 active:scale-[0.98];
   }
 
   .team-avatar {
@@ -270,10 +246,6 @@
 
   .portfolio-slide {
     @apply min-w-0 flex-[0_0_70%] px-1.5 sm:flex-[0_0_58%] sm:px-2 md:flex-[0_0_40%] md:px-2.5 lg:flex-[0_0_32%] xl:flex-[0_0_26%];
-  }
-
-  .portfolio-card {
-    @apply mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem];
   }
 
   .portfolio-img {

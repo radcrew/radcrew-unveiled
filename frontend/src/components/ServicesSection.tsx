@@ -1,4 +1,5 @@
 import { Layers, Hexagon, Brain } from "lucide-react";
+import { Card, CardTitle } from "@/components/ui/card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const pillars = [
@@ -39,13 +40,17 @@ const ServicesSection = () => {
 
         <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
           {pillars.map(({ icon: Icon, title, description }) => (
-            <article key={title} className="service-card">
+            <Card
+              key={title}
+              role="article"
+              className="p-8 transition-shadow duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5"
+            >
               <div className="service-icon-wrap">
                 <Icon className="h-7 w-7" strokeWidth={1.5} />
               </div>
-              <h3 className="mb-3 text-xl font-bold">{title}</h3>
+              <CardTitle className="mb-3 mt-0 text-xl font-bold">{title}</CardTitle>
               <p className="muted-p">{description}</p>
-            </article>
+            </Card>
           ))}
         </div>
       </div>
