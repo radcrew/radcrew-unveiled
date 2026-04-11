@@ -1,11 +1,12 @@
 """LLM tool routing for user feedback + Web3Forms submission (runs before RAG when HF key is set)."""
 
 from __future__ import annotations
+
 import json
 import logging
-import re
 from collections.abc import Iterator
 from typing import Any
+
 from app.config import get_settings
 from app.chat.utils import get_text_chunk_stream
 from app.chat.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
@@ -13,18 +14,21 @@ from app.chat.huggingface.tool_routing import (
     build_feedback_routing_messages,
     route_send_feedback_call,
 )
+from app.chat.huggingface.tool_routing.types import ParsedToolCall
 from app.chat.messages import MSG_FEEDBACK_SEND_FAILED, MSG_FEEDBACK_THANKS
 from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
 
-def try_feedback_tool_call(
+
+def classify_feedback_route(
     message: str,
     history: list[ChatHistoryMessage],
-) -> Iterator[str] | None:
+) -> ParsedToolCall | None:
     """
-    If the model returns ``send_feedback``, submit the user's message via Web3Forms and stream a reply.
-    Returns ``None`` when the normal RAG path should run instead.
+    Run feedback-intent routing; return a ``send_feedback`` tool call only when
+    the model routed to feedback and arguments contain a usable ``message`` string.
+    Otherwise ``None`` so the RAG path should run.
     """
     settings = get_settings()
     if not settings.HUGGINGFACE_API_KEY:
@@ -50,6 +54,22 @@ def try_feedback_tool_call(
     if args is None or not isinstance(args.get("message"), str):
         return None
 
+    return feedback_call
+
+
+def stream_feedback_tool_response(feedback_call: ParsedToolCall) -> Iterator[str]:
+    """Submit validated ``send_feedback`` args via Web3Forms and stream thanks or error text."""
+    settings = get_settings()
+    args: dict[str, Any] | None = None
+    try:
+        parsed = json.loads(feedback_call.arguments)
+        args = parsed if isinstance(parsed, dict) else None
+    except json.JSONDecodeError:
+        args = None
+
+    if args is None or not isinstance(args.get("message"), str):
+        return iter(())
+
     body_text = args["message"]
     raw_subj = args.get("subject")
     subject = raw_subj if isinstance(raw_subj, str) else None
@@ -65,3 +85,18 @@ def try_feedback_tool_call(
         return get_text_chunk_stream(MSG_FEEDBACK_SEND_FAILED.format(email=email))
 
     return get_text_chunk_stream(MSG_FEEDBACK_THANKS.format(email=email))
+
+
+def try_feedback_tool_call(
+    message: str,
+    history: list[ChatHistoryMessage],
+) -> Iterator[str] | None:
+    """
+    If the model returns ``send_feedback``, submit the user's message via Web3Forms and stream a reply.
+    Returns ``None`` when the normal RAG path should run instead.
+    """
+    call = classify_feedback_route(message, history)
+    if call is None:
+        return None
+
+    return stream_feedback_tool_response(call)
