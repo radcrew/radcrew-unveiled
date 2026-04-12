@@ -17,7 +17,7 @@ pip install -U pip
 pip install -r requirements-train.txt
 ```
 
-Do not commit API tokens. For Hub uploads, use `HF_TOKEN` (or `HUGGINGFACE_API_KEY`) in the environment, not in the repo.
+Do not commit API tokens. For Hub uploads, set `HUGGINGFACE_API_KEY` in the environment, not in the repo.
 
 ## Train (QLoRA + TRL `SFTTrainer`)
 
@@ -66,7 +66,7 @@ You can also merge programmatically: load the base model in `float16`/`bfloat16`
 
 ## Push to the Hugging Face Hub
 
-1. Log in: `huggingface-cli login` (or export `HF_TOKEN`).
+1. Log in: `huggingface-cli login` (or export `HUGGINGFACE_API_KEY`).
 2. Train, then push the adapter:
 
 ```bash

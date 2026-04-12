@@ -247,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.push_to_hub:
-        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_API_KEY")
+        token = os.environ.get("HUGGINGFACE_API_KEY")
         print(f"Pushing adapter to {args.hub_model_id} …")
         trainer.model.push_to_hub(args.hub_model_id, private=args.hub_private, token=token)
         tokenizer.push_to_hub(args.hub_model_id, private=args.hub_private, token=token)
