@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
 export const button = cn(
-  "fixed bottom-6 left-1/2 z-40 h-12 w-[min(640px,calc(100vw-2rem))] -translate-x-1/2",
-  "rounded-full border border-border bg-background px-4 shadow-lg",
-  "justify-start gap-2 text-left text-muted-foreground hover:bg-muted",
+  "fixed bottom-6 right-6 z-40 h-10 w-auto max-w-[calc(100vw-3rem)]",
+  "rounded-full border border-border bg-background px-3 shadow-lg",
+  "justify-start gap-1.5 text-left text-muted-foreground hover:bg-muted",
+  "[&_svg]:h-3.5 [&_svg]:w-3.5 [&_svg]:shrink-0",
 );
 
-export const icon = "h-4 w-4 shrink-0";
-export const placeholder = "truncate text-sm";
+export const icon = "shrink-0";
+export const placeholder = "text-sm";

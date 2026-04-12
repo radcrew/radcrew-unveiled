@@ -14,6 +14,6 @@ export const ChatFloatingButton = ({ onOpen }: ChatFloatingButtonProps) => (
     onClick={onOpen}
   >
     <MessageCircle className={styles.icon} strokeWidth={1.75} />
-    <span className={styles.placeholder}>Ask RadCrew assistant about projects, team, or contact...</span>
+    <span className={styles.placeholder}>Ask RadCrew assistant</span>
   </Button>
 );
