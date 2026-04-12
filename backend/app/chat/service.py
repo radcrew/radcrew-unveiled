@@ -12,4 +12,5 @@ def generate_chat_stream(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeChunk],
 ) -> Iterator[str]:
+
     return run_chat_stream(body, knowledge_chunks)

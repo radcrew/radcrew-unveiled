@@ -85,18 +85,3 @@ def stream_feedback_tool_response(feedback_call: ParsedToolCall) -> Iterator[str
         return get_text_chunk_stream(MSG_FEEDBACK_SEND_FAILED.format(email=email))
 
     return get_text_chunk_stream(MSG_FEEDBACK_THANKS.format(email=email))
-
-
-def try_feedback_tool_call(
-    message: str,
-    history: list[ChatHistoryMessage],
-) -> Iterator[str] | None:
-    """
-    If the model returns ``send_feedback``, submit the user's message via Web3Forms and stream a reply.
-    Returns ``None`` when the normal RAG path should run instead.
-    """
-    call = classify_feedback_route(message, history)
-    if call is None:
-        return None
-
-    return stream_feedback_tool_response(call)
