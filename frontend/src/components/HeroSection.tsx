@@ -1,10 +1,13 @@
 import { ArrowDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useHeroParallax } from "@/hooks/useHeroParallax";
 import heroTechBg from "@/assets/hero-tech-bg.png";
 
 const HeroSection = () => {
+  const heroRef = useHeroParallax();
+
   return (
-    <section className="hero-root">
+    <section ref={heroRef} className="hero-root">
       <div className="hero-bg" aria-hidden>
         <img src={heroTechBg} alt="" className="hero-bg-img" />
         <div

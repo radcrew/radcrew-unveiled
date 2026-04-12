@@ -151,6 +151,8 @@
 
   .hero-bg-img {
     @apply h-full min-h-screen min-h-dvh w-full object-cover object-center opacity-[0.52];
+    transform-origin: center center;
+    backface-visibility: hidden;
   }
 
   /* Hero gradients use responsive stops — keep on the element (see HeroSection) */
@@ -282,6 +284,52 @@
   .reveal-delay-1 { animation-delay: 80ms; }
   .reveal-delay-2 { animation-delay: 160ms; }
   .reveal-delay-3 { animation-delay: 240ms; }
+
+  /* Scroll-linked block reveal (ScrollDriven); fallback uses [data-revealed] */
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-driven-fallback:not([data-revealed="true"]) {
+      opacity: 0;
+      transform: translateY(1.75rem);
+      filter: blur(4px);
+    }
+
+    .scroll-driven-fallback[data-revealed="true"] {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+      transition:
+        opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+}
+
+@keyframes scrollAlongReveal {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+    filter: blur(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@supports (animation-timeline: view(block)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-driven-native {
+      animation-name: scrollAlongReveal;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+      animation-fill-mode: both;
+      animation-timeline: view(block);
+      animation-range: entry 0% cover 42%;
+      animation-duration: 1ms;
+    }
+  }
 }
 
 @keyframes revealUp {

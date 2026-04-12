@@ -1,24 +1,25 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { ScrollDriven } from "@/components/ScrollDriven";
 import { RadCard } from "@/components/ui/rad-card";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { isContentfulConfigured } from "@/lib/contentful";
 
 const TeamSection = () => {
-  const ref = useScrollReveal();
   const { data: teamMembers, isPending, isError, error } = useTeamMembers();
 
   const showSetupHint = !isContentfulConfigured();
 
   return (
-    <section id="team" className="team-shell" ref={ref}>
+    <section id="team" className="team-shell">
       <div className="content-stack">
-        <header className="section-block">
-          <p className="kicker">The Crew</p>
-          <h2 className="section-heading">Three minds, one mission.</h2>
-        </header>
+        <ScrollDriven>
+          <header className="section-block">
+            <p className="kicker">The Crew</p>
+            <h2 className="section-heading">Three minds, one mission.</h2>
+          </header>
+        </ScrollDriven>
 
         {showSetupHint && (
           <p className="text-sm text-muted-foreground">
@@ -61,25 +62,22 @@ const TeamSection = () => {
 
         {!isPending && !isError && teamMembers && teamMembers.length > 0 && (
           <div className="team-grid">
-            {teamMembers.map((member, i) => (
-              <Link
-                key={member.id}
-                to={`/team/${member.id}`}
-                className="group block h-full"
-                style={{ animationDelay: `${i * 100}ms` }}
-              >
-                <RadCard className="h-full p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out active:scale-[0.98]">
-                  <div className="team-avatar">{member.initials}</div>
-                  <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
-                  <p className="mb-4 text-base text-muted-foreground">{member.shortRole}</p>
-                  <p className="line-clamp-3 text-base leading-relaxed text-muted-foreground">
-                    {member.bio || "—"}
-                  </p>
-                  <div className="mt-6 flex items-center gap-1 text-sm font-medium text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                    View profile <ArrowUpRight size={14} />
-                  </div>
-                </RadCard>
-              </Link>
+            {teamMembers.map((member) => (
+              <ScrollDriven key={member.id} className="h-full">
+                <Link to={`/team/${member.id}`} className="group block h-full">
+                  <RadCard className="h-full p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out active:scale-[0.98]">
+                    <div className="team-avatar">{member.initials}</div>
+                    <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
+                    <p className="mb-4 text-base text-muted-foreground">{member.shortRole}</p>
+                    <p className="line-clamp-3 text-base leading-relaxed text-muted-foreground">
+                      {member.bio || "—"}
+                    </p>
+                    <div className="mt-6 flex items-center gap-1 text-sm font-medium text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      View profile <ArrowUpRight size={14} />
+                    </div>
+                  </RadCard>
+                </Link>
+              </ScrollDriven>
             ))}
           </div>
         )}

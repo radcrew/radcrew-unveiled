@@ -3,14 +3,13 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RadButton } from "@/components/ui/rad-button";
+import { ScrollDriven } from "@/components/ScrollDriven";
 import { RadCard } from "@/components/ui/rad-card";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { cn } from "@/lib/utils";
 import { portfolioProjects } from "@/lib/portfolio-data";
 
 const PortfolioSection = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const ref = useScrollReveal();
   const [selected, setSelected] = useState(0);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -28,18 +27,20 @@ const PortfolioSection = () => {
   }, [emblaApi]);
 
   return (
-    <section id="portfolio" className="portfolio-shell" ref={ref}>
+    <section id="portfolio" className="portfolio-shell">
       <div className="portfolio-inner">
-        <header className="section-block w-full">
-          <p className="kicker">Portfolio</p>
-          <h2 className="section-heading">Past wins, shipped end to end.</h2>
-          <p className="section-prose-tight">
-            A snapshot of the kinds of problems we take from idea to production—swap in your own screenshots and stories
-            anytime.
-          </p>
-        </header>
+        <ScrollDriven>
+          <header className="section-block w-full">
+            <p className="kicker">Portfolio</p>
+            <h2 className="section-heading">Past wins, shipped end to end.</h2>
+            <p className="section-prose-tight">
+              A snapshot of the kinds of problems we take from idea to production—swap in your own screenshots and stories
+              anytime.
+            </p>
+          </header>
+        </ScrollDriven>
 
-        <div className="relative w-full min-h-0 shrink-0">
+        <ScrollDriven className="relative w-full min-h-0 shrink-0">
           <div className="overflow-hidden px-0" ref={emblaRef}>
             <div className="flex">
               {portfolioProjects.map((project) => (
@@ -116,7 +117,7 @@ const PortfolioSection = () => {
               ))}
             </div>
           </div>
-        </div>
+        </ScrollDriven>
       </div>
     </section>
   );

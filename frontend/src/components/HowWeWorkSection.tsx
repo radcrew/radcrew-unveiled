@@ -1,6 +1,6 @@
 import { Search, Hammer, Rocket, Handshake } from "lucide-react";
+import { ScrollDriven } from "@/components/ScrollDriven";
 import { RadCard } from "@/components/ui/rad-card";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const steps = [
   {
@@ -30,33 +30,35 @@ const steps = [
 ];
 
 const HowWeWorkSection = () => {
-  const ref = useScrollReveal();
-
   return (
-    <section id="how-we-work" className="how-shell" ref={ref}>
+    <section id="how-we-work" className="how-shell">
       <div className="content-stack-wide">
-        <header className="section-block">
-          <p className="kicker">How we work</p>
-          <h2 className="section-heading max-w-2xl lg:max-w-3xl">From first call to production—and after.</h2>
-          <p className="section-prose">
-            A straightforward rhythm that keeps scope honest and velocity high, whether we’re shipping a web app, a
-            protocol touchpoint, or AI features.
-          </p>
-        </header>
+        <ScrollDriven>
+          <header className="section-block">
+            <p className="kicker">How we work</p>
+            <h2 className="section-heading max-w-2xl lg:max-w-3xl">From first call to production—and after.</h2>
+            <p className="section-prose">
+              A straightforward rhythm that keeps scope honest and velocity high, whether we’re shipping a web app, a
+              protocol touchpoint, or AI features.
+            </p>
+          </header>
+        </ScrollDriven>
 
         <ol className="how-step-grid">
           {steps.map(({ icon: Icon, phase, detail }, i) => (
             <li key={phase} className="relative flex min-h-0 flex-col">
-              <RadCard className="flex h-full flex-col p-6 shadow-sm">
-                <div className="mb-4 flex flex-wrap items-center gap-3">
-                  <span className="step-num">{i + 1}</span>
-                  <div className="step-icon">
-                    <Icon className="h-5 w-5" strokeWidth={1.5} />
+              <ScrollDriven className="flex min-h-0 flex-1 flex-col">
+                <RadCard className="flex h-full flex-col p-6 shadow-sm">
+                  <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <span className="step-num">{i + 1}</span>
+                    <div className="step-icon">
+                      <Icon className="h-5 w-5" strokeWidth={1.5} />
+                    </div>
                   </div>
-                </div>
-                <h3 className="mb-2 text-xl font-bold">{phase}</h3>
-                <p className="muted-p flex-1">{detail}</p>
-              </RadCard>
+                  <h3 className="mb-2 text-xl font-bold">{phase}</h3>
+                  <p className="muted-p flex-1">{detail}</p>
+                </RadCard>
+              </ScrollDriven>
             </li>
           ))}
         </ol>

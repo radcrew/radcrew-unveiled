@@ -1,8 +1,8 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ScrollDriven } from "@/components/ScrollDriven";
 import { RadButton } from "@/components/ui/rad-button";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 import workspace1 from "@/assets/workspace-1.jpg";
 import workspace2 from "@/assets/workspace-2.jpg";
@@ -16,19 +16,18 @@ const slides = [
 
 const WorkspaceCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const ref = useScrollReveal();
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <section id="workspace" className="workspace-shell" ref={ref}>
-      <div className="content-max section-padding mb-10">
+    <section id="workspace" className="workspace-shell">
+      <ScrollDriven className="content-max section-padding mb-10">
         <p className="kicker mb-3">Where We Work</p>
         <h2 className="section-heading">Our workspace.</h2>
-      </div>
+      </ScrollDriven>
 
-      <div className="relative">
+      <ScrollDriven className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {slides.map((slide, i) => (
@@ -68,7 +67,7 @@ const WorkspaceCarousel = () => {
             <ChevronRight size={18} />
           </RadButton>
         </div>
-      </div>
+      </ScrollDriven>
     </section>
   );
 };
