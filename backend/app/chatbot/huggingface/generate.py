@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Iterator
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.chatbot.huggingface.chat_completion import stream_chat_completion
 from app.chatbot.huggingface.common import logger, providers_to_try
 from app.chatbot.huggingface.text_generation import stream_text_generation

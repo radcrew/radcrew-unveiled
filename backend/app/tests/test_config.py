@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.core.config import Settings
+from app.core.settings import Settings
 
 
 def test_settings_defaults_without_env_file() -> None:

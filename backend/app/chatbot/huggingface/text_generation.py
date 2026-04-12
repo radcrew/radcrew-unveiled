@@ -5,7 +5,7 @@ from typing import Any
 
 from huggingface_hub import InferenceClient
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED, safe_get
-from app.core.config import get_settings
+from app.core.settings import get_settings
 
 
 def extract_stream_content(chunk: Any) -> str:

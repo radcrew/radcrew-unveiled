@@ -6,7 +6,7 @@ import uvicorn
 
 from app.api import chat, health
 from app.chatbot import chatbot_logic
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.core.http import create_http_app
 from app.core.logger import configure_logging
 

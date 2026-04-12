@@ -14,7 +14,7 @@ from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
 from app.chatbot.rag.prompt import build_chat_prompt
 from app.chatbot.rag.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.chatbot.knowledge.models import KnowledgeChunk
 from app.schemas import ChatRequest
 

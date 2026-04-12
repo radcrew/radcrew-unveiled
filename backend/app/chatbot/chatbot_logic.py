@@ -12,7 +12,7 @@ from app.chatbot.knowledge.github_loader import get_resume_documents
 from app.chatbot.knowledge.models import KnowledgeChunk
 from app.chatbot.langchain_service import run_chat_stream
 from app.chatbot.rag.retrieval import build_knowledge_chunks
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.schemas import ChatRequest
 
 knowledge_chunks: list[KnowledgeChunk] = []

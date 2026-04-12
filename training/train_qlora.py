@@ -18,7 +18,7 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
 
-# Match backend/app/config.py default for HUGGINGFACE_MODEL.
+# Match backend/app/core/settings.py default for HUGGINGFACE_MODEL.
 DEFAULT_BASE_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 
 # Attention + MLP projections for Qwen2 / Qwen2.5 style models.

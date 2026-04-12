@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.chatbot.huggingface.common import providers_to_try
 
 from .completion import feedback_route_completion, feedback_route_messages

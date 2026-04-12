@@ -7,7 +7,7 @@ import logging
 from collections.abc import Iterator
 from typing import Any
 
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
 from app.chatbot.huggingface.tool_routing import (

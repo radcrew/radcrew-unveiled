@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import re
 from huggingface_hub import InferenceClient
-from app.core.config import get_settings
+from app.core.settings import get_settings
 from app.chatbot.rag.models import EmbeddingInferenceConfig
 from app.chatbot.knowledge.models import KnowledgeChunk, KnowledgeDocument
 

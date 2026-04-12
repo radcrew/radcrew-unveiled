@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from urllib import error, request
 
-from app.core.config import get_settings
+from app.core.settings import get_settings
 
 WEB3FORMS_SUBMIT_URL = "https://api.web3forms.com/submit"
 
