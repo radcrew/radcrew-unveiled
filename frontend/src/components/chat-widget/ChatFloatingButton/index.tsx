@@ -4,12 +4,18 @@ import * as styles from "./styles";
 
 interface ChatFloatingButtonProps {
   onOpen: () => void;
+  /** Distance from viewport bottom; on home page derived from footer height to vertically center in the footer band. */
+  fixedBottomPx?: number;
 }
 
-export const ChatFloatingButton = ({ onOpen }: ChatFloatingButtonProps) => (
+export const ChatFloatingButton = ({
+  onOpen,
+  fixedBottomPx = 24,
+}: ChatFloatingButtonProps) => (
   <Button
     type="button"
-    className={styles.button}
+    className={styles.buttonFixed}
+    style={{ bottom: fixedBottomPx }}
     aria-label="Open FAQ chat"
     onClick={onOpen}
   >

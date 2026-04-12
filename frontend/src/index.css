@@ -196,11 +196,11 @@
   }
 
   .footer-shell {
-    @apply shrink-0 border-t border-border section-padding py-8 md:py-10;
+    @apply shrink-0 border-t border-border section-padding py-4 md:py-5;
   }
 
   .footer-row {
-    @apply content-max flex flex-col justify-between gap-8 md:flex-row md:items-center md:gap-12;
+    @apply content-max flex flex-col justify-between gap-4 md:flex-row md:items-center md:gap-8;
   }
 
   /* —— UI bits —— */
