@@ -1,5 +1,5 @@
 import { MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import * as styles from "./styles";
 
 interface ChatFloatingButtonProps {
@@ -12,7 +12,7 @@ export const ChatFloatingButton = ({
   onOpen,
   fixedBottomPx = 24,
 }: ChatFloatingButtonProps) => (
-  <Button
+  <RadButton
     type="button"
     className={styles.buttonFixed}
     style={{ bottom: fixedBottomPx }}
@@ -21,5 +21,5 @@ export const ChatFloatingButton = ({
   >
     <MessageCircle className={styles.icon} strokeWidth={1.75} />
     <span className={styles.placeholder}>Ask RadCrew assistant about projects, team, or contact...</span>
-  </Button>
+  </RadButton>
 );

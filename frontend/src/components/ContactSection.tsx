@@ -1,5 +1,5 @@
 import { Mail, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -20,7 +20,7 @@ const ContactSection = () => {
             </p>
           </div>
           <div className="mt-10 flex flex-col gap-4 lg:mt-0 lg:shrink-0">
-            <Button
+            <RadButton
               asChild
               className="h-auto gap-2 rounded-lg bg-accent px-8 py-4 text-base font-semibold text-accent-foreground shadow-none hover:bg-accent hover:opacity-90 active:scale-[0.98]"
             >
@@ -29,7 +29,7 @@ const ContactSection = () => {
                 Email {email}
                 <ArrowRight className="h-4 w-4 opacity-80" />
               </a>
-            </Button>
+            </RadButton>
             <p className="text-center text-xs text-muted-foreground lg:text-right">
               We usually respond within one to two business days.
             </p>

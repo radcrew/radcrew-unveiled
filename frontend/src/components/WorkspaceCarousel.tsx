@@ -1,7 +1,7 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 import workspace1 from "@/assets/workspace-1.jpg";
@@ -47,7 +47,7 @@ const WorkspaceCarousel = () => {
         </div>
 
         <div className="mt-8 flex justify-center gap-3">
-          <Button
+          <RadButton
             type="button"
             variant="outline"
             size="icon"
@@ -56,8 +56,8 @@ const WorkspaceCarousel = () => {
             aria-label="Previous slide"
           >
             <ChevronLeft size={18} />
-          </Button>
-          <Button
+          </RadButton>
+          <RadButton
             type="button"
             variant="outline"
             size="icon"
@@ -66,7 +66,7 @@ const WorkspaceCarousel = () => {
             aria-label="Next slide"
           >
             <ChevronRight size={18} />
-          </Button>
+          </RadButton>
         </div>
       </div>
     </section>

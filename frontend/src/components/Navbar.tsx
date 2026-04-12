@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 
 const NAV_LINKS = [
   { href: "#services", label: "Services" },
@@ -29,7 +29,7 @@ const Navbar = () => {
           ))}
         </div>
 
-        <Button
+        <RadButton
           type="button"
           variant="ghost"
           size="icon"
@@ -38,7 +38,7 @@ const Navbar = () => {
           aria-label="Toggle menu"
         >
           {open ? <X size={20} /> : <Menu size={20} />}
-        </Button>
+        </RadButton>
       </div>
 
       {open && (

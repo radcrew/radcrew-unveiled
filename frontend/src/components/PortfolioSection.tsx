@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { cn } from "@/lib/utils";
@@ -74,7 +75,7 @@ const PortfolioSection = () => {
 
           <div className="mt-5 flex flex-col items-center gap-4 md:mt-6 md:gap-5">
             <div className="flex justify-center gap-3">
-              <Button
+              <RadButton
                 type="button"
                 variant="outline"
                 size="icon"
@@ -83,8 +84,8 @@ const PortfolioSection = () => {
                 aria-label="Previous project"
               >
                 <ChevronLeft size={18} />
-              </Button>
-              <Button
+              </RadButton>
+              <RadButton
                 type="button"
                 variant="outline"
                 size="icon"
@@ -93,7 +94,7 @@ const PortfolioSection = () => {
                 aria-label="Next project"
               >
                 <ChevronRight size={18} />
-              </Button>
+              </RadButton>
             </div>
             <div className="flex justify-center gap-2" role="tablist" aria-label="Portfolio slides">
               {portfolioProjects.map((project, i) => (

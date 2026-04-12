@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadCard } from "@/components/ui/rad-card";
 
@@ -19,9 +19,9 @@ const NotFound = () => {
           <CardDescription className="text-base">Oops! Page not found</CardDescription>
         </CardHeader>
         <CardFooter className="justify-center pb-6 pt-0">
-          <Button asChild>
+          <RadButton asChild>
             <Link to="/">Return to Home</Link>
-          </Button>
+          </RadButton>
         </CardFooter>
       </RadCard>
     </div>

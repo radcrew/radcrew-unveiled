@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { Loader2, SendHorizontal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { RadButton } from "@/components/ui/rad-button";
 import { Textarea } from "@/components/ui/textarea";
 import * as styles from "./styles";
 
@@ -37,7 +37,7 @@ export const ChatComposer = ({
       }}
     />
     <div className={styles.actionsRow}>
-      <Button type="submit" disabled={!canSend} className={styles.submitButton}>
+      <RadButton type="submit" disabled={!canSend} className={styles.submitButton}>
         {pending ? (
           <>
             <Loader2 className={styles.pendingSpinner} />
@@ -49,7 +49,7 @@ export const ChatComposer = ({
             Send
           </>
         )}
-      </Button>
+      </RadButton>
     </div>
   </form>
 );
