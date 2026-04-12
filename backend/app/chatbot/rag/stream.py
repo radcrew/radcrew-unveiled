@@ -15,13 +15,13 @@ from app.chatbot.huggingface import generate_answer
 from app.chatbot.rag.prompt import build_chat_prompt
 from app.chatbot.rag.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
 from app.core.settings import get_settings
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatRequest
 
 
 def stream_rag_chat_answer(
     body: ChatRequest,
-    knowledge_chunks: list[KnowledgeChunk],
+    knowledge_chunks: list[KnowledgeDocument],
 ) -> Iterator[str]:
     settings = get_settings()
     message = body.message
@@ -33,13 +33,13 @@ def stream_rag_chat_answer(
         recent_context = "\n".join(recent_user_turns[-2:])
         retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
-    relevant_chunks = retrieve_relevant_chunks(
+    relevant_chunks, top_similarity = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
-        5
+        5,
     )
 
-    if retrieval_fallback_needed(relevant_chunks) and not history:
+    if retrieval_fallback_needed(top_similarity) and not history:
         return get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)
 
     if not settings.HUGGINGFACE_API_KEY:

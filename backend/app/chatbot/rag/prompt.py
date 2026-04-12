@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatHistoryMessage
 
 
@@ -11,7 +11,7 @@ MAX_HISTORY_MESSAGES = 10
 
 def build_chat_prompt(
     question: str,
-    context_chunks: list[KnowledgeChunk],
+    context_chunks: list[KnowledgeDocument],
     history: list[ChatHistoryMessage] | None,
 ) -> str:
     context = "\n".join(

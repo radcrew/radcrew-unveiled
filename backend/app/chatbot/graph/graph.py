@@ -13,7 +13,7 @@ from app.chatbot.graph.nodes import (
     route_feedback_or_rag,
 )
 from app.chatbot.graph.state import ChatState
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatRequest
 
 
@@ -41,7 +41,7 @@ _compiled_routing_graph = build_chat_graph().compile()
 
 def run_chat_stream(
     body: ChatRequest,
-    knowledge_chunks: list[KnowledgeChunk],
+    knowledge_chunks: list[KnowledgeDocument],
 ) -> Iterator[str]:
 
     result = _compiled_routing_graph.invoke(

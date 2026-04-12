@@ -14,16 +14,6 @@ class KnowledgeDocument:
 
 
 @dataclass(frozen=True)
-class KnowledgeChunk:
-    id: str
-    title: str
-    text: str
-    tokens: list[str]
-    url: str | None = None
-    score: float | None = None
-
-
-@dataclass(frozen=True)
 class GithubRepoSource:
     owner: str
     repo: str

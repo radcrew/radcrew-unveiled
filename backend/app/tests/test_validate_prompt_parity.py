@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 from app.chatbot.rag.prompt import build_chat_prompt
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatHistoryMessage
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -26,7 +26,7 @@ def _load_parity_module():
 
 def test_rebuild_user_prompt_matches_build_chat_prompt() -> None:
     vpp = _load_parity_module()
-    chunks = [KnowledgeChunk(id="c1", title="Guide", text="Team A owns X.", tokens=[])]
+    chunks = [KnowledgeDocument(id="c1", title="Guide", text="Team A owns X.")]
     history = [ChatHistoryMessage(role="user", content="Hello there")]
     expected = build_chat_prompt("Who maintains X?", chunks, history)
 
@@ -58,7 +58,7 @@ def test_rebuild_empty_context_and_history() -> None:
 
 
 def test_cli_exits_zero_on_valid_jsonl(tmp_path: Path) -> None:
-    chunks = [KnowledgeChunk(id="c1", title="Guide", text="Body", tokens=[])]
+    chunks = [KnowledgeDocument(id="c1", title="Guide", text="Body")]
     expected = build_chat_prompt("Q?", chunks, None)
     row = {
         "question": "Q?",

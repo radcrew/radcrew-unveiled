@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.chatbot.huggingface.tool_routing import ParsedToolCall
 from app.main import app
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 
 
 def _stream_content(response_text: str) -> str:
@@ -52,7 +52,7 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
 
 
 @patch("app.chatbot.feedback.tool_branch.route_send_feedback_call", return_value=None)
-@patch("app.chatbot.rag.stream.retrieve_relevant_chunks", return_value=[])
+@patch("app.chatbot.rag.stream.retrieve_relevant_chunks", return_value=([], 0.0))
 def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
     _mock_retrieve: object, _mock_route: object, client: TestClient
 ) -> None:
@@ -65,7 +65,13 @@ def test_chat_retrieval_fallback_returns_200_with_fallback_copy(
 
 @patch("app.chatbot.rag.stream.generate_answer", return_value=iter(["Your name is Macho."]))
 @patch("app.chatbot.rag.stream.get_settings")
-@patch("app.chatbot.rag.stream.retrieve_relevant_chunks", return_value=[])
+@patch(
+    "app.chatbot.rag.stream.retrieve_relevant_chunks",
+    return_value=(
+        [KnowledgeDocument(id="c1", title="T", text="ctx")],
+        0.9,
+    ),
+)
 @patch("app.chatbot.feedback.tool_branch.route_send_feedback_call", return_value=None)
 def test_chat_with_history_does_not_force_retrieval_fallback(
     _mock_route: object,
@@ -96,7 +102,7 @@ def test_chat_with_history_does_not_force_retrieval_fallback(
     assert '"type": "done"' in r.text
 
 
-@patch("app.api.chat.chat.generate_chat_stream", side_effect=RuntimeError("no provider"))
+@patch("app.api.chat.chatbot.generate_chat_stream", side_effect=RuntimeError("no provider"))
 def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello world"})
     assert r.status_code == 200
@@ -112,16 +118,10 @@ def test_chat_missing_hf_key_returns_200_with_config_message(
     mock_settings: MagicMock,
     client: TestClient,
 ) -> None:
-    mock_retrieve.return_value = [
-        KnowledgeChunk(
-            id="c1",
-            title="Title",
-            text="snippet text",
-            tokens=["hello", "world"],
-            score=2.0,
-            url=None,
-        )
-    ]
+    mock_retrieve.return_value = (
+        [KnowledgeDocument(id="c1", title="Title", text="snippet text", url=None)],
+        0.9,
+    )
     cfg = MagicMock()
     cfg.HUGGINGFACE_API_KEY = None
     mock_settings.return_value = cfg

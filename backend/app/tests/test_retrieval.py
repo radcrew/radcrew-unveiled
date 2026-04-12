@@ -1,15 +1,12 @@
+from unittest.mock import patch
+
 from app.chatbot.rag.retrieval import (
-    RETRIEVAL_FALLBACK_SCORE_THRESHOLD,
+    RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD,
     build_knowledge_chunks,
     retrieval_fallback_needed,
     retrieve_relevant_chunks,
-    tokenize,
 )
-from app.chatbot.knowledge.models import KnowledgeChunk, KnowledgeDocument
-
-
-def test_tokenize_filters_single_character_tokens():
-    assert tokenize("a bc de") == ["bc", "de"]
+from app.chatbot.knowledge.models import KnowledgeDocument
 
 
 def test_one_chunk_per_document():
@@ -21,8 +18,7 @@ def test_one_chunk_per_document():
     chunks = build_knowledge_chunks([doc])
     assert len(chunks) == 1
     assert chunks[0].id == "x:0"
-    assert chunks[0].score is None
-    assert "sentence" in chunks[0].tokens
+    assert chunks[0].text == doc.text
 
 
 def test_one_chunk_per_document_keeps_full_text():
@@ -31,42 +27,47 @@ def test_one_chunk_per_document_keeps_full_text():
     chunks = build_knowledge_chunks([doc])
     assert len(chunks) == 1
     assert chunks[0].text == text
-    assert "first" in chunks[0].tokens and "third" in chunks[0].tokens
 
 
-def test_retrieve_sorts_by_score_and_respects_limit():
+def test_skips_empty_text_documents():
+    doc = KnowledgeDocument(id="e", title="E", text="   ")
+    assert build_knowledge_chunks([doc]) == []
+
+
+@patch("app.chatbot.rag.retrieval._semantic_similarities")
+def test_retrieve_sorts_by_similarity_and_respects_limit(mock_sim: object) -> None:
     docs = [
         KnowledgeDocument(id="a", title="A", text="alpha beta gamma delta."),
         KnowledgeDocument(id="b", title="B", text="unrelated text."),
     ]
-    chunks = build_knowledge_chunks(docs)
-    out = retrieve_relevant_chunks(chunks, "alpha beta", limit=1)
+    mock_sim.return_value = [0.9, 0.1]
+    corpus = build_knowledge_chunks(docs)
+    out, top = retrieve_relevant_chunks(corpus, "alpha beta", limit=1)
     assert len(out) == 1
     assert out[0].title == "A"
+    assert top == 0.9
 
 
-def test_retrieve_empty_when_query_has_no_tokens():
+@patch("app.chatbot.rag.retrieval._semantic_similarities")
+def test_retrieve_empty_when_no_positive_scores(mock_sim: object) -> None:
     doc = KnowledgeDocument(id="a", title="A", text="hello world.")
-    chunks = build_knowledge_chunks([doc])
-    assert retrieve_relevant_chunks(chunks, "a") == []
+    mock_sim.return_value = [0.0]
+    corpus = build_knowledge_chunks([doc])
+    out, top = retrieve_relevant_chunks(corpus, "hello", limit=5)
+    assert out == []
+    assert top == 0.0
 
 
-def test_retrieval_fallback_threshold_boundary():
-    low = KnowledgeChunk(
-        id="1",
-        title="t",
-        text="x",
-        tokens=["hello"],
-        score=1.19,
-    )
-    high = KnowledgeChunk(
-        id="2",
-        title="t",
-        text="x",
-        tokens=["hello"],
-        score=1.2,
-    )
-    assert retrieval_fallback_needed([low]) is True
-    assert retrieval_fallback_needed([high]) is False
-    assert retrieval_fallback_needed([]) is True
-    assert RETRIEVAL_FALLBACK_SCORE_THRESHOLD == 1.2
+def test_retrieve_empty_when_query_blank() -> None:
+    doc = KnowledgeDocument(id="a", title="A", text="hello world.")
+    corpus = build_knowledge_chunks([doc])
+    out, top = retrieve_relevant_chunks(corpus, "   ", limit=5)
+    assert out == []
+    assert top == 0.0
+
+
+def test_retrieval_fallback_threshold() -> None:
+    assert retrieval_fallback_needed(0.0) is True
+    assert retrieval_fallback_needed(0.34) is True
+    assert retrieval_fallback_needed(RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD) is False
+    assert retrieval_fallback_needed(0.99) is False

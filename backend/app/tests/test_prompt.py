@@ -1,20 +1,18 @@
 from app.chatbot.rag.prompt import build_chat_prompt
-from app.chatbot.knowledge.models import KnowledgeChunk
+from app.chatbot.knowledge.models import KnowledgeDocument
 
 
 def test_build_chat_prompt_joins_sources_and_question():
     chunks = [
-        KnowledgeChunk(
+        KnowledgeDocument(
             id="a:0",
             title="About",
             text="We build things.",
-            tokens=["we", "build"],
         ),
-        KnowledgeChunk(
+        KnowledgeDocument(
             id="b:0",
             title="Contact",
             text="Email us.",
-            tokens=["email", "us"],
             url="https://radcrew.org/contact",
         ),
     ]
