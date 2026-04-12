@@ -40,11 +40,6 @@ class Settings(BaseSettings):
     GITHUB_KB_BRANCH: str | None = None
     GITHUB_KB_PATH: str | None = None
     GITHUB_KB_PRIVATE_REPO: bool = Field(default=False)
-    # Contentful Content Delivery API (same space/token as frontend; set in backend/.env for RAG).
-    CONTENTFUL_SPACE_ID: str | None = None
-    CONTENTFUL_DELIVERY_TOKEN: str | None = None
-    CONTENTFUL_ENVIRONMENT: str = Field(default="master")
-    CONTENTFUL_RAG_CONTENT_TYPES: str = Field(default="engineers")
     # Company feedback via Web3Forms (https://web3forms.com): POST JSON to their API with access_key.
     # When WEB3FORMS_ACCESS_KEY is unset, sending is disabled. Inbox is configured in the Web3Forms dashboard.
     COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
@@ -69,16 +64,6 @@ class Settings(BaseSettings):
             stripped = github_token.strip()
             merged["GITHUB_KB_TOKEN"] = stripped if stripped else None
         for key in ("GITHUB_KB_BRANCH", "GITHUB_KB_PATH"):
-            value = merged.get(key)
-            if isinstance(value, str):
-                stripped = value.strip()
-                merged[key] = stripped if stripped else None
-        
-        cf_env = merged.get("CONTENTFUL_ENVIRONMENT")
-        if isinstance(cf_env, str):
-            stripped = cf_env.strip()
-            merged["CONTENTFUL_ENVIRONMENT"] = stripped if stripped else "master"
-        for key in ("CONTENTFUL_SPACE_ID", "CONTENTFUL_DELIVERY_TOKEN"):
             value = merged.get(key)
             if isinstance(value, str):
                 stripped = value.strip()
@@ -123,12 +108,6 @@ class Settings(BaseSettings):
             stripped = value.strip()
             return stripped if stripped else None
         return value
-
-    @field_validator("CONTENTFUL_RAG_CONTENT_TYPES")
-    @classmethod
-    def contentful_rag_content_types_strip(cls, value: str) -> str:
-        s = value.strip()
-        return s if s else "engineers"
 
     @model_validator(mode="after")
     def validate_github_kb_settings(self) -> Settings:

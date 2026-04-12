@@ -30,8 +30,8 @@ def build_chat_prompt(
         [
             "You are RadCrew's website assistant.",
             "Answer only using the conversation history and provided context sources.",
-            "For team-member questions, prioritize team profile details found in the loaded knowledge context (including GitHub markdown and Contentful entries).",
-            "For team-member answers, use Contentful engineer entries for short summary fields (name and role) and GitHub markdown files for detailed profile information.",
+            "For team-member questions, prioritize team profile details found in the loaded knowledge context (static site copy and GitHub markdown when configured).",
+            "For team-member answers, use GitHub markdown files for detailed profile information when present; otherwise rely on static knowledge in the context.",
             "Treat the first line of each GitHub team markdown file (a single Markdown heading: '# Name') as the canonical team-member name.",
             "When listing team members, include only people explicitly present in the context.",
             "Do not infer person names from source titles or file names; use names explicitly written in the source content.",

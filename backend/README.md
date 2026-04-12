@@ -1,6 +1,6 @@
 # RadCrew Unveiled — Backend (FAQ chatbot API)
 
-FastAPI service served with Uvicorn. It powers chat completion, retrieval (static copy, optional Contentful, optional GitHub Markdown), and related endpoints.
+FastAPI service served with Uvicorn. It powers chat completion, retrieval (static site copy and optional GitHub Markdown), and related endpoints.
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging Face token, optional GitHub / Contentful, etc.).
+Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging Face token, optional GitHub Markdown KB, etc.).
 
 ### Environment variables
 
@@ -50,8 +50,6 @@ Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging 
 - `GITHUB_KB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_KB_REPO_URL` is set; example: `main`)
 - `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
 - `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
-- `CONTENTFUL_SPACE_ID`, `CONTENTFUL_DELIVERY_TOKEN`, `CONTENTFUL_ENVIRONMENT`: Content Delivery API credentials (mirror the frontend `VITE_CONTENTFUL_*` values in `backend/.env` so the API can ingest entries at startup)
-- `CONTENTFUL_RAG_CONTENT_TYPES`: comma-separated Contentful content type ids to include in RAG (default `engineers`)
 
 ### Private GitHub repo knowledge setup
 
@@ -83,7 +81,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8787 --reload --reload-dir 
 ## How the chatbot API fits in
 
 - The browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL` in the frontend, default `http://localhost:8787`).
-- The API retrieves snippets from static site copy, optional Contentful entries, and optional GitHub Markdown.
+- The API retrieves snippets from static site copy and optional GitHub Markdown.
 - Hugging Face chat completion (with text-generation fallback) produces grounded answers.
 - Weak retrieval (with no prior conversation history) returns a safe fallback with contact guidance.
 

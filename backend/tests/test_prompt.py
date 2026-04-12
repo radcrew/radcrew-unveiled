@@ -40,5 +40,5 @@ def test_build_chat_prompt_includes_markdown_list_style_guidance():
     assert "Do not include URLs, links, href attributes, or markdown link syntax in the final answer." in out
     assert "Answer as briefly as possible and do not add extra details unless the user explicitly asks for them." in out
     assert "For direct questions, respond with a direct sentence only" in out
-    assert "use Contentful engineer entries for short summary fields" in out
+    assert "GitHub markdown files for detailed profile information" in out
     assert "first line of each GitHub team markdown file" in out and "canonical team-member name" in out
