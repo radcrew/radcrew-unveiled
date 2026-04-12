@@ -1,6 +1,6 @@
 import { Mail, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const ContactSection = () => {
@@ -10,7 +10,7 @@ const ContactSection = () => {
   return (
     <section id="contact" className="contact-shell" ref={ref}>
       <div className="content-max">
-        <Card className="rounded-2xl p-10 shadow-sm md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
+        <RadCard className="rounded-2xl p-10 shadow-sm md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
           <div className="max-w-xl">
             <p className="kicker mb-3">Start a project</p>
             <h2 className="section-heading mb-4">Tell us what you’re building.</h2>
@@ -34,7 +34,7 @@ const ContactSection = () => {
               We usually respond within one to two business days.
             </p>
           </div>
-        </Card>
+        </RadCard>
       </div>
     </section>
   );

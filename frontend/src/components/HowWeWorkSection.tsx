@@ -1,5 +1,5 @@
 import { Search, Hammer, Rocket, Handshake } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const steps = [
@@ -47,7 +47,7 @@ const HowWeWorkSection = () => {
         <ol className="how-step-grid">
           {steps.map(({ icon: Icon, phase, detail }, i) => (
             <li key={phase} className="relative flex min-h-0 flex-col">
-              <Card className="flex h-full flex-col p-6 shadow-sm">
+              <RadCard className="flex h-full flex-col p-6 shadow-sm">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
                   <span className="step-num">{i + 1}</span>
                   <div className="step-icon">
@@ -56,7 +56,7 @@ const HowWeWorkSection = () => {
                 </div>
                 <h3 className="mb-2 text-xl font-bold">{phase}</h3>
                 <p className="muted-p flex-1">{detail}</p>
-              </Card>
+              </RadCard>
             </li>
           ))}
         </ol>

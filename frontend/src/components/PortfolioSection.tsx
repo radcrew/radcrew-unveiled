@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { cn } from "@/lib/utils";
 import { portfolioProjects } from "@/lib/portfolio-data";
@@ -43,7 +43,7 @@ const PortfolioSection = () => {
             <div className="flex">
               {portfolioProjects.map((project) => (
                 <div key={project.id} className="portfolio-slide">
-                  <Card
+                  <RadCard
                     role="article"
                     className="mx-auto flex h-[24rem] w-full max-w-[17rem] flex-col overflow-hidden rounded-xl border-border p-0 shadow-sm sm:max-w-[19rem] md:max-w-[21rem] lg:max-w-[23rem]"
                   >
@@ -66,7 +66,7 @@ const PortfolioSection = () => {
                       <h3 className="portfolio-title">{project.title}</h3>
                       <p className="portfolio-desc">{project.achievement}</p>
                     </div>
-                  </Card>
+                  </RadCard>
                 </div>
               ))}
             </div>

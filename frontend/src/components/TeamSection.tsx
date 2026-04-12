@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { RadCard } from "@/components/ui/rad-card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { isContentfulConfigured } from "@/lib/contentful";
@@ -67,7 +68,7 @@ const TeamSection = () => {
                 className="group block h-full"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <Card className="h-full p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out active:scale-[0.98]">
+                <RadCard className="h-full p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out active:scale-[0.98]">
                   <div className="team-avatar">{member.initials}</div>
                   <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
                   <p className="mb-4 text-base text-muted-foreground">{member.shortRole}</p>
@@ -77,7 +78,7 @@ const TeamSection = () => {
                   <div className="mt-6 flex items-center gap-1 text-sm font-medium text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     View profile <ArrowUpRight size={14} />
                   </div>
-                </Card>
+                </RadCard>
               </Link>
             ))}
           </div>

@@ -1,7 +1,8 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadCard } from "@/components/ui/rad-card";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,7 +13,7 @@ const NotFound = () => {
 
   return (
     <div className="not-found-root">
-      <Card className="mx-auto w-full max-w-md text-center shadow-sm">
+      <RadCard className="mx-auto w-full max-w-md text-center shadow-sm">
         <CardHeader>
           <CardTitle className="text-4xl">404</CardTitle>
           <CardDescription className="text-base">Oops! Page not found</CardDescription>
@@ -22,7 +23,7 @@ const NotFound = () => {
             <Link to="/">Return to Home</Link>
           </Button>
         </CardFooter>
-      </Card>
+      </RadCard>
     </div>
   );
 };
