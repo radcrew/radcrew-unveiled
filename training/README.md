@@ -88,4 +88,4 @@ For rows that include `question`, `context_chunks`, and optional `history` (see 
 python training/scripts/validate_prompt_parity.py path/to/dataset.jsonl
 ```
 
-Use `--verbose` for a unified diff on mismatch, `--max-rows N` to scan only the first N JSON objects, and `--strict` to fail if an auditable row has no stored user content. Backend tests in `backend/tests/test_validate_prompt_parity.py` cover the same contract.
+Use `--verbose` for a unified diff on mismatch, `--max-rows N` to scan only the first N JSON objects, and `--strict` to fail if an auditable row has no stored user content. Backend tests in `backend/app/tests/test_validate_prompt_parity.py` cover the same contract.

@@ -85,8 +85,8 @@ def rebuild_user_prompt(row: dict[str, Any]) -> str:
         raise ValueError("'history' must be an array when present")
 
     ensure_backend_on_path()
-    from app.chat.rag.prompt import build_chat_prompt
-    from app.knowledge.models import KnowledgeChunk
+    from app.chatbot.rag.prompt import build_chat_prompt
+    from app.chatbot.knowledge.models import KnowledgeChunk
     from app.schemas import ChatHistoryMessage
 
     chunks: list[KnowledgeChunk] = []
