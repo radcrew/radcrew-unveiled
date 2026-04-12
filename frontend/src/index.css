@@ -121,15 +121,15 @@
   }
 
   .team-member-root {
-    @apply flex min-h-screen min-h-dvh flex-col justify-center py-10 sm:py-12 md:py-14 lg:py-16;
+    @apply flex min-h-screen min-h-dvh flex-col justify-center pb-10 pt-24 sm:pb-12 sm:pt-28 md:pb-14 md:pt-28 lg:pb-16 lg:pt-28;
   }
 
   .team-member-not-found {
-    @apply content-max section-padding flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4;
+    @apply content-max section-padding flex min-h-screen min-h-dvh flex-col items-center justify-center gap-4 pt-24;
   }
 
   .not-found-root {
-    @apply flex min-h-screen min-h-dvh flex-col items-center justify-center bg-muted section-padding py-10;
+    @apply flex min-h-screen min-h-dvh flex-col items-center justify-center bg-muted section-padding pb-10 pt-24;
   }
 
   .workspace-shell {
@@ -211,11 +211,20 @@
   }
 
   .nav-shell {
-    @apply fixed left-0 right-0 top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md;
+    @apply fixed inset-x-0 top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md;
   }
 
   .nav-inner {
     @apply content-max section-padding flex h-16 items-center justify-between;
+  }
+
+  /* Fixed header offset for in-page anchors / scrollIntoView */
+  #services,
+  #how-we-work,
+  #portfolio,
+  #team,
+  #contact {
+    scroll-margin-top: 5.5rem;
   }
 
   .service-icon-wrap {
