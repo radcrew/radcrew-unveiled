@@ -6,7 +6,7 @@ FastAPI service served with Uvicorn. It powers chat completion, retrieval (stati
 
 - `app/main.py` — FastAPI app factory wiring (routers + middleware).
 - `app/api/` — HTTP routers (`health`, `chat`).
-- `app/chatbot/` — Assistant logic: `chatbot_logic.py` (state + lifespan + stream entry), `rag_service.py` and `langchain_service.py` (facades), plus `knowledge/`, `rag/`, `graph/`, `huggingface/`, `feedback/`, `cache/`.
+- `app/chatbot/` — Assistant logic: `chat.py` (state + lifespan + stream entry), `rag_service.py` and `langchain_service.py` (facades), plus `knowledge/`, `rag/`, `graph/`, `huggingface/`, `feedback/`, `cache/`.
 - `app/core/` — `settings.py` (`Settings`, `get_settings`), `http.py` (CORS + rate limit), `logger.py`.
 - `app/tests/` — Pytest suite (`pytest.ini` uses `testpaths = app/tests`).
 

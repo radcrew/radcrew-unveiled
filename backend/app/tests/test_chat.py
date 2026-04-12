@@ -96,7 +96,7 @@ def test_chat_with_history_does_not_force_retrieval_fallback(
     assert '"type": "done"' in r.text
 
 
-@patch("app.api.chat.chatbot_logic.generate_chat_stream", side_effect=RuntimeError("no provider"))
+@patch("app.api.chat.chat.generate_chat_stream", side_effect=RuntimeError("no provider"))
 def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello world"})
     assert r.status_code == 200

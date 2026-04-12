@@ -8,7 +8,7 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
-from app.chatbot import chatbot_logic
+from app.chatbot import chat as chatbot
 from app.chatbot.messages import MSG_AI_UNAVAILABLE
 from app.schemas import ChatRequest
 
@@ -20,7 +20,7 @@ router = APIRouter(tags=["chat"])
 @router.post("/chat")
 def chat(body: ChatRequest) -> StreamingResponse:
     try:
-        answer_stream = chatbot_logic.generate_chat_stream(body, chatbot_logic.knowledge_chunks)
+        answer_stream = chatbot.generate_chat_stream(body, chatbot.knowledge_chunks)
     except Exception:
         logger.exception("POST /chat failed")
         answer_stream = iter([MSG_AI_UNAVAILABLE])
