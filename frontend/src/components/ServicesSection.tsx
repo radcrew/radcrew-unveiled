@@ -40,11 +40,7 @@ const ServicesSection = () => {
 
         <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
           {pillars.map(({ icon: Icon, title, description }) => (
-            <Card
-              key={title}
-              role="article"
-              className="p-8 transition-shadow duration-300 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5"
-            >
+            <Card key={title} role="article" className="p-8">
               <div className="service-icon-wrap">
                 <Icon className="h-7 w-7" strokeWidth={1.5} />
               </div>

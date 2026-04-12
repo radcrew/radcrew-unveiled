@@ -67,7 +67,7 @@ const TeamSection = () => {
                 className="group block h-full"
                 style={{ animationDelay: `${i * 100}ms` }}
               >
-                <Card className="h-full p-8 transition-all duration-300 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 active:scale-[0.98]">
+                <Card className="h-full p-8 transition-[transform,box-shadow,border-color] duration-300 ease-out active:scale-[0.98]">
                   <div className="team-avatar">{member.initials}</div>
                   <h3 className="mb-1 text-xl font-bold">{member.name}</h3>
                   <p className="mb-4 text-base text-muted-foreground">{member.shortRole}</p>
