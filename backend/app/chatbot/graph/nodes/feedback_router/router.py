@@ -10,10 +10,8 @@ def route_feedback_or_rag(state: ChatState) -> Literal["feedback", "rag"]:
 
 def feedback_router_node(state: ChatState) -> dict[str, object]:
     body = state["body"]
-    message = body.message
-    history = body.history or []
     
-    routing_msgs = build_feedback_routing_messages(message, history)
+    routing_msgs = build_feedback_routing_messages(body.message)
     feedback_call = route_send_feedback_call(routing_msgs)
 
     if feedback_call is not None:
