@@ -9,12 +9,11 @@ from app.chatbot.cache.response import (
     prompt_cache_key,
     stream_answer_with_cache,
 )
-from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT, MSG_MISSING_HF_KEY
+from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
 from app.chatbot.rag.prompt import build_chat_prompt
 from app.chatbot.rag.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
-from app.core.settings import get_settings
 from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatRequest
 
@@ -23,7 +22,6 @@ def stream_rag_chat_answer(
     body: ChatRequest,
     knowledge_chunks: list[KnowledgeDocument],
 ) -> Iterator[str]:
-    settings = get_settings()
     message = body.message
     history = body.history or []
     recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
@@ -41,9 +39,6 @@ def stream_rag_chat_answer(
 
     if retrieval_fallback_needed(top_similarity) and not history:
         return get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)
-
-    if not settings.HUGGINGFACE_API_KEY:
-        return get_text_chunk_stream(MSG_MISSING_HF_KEY)
 
     prompt = build_chat_prompt(message, relevant_chunks, history)
 

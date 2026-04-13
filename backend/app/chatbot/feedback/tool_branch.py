@@ -30,9 +30,6 @@ def classify_feedback_route(
     the model routed to feedback and arguments contain a usable ``message`` string.
     Otherwise ``None`` so the RAG path should run.
     """
-    settings = get_settings()
-    if not settings.HUGGINGFACE_API_KEY:
-        return None
 
     try:
         routing_msgs = build_feedback_routing_messages(message, history)
