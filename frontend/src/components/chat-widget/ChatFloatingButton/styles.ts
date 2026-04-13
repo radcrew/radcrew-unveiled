@@ -6,5 +6,5 @@ export const buttonFixed = cn(
   "justify-start gap-2 text-left text-muted-foreground hover:bg-muted",
 );
 
-export const icon = "h-4 w-4 shrink-0";
-export const placeholder = "truncate text-sm";
+export const icon = "shrink-0";
+export const placeholder = "text-sm";

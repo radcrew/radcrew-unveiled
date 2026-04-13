@@ -85,11 +85,11 @@ def rebuild_user_prompt(row: dict[str, Any]) -> str:
         raise ValueError("'history' must be an array when present")
 
     ensure_backend_on_path()
-    from app.chat.rag.prompt import build_chat_prompt
-    from app.knowledge.models import KnowledgeChunk
+    from app.chatbot.rag.prompt import build_chat_prompt
+    from app.chatbot.knowledge.models import KnowledgeDocument
     from app.schemas import ChatHistoryMessage
 
-    chunks: list[KnowledgeChunk] = []
+    chunks: list[KnowledgeDocument] = []
     for i, raw in enumerate(chunks_raw):
         if not isinstance(raw, dict):
             raise ValueError(f"context_chunks[{i}] must be an object")
@@ -98,22 +98,15 @@ def rebuild_user_prompt(row: dict[str, Any]) -> str:
         if not isinstance(title, str) or not isinstance(text, str):
             raise ValueError(f"context_chunks[{i}] needs string 'title' and 'text'")
         cid = raw.get("id")
-        tokens_raw = raw.get("tokens")
-        tokens = list(tokens_raw) if isinstance(tokens_raw, list) else []
         url = raw.get("url")
         if url is not None and not isinstance(url, str):
             raise ValueError(f"context_chunks[{i}].url must be a string or null")
-        score = raw.get("score")
-        if score is not None and not isinstance(score, int | float):
-            raise ValueError(f"context_chunks[{i}].score must be a number or null")
         chunks.append(
-            KnowledgeChunk(
+            KnowledgeDocument(
                 id=str(cid) if cid is not None else f"dataset-chunk-{i}",
                 title=title,
                 text=text,
-                tokens=[str(t) for t in tokens],
                 url=url,
-                score=float(score) if score is not None else None,
             )
         )
 

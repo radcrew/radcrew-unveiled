@@ -18,8 +18,8 @@ from peft import LoraConfig, PeftModel, prepare_model_for_kbit_training
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
 
-# Match backend/app/config.py default for HUGGINGFACE_MODEL.
-DEFAULT_BASE_MODEL = "Qwen/Qwen2.5-1.5B-Instruct"
+# Match backend/app/core/settings.py default for HUGGINGFACE_MODEL.
+DEFAULT_BASE_MODEL = "meta-llama/Meta-Llama-3-8B-Instruct"
 
 # Attention + MLP projections for Qwen2 / Qwen2.5 style models.
 DEFAULT_LORA_TARGETS = ("q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj")
@@ -247,7 +247,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     if args.push_to_hub:
-        token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_API_KEY")
+        token = os.environ.get("HUGGINGFACE_API_KEY")
         print(f"Pushing adapter to {args.hub_model_id} …")
         trainer.model.push_to_hub(args.hub_model_id, private=args.hub_private, token=token)
         tokenizer.push_to_hub(args.hub_model_id, private=args.hub_private, token=token)
