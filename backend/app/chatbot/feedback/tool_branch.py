@@ -10,48 +10,11 @@ from typing import Any
 from app.core.settings import get_settings
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
-from app.chatbot.huggingface.tool_routing import (
-    build_feedback_routing_messages,
-    route_send_feedback_call,
-)
+
 from app.chatbot.huggingface.tool_routing.types import ParsedToolCall
 from app.chatbot.messages import MSG_FEEDBACK_SEND_FAILED, MSG_FEEDBACK_THANKS
-from app.schemas import ChatHistoryMessage
 
 logger = logging.getLogger(__name__)
-
-
-def classify_feedback_route(
-    message: str,
-    history: list[ChatHistoryMessage],
-) -> ParsedToolCall | None:
-    """
-    Run feedback-intent routing; return a ``send_feedback`` tool call only when
-    the model routed to feedback and arguments contain a usable ``message`` string.
-    Otherwise ``None`` so the RAG path should run.
-    """
-
-    try:
-        routing_msgs = build_feedback_routing_messages(message, history)
-        feedback_call = route_send_feedback_call(routing_msgs)
-    except Exception as exc:
-        logger.exception("[chat] tool routing failed: %s", exc)
-        return None
-
-    if feedback_call is None:
-        return None
-
-    args: dict[str, Any] | None = None
-    try:
-        parsed = json.loads(feedback_call.arguments)
-        args = parsed if isinstance(parsed, dict) else None
-    except json.JSONDecodeError:
-        logger.warning("[chat] could not parse send_feedback arguments as JSON")
-
-    if args is None or not isinstance(args.get("message"), str):
-        return None
-
-    return feedback_call
 
 
 def stream_feedback_tool_response(feedback_call: ParsedToolCall) -> Iterator[str]:

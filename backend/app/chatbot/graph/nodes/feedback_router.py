@@ -1,7 +1,7 @@
 from typing import Literal
 
 from app.chatbot.graph.state import ChatState
-from app.chatbot.feedback.tool_branch import classify_feedback_route
+from app.chatbot.huggingface.tool_routing import build_feedback_routing_messages, route_send_feedback_call
 
 
 def route_feedback_or_rag(state: ChatState) -> Literal["feedback", "rag"]:
@@ -13,9 +13,11 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
     body = state["body"]
     message = body.message
     history = body.history or []
-    call = classify_feedback_route(message, history)
+    
+    routing_msgs = build_feedback_routing_messages(message, history)
+    feedback_call = route_send_feedback_call(routing_msgs)
 
-    if call is not None:
-        return {"route": "feedback", "feedback_call": call}
+    if feedback_call is not None:
+        return {"route": "feedback", "feedback_call": feedback_call}
 
     return {"route": "rag"}
