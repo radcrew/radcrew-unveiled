@@ -8,7 +8,7 @@ from typing import Any
 from app.core.settings import get_settings
 from app.chatbot.huggingface.common import providers_to_try
 
-from .completion import feedback_route_completion, feedback_route_messages
+from .completion import feedback_route_completion
 from .parse import (
     RouteReplyUnparseable,
     extract_message_content,
@@ -34,14 +34,13 @@ def route_send_feedback_call(messages: list[dict[str, Any]]) -> ParsedToolCall |
     access_token = settings.HUGGINGFACE_API_KEY
     providers = providers_to_try(settings.HUGGINGFACE_PROVIDER)
 
-    messages_for_route = feedback_route_messages(messages)
     for provider in providers:
         for use_json_object_format in (True, False):
             try:
                 resp = feedback_route_completion(
                     model,
                     access_token,
-                    messages_for_route,
+                    messages,
                     provider,
                     use_json_object_format,
                 )

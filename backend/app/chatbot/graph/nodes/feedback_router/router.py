@@ -9,7 +9,6 @@ def route_feedback_or_rag(state: ChatState) -> Literal["feedback", "rag"]:
 
 
 def feedback_router_node(state: ChatState) -> dict[str, object]:
-    """Classify user message as feedback tool vs general chat (RAG)."""
     body = state["body"]
     message = body.message
     history = body.history or []

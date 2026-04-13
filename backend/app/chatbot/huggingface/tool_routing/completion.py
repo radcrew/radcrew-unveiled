@@ -11,13 +11,6 @@ from huggingface_hub.inference._generated.types.chat_completion import (
 
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
 
-from .constants import _FEEDBACK_ROUTE_REPLY_SUFFIX
-
-
-def feedback_route_messages(base: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Append the user instruction that asks for a ``tool_call`` JSON object."""
-    return [*base, {"role": "user", "content": _FEEDBACK_ROUTE_REPLY_SUFFIX}]
-
 
 def feedback_route_completion(
     model: str,
