@@ -20,13 +20,13 @@ from app.schemas import ChatRequest
 def build_chat_graph() -> StateGraph:
     builder = StateGraph(ChatState)
 
-    builder.add_node("classify", feedback_router_node)
+    builder.add_node("route", feedback_router_node)
     builder.add_node("feedback", feedback_handler_node)
     builder.add_node("rag", rag_answer_node)
 
-    builder.add_edge(START, "classify")
+    builder.add_edge(START, "route")
     builder.add_conditional_edges(
-        "classify",
+        "route",
         route_feedback_or_rag,
         {"feedback": "feedback", "rag": "rag"},
     )
