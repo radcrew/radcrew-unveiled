@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable
-
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,15 +11,14 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
+from app.core.lifespan import create_lifespan
+from app.chatbot.chat import set_knowledge_chunks
 
-def create_http_app(
-    *,
-    frontend_origin: str,
-    lifespan: Callable[[FastAPI], AsyncIterator[None]],
-) -> FastAPI:
+
+def create_http_app(frontend_origin: str) -> FastAPI:
     limiter = Limiter(key_func=get_remote_address, default_limits=["25/minute"])
 
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(lifespan=create_lifespan(set_knowledge_chunks))
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
