@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
-
 from langgraph.graph import END, START, StateGraph
 
 from app.chatbot.graph.nodes import (
@@ -13,8 +11,6 @@ from app.chatbot.graph.nodes import (
     route_feedback_or_rag,
 )
 from app.chatbot.graph.state import ChatState
-from app.chatbot.knowledge.models import KnowledgeDocument
-from app.schemas import ChatRequest
 
 
 def build_chat_graph() -> StateGraph:
@@ -36,18 +32,4 @@ def build_chat_graph() -> StateGraph:
     return builder
 
 
-_compiled_routing_graph = build_chat_graph().compile()
-
-
-def run_chat_stream(
-    body: ChatRequest,
-    knowledge_chunks: list[KnowledgeDocument],
-) -> Iterator[str]:
-
-    result = _compiled_routing_graph.invoke(
-        {
-            "body": body,
-            "knowledge_chunks": knowledge_chunks,
-        }
-    )
-    return result["output_stream"]
+chat_graph = build_chat_graph().compile()

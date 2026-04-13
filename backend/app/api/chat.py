@@ -20,7 +20,7 @@ router = APIRouter(tags=["chat"])
 @router.post("/chat")
 def chat(body: ChatRequest) -> StreamingResponse:
     try:
-        answer_stream = chatbot.generate_chat_stream(body, chatbot.knowledge_chunks)
+        answer_stream = chatbot.generate_chat_stream(body)
     except Exception:
         logger.exception("POST /chat failed")
         answer_stream = iter([MSG_AI_UNAVAILABLE])
