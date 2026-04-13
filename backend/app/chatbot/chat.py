@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 from app.chatbot.knowledge.models import KnowledgeDocument
-from app.chatbot.graph.graph import chat_graph
+from app.chatbot.graph.build import chat_graph
 from app.schemas import ChatRequest
 
 knowledge_chunks: list[KnowledgeDocument] = []
