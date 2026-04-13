@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useEngineerMember } from "@/hooks/useEngineerMember";
 import { isContentfulConfigured } from "@/lib/contentful";
 
@@ -11,9 +12,9 @@ const TeamMember = () => {
     return (
       <div className="team-member-not-found">
         <p className="text-muted-foreground">Contentful is not configured.</p>
-        <Link to="/" className="text-sm font-medium text-accent hover:underline">
-          ← Back home
-        </Link>
+        <Button variant="link" asChild className="h-auto p-0 text-sm font-medium text-accent">
+          <Link to="/">← Back home</Link>
+        </Button>
       </div>
     );
   }
@@ -41,9 +42,9 @@ const TeamMember = () => {
     return (
       <div className="team-member-not-found">
         <p className="text-destructive">{error instanceof Error ? error.message : "Something went wrong."}</p>
-        <Link to="/" className="text-sm font-medium text-accent hover:underline">
-          ← Back home
-        </Link>
+        <Button variant="link" asChild className="h-auto p-0 text-sm font-medium text-accent">
+          <Link to="/">← Back home</Link>
+        </Button>
       </div>
     );
   }
@@ -52,9 +53,9 @@ const TeamMember = () => {
     return (
       <div className="team-member-not-found">
         <p className="text-muted-foreground">Member not found.</p>
-        <Link to="/" className="text-sm font-medium text-accent hover:underline">
-          ← Back home
-        </Link>
+        <Button variant="link" asChild className="h-auto p-0 text-sm font-medium text-accent">
+          <Link to="/">← Back home</Link>
+        </Button>
       </div>
     );
   }
@@ -67,29 +68,28 @@ const TeamMember = () => {
     <div className="team-member-root">
       <div className="content-max section-padding w-full">
         <div className="w-full max-w-3xl pt-16 text-left">
-          <Link to="/" className="back-link">
-            <ArrowLeft size={16} /> Back to home
-          </Link>
+          <Button variant="ghost" asChild className="back-link h-auto justify-start gap-2 px-0 font-normal hover:bg-transparent">
+            <Link to="/">
+              <ArrowLeft size={16} /> Back to home
+            </Link>
+          </Button>
 
           <div className="reveal">
             <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-2xl font-bold text-accent">
               {member.initials}
             </div>
 
-            <h1 className="mb-2 text-4xl font-bold leading-tight md:text-5xl">{member.name}</h1>
+            <h1 className="mb-2 text-3xl font-bold leading-tight md:text-4xl">{member.name}</h1>
             <div className="mb-8 space-y-4">
               <p className="font-medium text-accent">{member.role}</p>
               {member.website && (
                 <p>
-                  <a
-                    href={member.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="profile-external-link"
-                  >
-                    Profile & work
-                    <ExternalLink className="h-4 w-4 opacity-70" aria-hidden />
-                  </a>
+                  <Button variant="link" asChild className="profile-external-link h-auto gap-2 p-0">
+                    <a href={member.website} target="_blank" rel="noopener noreferrer">
+                      Profile & work
+                      <ExternalLink className="h-4 w-4 opacity-70" aria-hidden />
+                    </a>
+                  </Button>
                 </p>
               )}
             </div>

@@ -1,10 +1,16 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { streamChatMessage } from "@/lib/chatbot-api";
 import { ChatFloatingButton } from "./ChatFloatingButton";
 import { ChatPanel } from "./ChatPanel";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
 
+/** Matches `h-12` on the floating chat control. */
+const CHAT_FLOAT_BUTTON_PX = 48;
+
 export const ChatWidget = () => {
+  const location = useLocation();
+  const [fixedBottomPx, setFixedBottomPx] = useState(24);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState("");
@@ -12,6 +18,26 @@ export const ChatWidget = () => {
   const [streamStarted, setStreamStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (location.pathname !== "/") {
+      setFixedBottomPx(24);
+      return;
+    }
+    const footer = document.getElementById("footer");
+    if (!footer) {
+      setFixedBottomPx(24);
+      return;
+    }
+    const update = () => {
+      const h = footer.offsetHeight;
+      setFixedBottomPx(Math.max(8, h / 2 - CHAT_FLOAT_BUTTON_PX / 2));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(footer);
+    return () => ro.disconnect();
+  }, [location.pathname]);
 
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -86,7 +112,7 @@ export const ChatWidget = () => {
 
   return (
     <>
-      <ChatFloatingButton onOpen={() => setOpen(true)} />
+      <ChatFloatingButton onOpen={() => setOpen(true)} fixedBottomPx={fixedBottomPx} />
       <ChatPanel
         open={open}
         onOpenChange={setOpen}

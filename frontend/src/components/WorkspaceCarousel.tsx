@@ -1,7 +1,8 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { ScrollDriven } from "@/components/ScrollDriven";
+import { RadButton } from "@/components/ui/rad-button";
 
 import workspace1 from "@/assets/workspace-1.jpg";
 import workspace2 from "@/assets/workspace-2.jpg";
@@ -15,19 +16,18 @@ const slides = [
 
 const WorkspaceCarousel = () => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "center" });
-  const ref = useScrollReveal();
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
-    <section id="workspace" className="workspace-shell" ref={ref}>
-      <div className="content-max section-padding mb-10">
+    <section id="workspace" className="workspace-shell">
+      <ScrollDriven className="content-max section-padding mb-10">
         <p className="kicker mb-3">Where We Work</p>
         <h2 className="section-heading">Our workspace.</h2>
-      </div>
+      </ScrollDriven>
 
-      <div className="relative">
+      <ScrollDriven className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {slides.map((slide, i) => (
@@ -46,14 +46,28 @@ const WorkspaceCarousel = () => {
         </div>
 
         <div className="mt-8 flex justify-center gap-3">
-          <button type="button" onClick={scrollPrev} className="carousel-btn" aria-label="Previous slide">
+          <RadButton
+            type="button"
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+            onClick={scrollPrev}
+            aria-label="Previous slide"
+          >
             <ChevronLeft size={18} />
-          </button>
-          <button type="button" onClick={scrollNext} className="carousel-btn" aria-label="Next slide">
+          </RadButton>
+          <RadButton
+            type="button"
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+            onClick={scrollNext}
+            aria-label="Next slide"
+          >
             <ChevronRight size={18} />
-          </button>
+          </RadButton>
         </div>
-      </div>
+      </ScrollDriven>
     </section>
   );
 };

@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import { useEffect } from "react";
 import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
 import HowWeWorkSection from "@/components/HowWeWorkSection";
@@ -7,10 +7,16 @@ import TeamSection from "@/components/TeamSection";
 import ContactSection from "@/components/ContactSection";
 import FooterSection from "@/components/FooterSection";
 
+const HOME_SCROLL_CLASS = "home-scroll-sections";
+
 const Index = () => {
+  useEffect(() => {
+    document.documentElement.classList.add(HOME_SCROLL_CLASS);
+    return () => document.documentElement.classList.remove(HOME_SCROLL_CLASS);
+  }, []);
+
   return (
     <div className="min-h-screen">
-      <Navbar />
       <HeroSection />
       <ServicesSection />
       <HowWeWorkSection />

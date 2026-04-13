@@ -1,5 +1,7 @@
 import { Layers, Hexagon, Brain } from "lucide-react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { CardTitle } from "@/components/ui/card";
+import { ScrollDriven } from "@/components/ScrollDriven";
+import { RadCard } from "@/components/ui/rad-card";
 
 const pillars = [
   {
@@ -23,29 +25,31 @@ const pillars = [
 ];
 
 const ServicesSection = () => {
-  const ref = useScrollReveal();
-
   return (
-    <section id="services" className="services-shell" ref={ref}>
+    <section id="services" className="services-shell">
       <div className="content-stack">
-        <header className="section-block">
-          <p className="kicker">What we do</p>
-          <h2 className="section-heading max-w-2xl lg:max-w-3xl">Capabilities across stack, chain, and model.</h2>
-          <p className="section-prose">
-            One crew covers the surfaces users see, the systems behind them, and the on-chain and AI layers when your
-            roadmap goes there.
-          </p>
-        </header>
+        <ScrollDriven>
+          <header className="section-block">
+            <p className="kicker">What we do</p>
+            <h2 className="section-heading max-w-2xl lg:max-w-3xl">Capabilities across stack, chain, and model.</h2>
+            <p className="section-prose">
+              One crew covers the surfaces users see, the systems behind them, and the on-chain and AI layers when your
+              roadmap goes there.
+            </p>
+          </header>
+        </ScrollDriven>
 
         <div className="grid shrink-0 gap-6 md:grid-cols-3 md:gap-8">
           {pillars.map(({ icon: Icon, title, description }) => (
-            <article key={title} className="service-card">
-              <div className="service-icon-wrap">
-                <Icon className="h-7 w-7" strokeWidth={1.5} />
-              </div>
-              <h3 className="mb-3 text-xl font-bold">{title}</h3>
-              <p className="muted-p">{description}</p>
-            </article>
+            <ScrollDriven key={title}>
+              <RadCard role="article" className="h-full p-8">
+                <div className="service-icon-wrap">
+                  <Icon className="h-7 w-7" strokeWidth={1.5} />
+                </div>
+                <CardTitle className="mb-3 mt-0 text-xl font-bold">{title}</CardTitle>
+                <p className="muted-p">{description}</p>
+              </RadCard>
+            </ScrollDriven>
           ))}
         </div>
       </div>
