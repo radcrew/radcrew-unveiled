@@ -55,7 +55,7 @@ def _arguments_json(arguments: object) -> str | None:
     return None
 
 
-def parse_tool_call_from_route_reply(text: str) -> ParsedToolCall | None:
+def parse_tool_call_reply(text: str) -> ParsedToolCall | None:
     """
     Parse ``{"tool_call": null | {...}}`` from the assistant message (routing completion).
 
