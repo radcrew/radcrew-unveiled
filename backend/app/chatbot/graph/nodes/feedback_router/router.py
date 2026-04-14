@@ -2,8 +2,12 @@ import logging
 from typing import Literal
 
 from huggingface_hub import InferenceClient
-from huggingface_hub.inference._generated.types.chat_completion import ChatCompletionInputResponseFormatJSONObject
+from huggingface_hub.inference._generated.types.chat_completion import (
+    ChatCompletionInputResponseFormatJSONSchema,
+    ChatCompletionInputJSONSchema
+)
 
+from .message import FeedbackRoutingReply
 from app.core.settings import get_settings
 from app.chatbot.graph.state import ChatState
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
@@ -34,7 +38,15 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
             temperature=0,
             top_p=1,
             seed=DETERMINISTIC_GENERATION_SEED,
-            response_format=ChatCompletionInputResponseFormatJSONObject(type="json_object")
+            response_format=ChatCompletionInputResponseFormatJSONSchema(
+                type="json_schema",
+                json_schema=ChatCompletionInputJSONSchema(
+                    name="feedback_routing_reply",
+                    description="Route to feedback tool call or default to RAG.",
+                    schema=FeedbackRoutingReply.model_json_schema(),
+                    strict=True,
+                ),
+            )
         )
 
         feedback_call = parse_tool_call_reply(resp.choices[0].message.content)
