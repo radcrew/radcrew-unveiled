@@ -1,16 +1,16 @@
 from collections.abc import Iterator
 
-from app.chatbot.cache.response import (
-    get_cached_response,
-    prompt_cache_key,
-    stream_answer_with_cache,
-)
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.graph.state import ChatState
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
 from .prompt import build_chat_prompt
-from .retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
+from .retrieval import retrieve_relevant_chunks
+from .cache import (
+    get_cached_response,
+    prompt_cache_key,
+    stream_answer_with_cache,
+)
 
 def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     body = state["body"]
@@ -18,20 +18,20 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
 
     message = body.message
     history = body.history or []
-    recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
+    user_messages = [m.content for m in history if m.role == "user" and m.content]
 
     retrieval_query = message
-    if recent_user_turns:
-        recent_context = "\n".join(recent_user_turns[-2:])
-        retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
+    recent_context = "\n".join(user_messages[-2:])
+    retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
-    relevant_chunks, top_similarity = retrieve_relevant_chunks(
+    relevant_chunks = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
         5,
     )
 
-    if retrieval_fallback_needed(top_similarity) and not history:
+    print("relevant_chunks", relevant_chunks)
+    if not relevant_chunks and not history:
         return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
     prompt = build_chat_prompt(message, relevant_chunks, history)

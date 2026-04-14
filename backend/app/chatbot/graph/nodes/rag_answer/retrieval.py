@@ -64,35 +64,17 @@ def retrieve_relevant_chunks(
     query: str,
     limit: int = 5,
 ) -> tuple[list[KnowledgeDocument], float]:
-    """
-    Rank corpus by semantic similarity to ``query``, return top ``limit`` and the best score.
-    Second value is 0.0 when nothing is returned (no query, empty corpus, API error, or no positive scores).
-    """
-    q = query.strip()
-    if not q or not corpus:
-        return [], 0.0
-
-    try:
-        scores = _semantic_similarities(corpus, q)
-    except Exception as exc:
-        logger.warning("Semantic retrieval failed: %s", exc)
-        return [], 0.0
-
-    if len(scores) != len(corpus):
-        logger.warning("Semantic score count mismatch; skipping retrieval.")
-        return [], 0.0
+    scores = _semantic_similarities(corpus, query)
 
     ranked = sorted(enumerate(scores), key=lambda x: -x[1])
     positive = [(i, s) for i, s in ranked if s > 0.0]
     if not positive:
-        return [], 0.0
+        return []
 
     top_pairs = positive[:limit]
     top_similarity = top_pairs[0][1]
+    if top_similarity < RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD:
+        return []
+
     out = [corpus[i] for i, _ in top_pairs]
-    return out, top_similarity
-
-
-def retrieval_fallback_needed(top_similarity: float) -> bool:
-    """True when the chat handler should use the low-context fallback response."""
-    return top_similarity < RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD
+    return out
