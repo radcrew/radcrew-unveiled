@@ -39,6 +39,7 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
             seed=DETERMINISTIC_GENERATION_SEED,
             response_format=ChatCompletionInputResponseFormatJSONObject(type="json_object")
         )
+
         content = extract_message_content(resp)
         feedback_call = parse_tool_call_reply(content)
 

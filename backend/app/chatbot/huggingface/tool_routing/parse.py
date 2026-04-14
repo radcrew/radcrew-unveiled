@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import logging
 from typing import Any
 
-from app.chatbot.huggingface.common import safe_get
+from pydantic import ValidationError
 
+from app.chatbot.huggingface.common import safe_get
+from app.chatbot.graph.nodes.feedback_router.message import FeedbackRoutingReply
 from .types import ParsedToolCall
 
 logger = logging.getLogger(__name__)
@@ -42,19 +43,6 @@ def _strip_json_fences(text: str) -> str:
     return "\n".join(lines).strip()
 
 
-def _arguments_json(arguments: object) -> str | None:
-    if isinstance(arguments, dict):
-        return json.dumps(arguments)
-
-    if isinstance(arguments, str):
-        return arguments
-
-    if arguments is None:
-        return "{}"
-
-    return None
-
-
 def parse_tool_call_reply(text: str) -> ParsedToolCall | None:
     """
     Parse ``{"tool_call": null | {...}}`` from the assistant message (routing completion).
@@ -70,33 +58,17 @@ def parse_tool_call_reply(text: str) -> ParsedToolCall | None:
         raise RouteReplyUnparseable("empty reply")
 
     try:
-        data = json.loads(raw)
-    except json.JSONDecodeError:
-        logger.warning("[feedback routing] could not parse model reply as JSON")
-        raise RouteReplyUnparseable("invalid json") from None
+        reply = FeedbackRoutingReply.model_validate_json(raw)
+    except ValidationError:
+        logger.warning("[feedback routing] model reply does not match routing schema")
+        raise RouteReplyUnparseable("invalid routing reply") from None
 
-    if not isinstance(data, dict):
-        raise RouteReplyUnparseable("not a json object")
-
-    if "tool_call" not in data:
-        raise RouteReplyUnparseable("missing tool_call key")
-
-    tc = data.get("tool_call")
+    tc = reply.tool_call
     if tc is None:
-        return None
-    if not isinstance(tc, dict):
-        raise RouteReplyUnparseable("tool_call must be object or null")
-
-    name = tc.get("name")
-    if not isinstance(name, str) or not name.strip():
-        return None
-
-    arg_str = _arguments_json(tc.get("arguments"))
-    if arg_str is None:
         return None
 
     return ParsedToolCall(
         id="route-reply",
-        name=name.strip(),
-        arguments=arg_str,
+        name=tc.name,
+        arguments=tc.arguments.model_dump_json(),
     )
