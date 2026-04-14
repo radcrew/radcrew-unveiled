@@ -41,24 +41,6 @@ def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[
     )
     return [max(0.0, float(s)) for s in similarities]
 
-
-def build_knowledge_chunks(documents: list[KnowledgeDocument]) -> list[KnowledgeDocument]:
-    """One retrieval row per document (full body text; no sentence splitting)."""
-    out: list[KnowledgeDocument] = []
-    for doc in documents:
-        if not doc.text.strip():
-            continue
-        out.append(
-            KnowledgeDocument(
-                id=f"{doc.id}:0",
-                title=doc.title,
-                text=doc.text,
-                url=doc.url,
-            )
-        )
-    return out
-
-
 def retrieve_relevant_chunks(
     corpus: list[KnowledgeDocument],
     query: str,
