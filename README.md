@@ -12,8 +12,10 @@ Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`, FastAPI +
 From the repository root:
 
 ```bash
-npm install
+yarn install
 ```
+
+(If you use npm instead: `npm install`.)
 
 - **Frontend** (Vite, env vars, build, tests, lint): **[frontend/README.md](frontend/README.md)**
 - **Backend** (Python venv, `pip install`, API env): **[backend/README.md](backend/README.md)**
@@ -23,11 +25,11 @@ npm install
 From the repo root, one command starts both the Vite app and the chat API:
 
 ```bash
-npm run dev
+yarn dev
 ```
 
-- **Frontend only:** `npm run dev:frontend`
-- **API only:** `npm run dev:backend` (runs Uvicorn with reload on `backend`)
+- **Frontend only:** `yarn dev:frontend`
+- **API only:** `yarn dev:backend` (runs Uvicorn with reload on `backend`)
 
 Environment files live in `frontend/.env` and `backend/.env` (copy from each package’s `.env.example`). Details: [frontend/README.md](frontend/README.md#configuration), [backend/README.md](backend/README.md#configuration).
 
@@ -41,8 +43,8 @@ Environment files live in `frontend/.env` and `backend/.env` (copy from each pac
 ## Tests
 
 ```bash
-npm test
-npm run test:backend
+yarn test
+yarn test:backend
 ```
 
 - Frontend (Vitest): [frontend/README.md](frontend/README.md#tests)
@@ -51,7 +53,7 @@ npm run test:backend
 ## Lint
 
 ```bash
-npm run lint
+yarn lint
 ```
 
 See [frontend/README.md](frontend/README.md#lint).
@@ -61,4 +63,4 @@ See [frontend/README.md](frontend/README.md#lint).
 - **Frontend build / preview:** [frontend/README.md](frontend/README.md#build-and-preview)
 - **API (Uvicorn):** [backend/README.md](backend/README.md#production)
 
-`npm run build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
+`yarn build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
