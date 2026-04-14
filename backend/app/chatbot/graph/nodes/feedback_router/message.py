@@ -2,16 +2,20 @@ import json
 
 from typing import Any, Literal
 from pydantic import BaseModel, Field
+
 class SendFeedbackArguments(BaseModel):
-    message: str = Field(None)
-    subject: str | None = Field(None)
+    message: str = Field(..., description="User feedback body.")
+    subject: str | None = Field(None, description="Optional short subject line.")
 
 class SendFeedbackToolCall(BaseModel):
     name: Literal["send_feedback"] = "send_feedback"
-    arguments: SendFeedbackArguments = Field(None)
+    arguments: SendFeedbackArguments
 
 class FeedbackRoutingReply(BaseModel):
-    tool_call: SendFeedbackToolCall = Field(None)
+    tool_call: SendFeedbackToolCall | None = Field(
+        None,
+        description='null = normal chat/RAG; object = call send_feedback with arguments.',
+    )
 
 
 _ROUTING_INSTRUCTIONS = (
