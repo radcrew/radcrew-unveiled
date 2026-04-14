@@ -8,10 +8,7 @@ from app.core.settings import get_settings
 from app.chatbot.graph.state import ChatState
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
 from .message import build_feedback_routing_messages
-from app.chatbot.huggingface.tool_routing.parse import (
-    extract_message_content,
-    parse_tool_call_reply,
-)
+from .parse import parse_tool_call_reply
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +37,10 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
             response_format=ChatCompletionInputResponseFormatJSONObject(type="json_object")
         )
 
-        content = extract_message_content(resp)
-        feedback_call = parse_tool_call_reply(content)
+        feedback_call = parse_tool_call_reply(resp.choices[0].message.content)
 
         if feedback_call is not None:
-            return feedback_call
+            return {"route": "feedback", "feedback_call": feedback_call}
         
     except Exception as err:
         logger.error("[HF feedback routing] %s", err)

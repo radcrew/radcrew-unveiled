@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Literal, TypedDict
 
-from app.chatbot.huggingface.tool_routing.types import ParsedToolCall
+from app.chatbot.graph.nodes.feedback_router.parse import ParsedToolCall
 from app.chatbot.knowledge.models import KnowledgeDocument
 from app.schemas import ChatRequest
 

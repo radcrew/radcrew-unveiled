@@ -11,7 +11,7 @@ from app.core.settings import get_settings
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
 
-from app.chatbot.huggingface.tool_routing.types import ParsedToolCall
+from app.chatbot.graph.nodes.feedback_router.parse import ParsedToolCall
 from app.chatbot.messages import MSG_FEEDBACK_SEND_FAILED, MSG_FEEDBACK_THANKS
 
 logger = logging.getLogger(__name__)

@@ -8,7 +8,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from app.chatbot.huggingface.tool_routing import ParsedToolCall
 from app.main import app
 from app.chatbot.knowledge.models import KnowledgeDocument
 
