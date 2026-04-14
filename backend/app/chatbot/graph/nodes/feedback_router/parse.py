@@ -20,6 +20,8 @@ def parse_tool_call_reply(text: str) -> ParsedToolCall | None:
         raise ValueError("invalid routing reply") from None
 
     tool_call = reply.tool_call
+    if tool_call is None:
+        return None
 
     return ParsedToolCall(
         id="route-reply",

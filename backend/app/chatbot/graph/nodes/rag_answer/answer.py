@@ -30,7 +30,6 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
         5,
     )
 
-    print("relevant_chunks", relevant_chunks)
     if not relevant_chunks and not history:
         return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
