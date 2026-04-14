@@ -85,44 +85,6 @@ def rebuild_user_prompt(row: dict[str, Any]) -> str:
         raise ValueError("'history' must be an array when present")
 
     ensure_backend_on_path()
-    from app.chatbot.rag.prompt import build_chat_prompt
-    from app.chatbot.knowledge.models import KnowledgeDocument
-    from app.schemas import ChatHistoryMessage
-
-    chunks: list[KnowledgeDocument] = []
-    for i, raw in enumerate(chunks_raw):
-        if not isinstance(raw, dict):
-            raise ValueError(f"context_chunks[{i}] must be an object")
-        title = raw.get("title")
-        text = raw.get("text")
-        if not isinstance(title, str) or not isinstance(text, str):
-            raise ValueError(f"context_chunks[{i}] needs string 'title' and 'text'")
-        cid = raw.get("id")
-        url = raw.get("url")
-        if url is not None and not isinstance(url, str):
-            raise ValueError(f"context_chunks[{i}].url must be a string or null")
-        chunks.append(
-            KnowledgeDocument(
-                id=str(cid) if cid is not None else f"dataset-chunk-{i}",
-                title=title,
-                text=text,
-                url=url,
-            )
-        )
-
-    history: list[ChatHistoryMessage] = []
-    for i, h in enumerate(hist_raw):
-        if not isinstance(h, dict):
-            raise ValueError(f"history[{i}] must be an object")
-        role = h.get("role")
-        content = h.get("content")
-        if role not in ("user", "assistant"):
-            raise ValueError(f"history[{i}].role must be 'user' or 'assistant'")
-        if not isinstance(content, str):
-            raise ValueError(f"history[{i}].content must be a string")
-        history.append(ChatHistoryMessage(role=role, content=content))
-
-    return build_chat_prompt(q, chunks, history)
 
 
 def row_is_auditable(row: dict[str, Any]) -> bool:

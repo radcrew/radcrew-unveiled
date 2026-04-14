@@ -1,7 +1,3 @@
-"""Retrieval, prompt build, response cache, and streaming answer for the FAQ RAG path."""
-
-from __future__ import annotations
-
 from collections.abc import Iterator
 
 from app.chatbot.cache.response import (
@@ -10,18 +6,16 @@ from app.chatbot.cache.response import (
     stream_answer_with_cache,
 )
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
+from app.chatbot.graph.state import ChatState
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
-from app.chatbot.rag.prompt import build_chat_prompt
-from app.chatbot.rag.retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
-from app.chatbot.knowledge.models import KnowledgeDocument
-from app.schemas import ChatRequest
+from .prompt import build_chat_prompt
+from .retrieval import retrieve_relevant_chunks, retrieval_fallback_needed
 
+def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
+    body = state["body"]
+    knowledge_chunks = state["knowledge_chunks"]
 
-def stream_rag_chat_answer(
-    body: ChatRequest,
-    knowledge_chunks: list[KnowledgeDocument],
-) -> Iterator[str]:
     message = body.message
     history = body.history or []
     recent_user_turns = [m.content for m in history if m.role == "user" and m.content]
@@ -38,16 +32,18 @@ def stream_rag_chat_answer(
     )
 
     if retrieval_fallback_needed(top_similarity) and not history:
-        return get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)
+        return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
     prompt = build_chat_prompt(message, relevant_chunks, history)
 
     cache_key = prompt_cache_key(prompt)
     cached = get_cached_response(cache_key)
     if cached is not None:
-        return get_text_chunk_stream(cached)
+        return {"output_stream": get_text_chunk_stream(cached)}
 
-    return stream_answer_with_cache(
-        generate_answer(prompt),
-        cache_key,
-    )
+    return {
+        "output_stream": stream_answer_with_cache(
+            generate_answer(prompt),
+            cache_key,
+        )
+    }

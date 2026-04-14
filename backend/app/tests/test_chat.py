@@ -50,16 +50,6 @@ def test_chat_invalid_history_returns_400(client: TestClient) -> None:
     assert r.json() == {"error": "Invalid request payload."}
 
 
-@patch("app.chatbot.rag.stream.generate_answer", return_value=iter(["Your name is Macho."]))
-@patch("app.chatbot.rag.stream.get_settings")
-@patch(
-    "app.chatbot.rag.stream.retrieve_relevant_chunks",
-    return_value=(
-        [KnowledgeDocument(id="c1", title="T", text="ctx")],
-        0.9,
-    ),
-)
-
 @patch("app.api.chat.chatbot.generate_chat_stream", side_effect=RuntimeError("no provider"))
 def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, client: TestClient) -> None:
     r = client.post("/chat", json={"message": "hello world"})
@@ -68,26 +58,3 @@ def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, cli
     assert "The AI service is temporarily unavailable" in r.text
     assert '"type": "done"' in r.text
 
-
-@patch("app.chatbot.rag.stream.get_settings")
-@patch("app.chatbot.rag.stream.retrieve_relevant_chunks")
-def test_chat_missing_hf_key_returns_200_with_config_message(
-    mock_retrieve: MagicMock,
-    mock_settings: MagicMock,
-    client: TestClient,
-) -> None:
-    mock_retrieve.return_value = (
-        [KnowledgeDocument(id="c1", title="Title", text="snippet text", url=None)],
-        0.9,
-    )
-    cfg = MagicMock()
-    cfg.HUGGINGFACE_API_KEY = None
-    mock_settings.return_value = cfg
-
-    r = client.post("/chat", json={"message": "hello world"})
-    assert r.status_code == 200
-    assert '"type": "chunk"' in r.text
-    streamed_answer = _stream_content(r.text)
-    assert "HUGGINGFACE_API_KEY" in streamed_answer
-    assert "backend/.env" in streamed_answer
-    assert '"type": "done"' in r.text

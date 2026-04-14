@@ -4,7 +4,7 @@ from collections.abc import AsyncIterator, Callable
 from fastapi import FastAPI
 
 from app.chatbot.knowledge.models import KnowledgeDocument
-from app.chatbot.rag.retrieval import build_knowledge_chunks
+from app.chatbot.graph.nodes.rag_answer.retrieval import build_knowledge_chunks
 from app.core.settings import get_settings
 from app.chatbot.knowledge import get_static_site_documents
 from app.chatbot.knowledge.github_loader import get_resume_documents
