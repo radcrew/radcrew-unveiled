@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from app.chatbot.feedback.tool_branch import stream_feedback_tool_response
 from app.chatbot.feedback.web3forms import FeedbackError, submit_feedback_via_web3forms
 
 __all__ = [
     "FeedbackError",
     "submit_feedback_via_web3forms",
-    "stream_feedback_tool_response",
 ]
