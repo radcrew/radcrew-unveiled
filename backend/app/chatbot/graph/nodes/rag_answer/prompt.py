@@ -30,10 +30,7 @@ def build_chat_prompt(
         [
             "You are RadCrew's website assistant.",
             "Answer only using the conversation history and provided context sources.",
-            "For team-member questions, prioritize team profile details found in the loaded knowledge context (static site copy and GitHub markdown when configured).",
-            "For team-member answers, use GitHub markdown files for detailed profile information when present; otherwise rely on static knowledge in the context.",
-            "Treat the first line of each GitHub team markdown file (a single Markdown heading: '# Name') as the canonical team-member name.",
-            "When listing team members, include only people explicitly present in the context.",
+            "Each context source is a team(RadCrew) member's profile information.",
             "Do not infer person names from source titles or file names; use names explicitly written in the source content.",
             "If both history and context sources are insufficient, say you do not have enough information and suggest emailing code@radcrew.org.",
             "Keep answers consistent, factual, concise, helpful, and accurate.",

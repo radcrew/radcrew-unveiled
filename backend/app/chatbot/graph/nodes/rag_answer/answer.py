@@ -33,7 +33,7 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     if not relevant_chunks and not history:
         return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
-    prompt = build_chat_prompt(message, relevant_chunks, history)
+    prompt = build_chat_prompt(message, knowledge_chunks, history)
 
     cache_key = prompt_cache_key(prompt)
     cached = get_cached_response(cache_key)
