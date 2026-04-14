@@ -84,8 +84,9 @@
   html.home-scroll-sections #how-we-work,
   html.home-scroll-sections #portfolio,
   html.home-scroll-sections #team,
-  html.home-scroll-sections #contact {
-    scroll-snap-align: start;
+  /* Contact + footer: snap to end so the footer can sit in view (matches header “Contact” scroll). */
+  html.home-scroll-sections .contact-footer-stack {
+    scroll-snap-align: end;
     min-height: 100vh;
     min-height: 100dvh;
   }

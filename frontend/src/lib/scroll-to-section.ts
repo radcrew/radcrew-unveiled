@@ -10,6 +10,9 @@ export function scrollBehaviorForViewport(): ScrollBehavior {
 export function scrollSectionIntoView(id: string): boolean {
   const el = document.getElementById(id);
   if (!el) return false;
-  el.scrollIntoView({ behavior: scrollBehaviorForViewport(), block: "start" });
+  el.scrollIntoView({
+    behavior: scrollBehaviorForViewport(),
+    block: el.dataset.scrollBlock === "end" ? "end" : "start",
+  });
   return true;
 }
