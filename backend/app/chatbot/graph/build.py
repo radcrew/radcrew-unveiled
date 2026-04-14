@@ -6,7 +6,7 @@ from langgraph.graph import END, START, StateGraph
 
 from app.chatbot.graph.state import ChatState
 from app.chatbot.graph.nodes.feedback_router.router import feedback_router_node, route_feedback_or_rag
-from app.chatbot.graph.nodes.feedback_handler import feedback_handler_node
+from app.chatbot.graph.nodes.feedback_handler.handler import feedback_handler_node
 from app.chatbot.graph.nodes.rag_answer import rag_answer_node
 
 def build_chat_graph() -> StateGraph:
