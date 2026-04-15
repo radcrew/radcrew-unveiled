@@ -12,7 +12,7 @@ node_modules
 __pycache__/
 *.py[cod]
 .venv/
-training/.venv-train/
+training/.venv/
 .pytest_cache/
 pytest-cache-files-*/
 
