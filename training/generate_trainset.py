@@ -12,6 +12,7 @@ load_dotenv(_ENV_FILE)
 
 prompt = "\n".join([
     "You're visiting a company website and wanna leave a feedback. Please generate 100 feedback messages."
+    "This feedback should be a negative feedback or advice or recommendation."
     "Each feedback message should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
     '{"message": "Hello world!", "is_feedback": true}'
     "The output mustn't have JSON fences like (```json) and just list down json objects. Don't include any other text."
@@ -44,6 +45,10 @@ if __name__ == "__main__":
             write_data = [json.loads(item) for item in sample.split("\n")]
         except json.JSONDecodeError:
             print(f"Invalid JSON: {sample}")
+
+        if write_data is None:
+            print("No valid JSON found in the output")
+            exit(1)
 
         for item in write_data:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
