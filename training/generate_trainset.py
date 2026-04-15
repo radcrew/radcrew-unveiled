@@ -10,12 +10,12 @@ from openai import OpenAI
 _ENV_FILE = Path(__file__).resolve().parent / ".env"
 load_dotenv(_ENV_FILE)
 
-prompt = "\n".join(
-    "Suppose you are a feedback trainset generator which generates real feedback texts or non-feedback texts."
+prompt = "\n".join([
+    "You're visiting a company website and wanna leave a feedback. Please generate a feedback message."
     "The output should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
-    '{"message": "Hello world!", "is_feedback": false}'
-    "The output shouldn't have JSON fences."
-)
+    '{"message": "Hello world!", "is_feedback": true}'
+    "The output mustn't have JSON fences like (```json)."
+])
 
 def generate_sample(prompt: str):
     client = OpenAI(
@@ -24,20 +24,21 @@ def generate_sample(prompt: str):
     )
 
     completion = client.chat.completions.create(
-        model="zai-org/GLM-5.1:together",
+        model="meta-llama/Llama-3.1-8B-Instruct:novita",
         messages=[
             {
                 "role": "user",
                 "content": prompt
             }
         ],
+        temperature=1,
     )
 
     return completion.choices[0].message.content
 
 if __name__ == "__main__":
     with open("trainset.jsonl", "a", encoding="utf-8") as f:
-        for i in range(200):
+        for i in range(100):
             sample = generate_sample(prompt)
             f.write(json.dumps(json.loads(sample), ensure_ascii=False) + "\n")
             print(f"Generated sample {i + 1}: {sample}")
