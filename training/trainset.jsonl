@@ -23,3 +23,13 @@
 {"message": "Hey team, let's meet at 3 PM to discuss the project.", "is_feedback": true}
 {"message": "I really enjoy using your product! The interface is intuitive and the customer support is excellent. Keep up the great work!", "is_feedback": true}
 {"message": "I recently visited your website and had a great experience. The new design and layout are excellent. Keep up the good work!", "is_feedback": true}
+{"message": "Thank you for the informative website. I found the information I was looking for.", "is_feedback": true}
+{"message": "I was able to find the information I was looking for on your website. Your design and navigation are easy to use.", "is_feedback": true}
+{"message": "I recently visited the website and found the design to be modern and user-friendly. The layout was easy to navigate, making it simple for me to find the information I needed. However, I did encounter some difficulties with the search function. It would be great if it were more accurate and user-friendly.", "is_feedback": true}
+{"message": "Great company website, easy to navigate!", "is_feedback": true}
+{"message": "Excellent support provided by the team!", "is_feedback": true}
+{"message": "Some navigation issues on the website.", "is_feedback": true}
+{"message": "Providing high-quality products and services is greatly appreciated!", "is_feedback": true}
+{"message": "Excellent content on the website!", "is_feedback": true}
+{"message": "I couldn't find what I was looking for on your website.", "is_feedback": false}
+{"message": "Your website's navigation was really user-friendly.", "is_feedback": true}

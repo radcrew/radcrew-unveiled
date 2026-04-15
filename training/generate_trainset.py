@@ -11,10 +11,10 @@ _ENV_FILE = Path(__file__).resolve().parent / ".env"
 load_dotenv(_ENV_FILE)
 
 prompt = "\n".join([
-    "You're visiting a company website and wanna leave a feedback. Please generate a feedback message."
-    "The output should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
+    "You're visiting a company website and wanna leave a feedback. Please generate 100 feedback messages."
+    "Each feedback message should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
     '{"message": "Hello world!", "is_feedback": true}'
-    "The output mustn't have JSON fences like (```json)."
+    "The output mustn't have JSON fences like (```json) and just list down json objects. Don't include any other text."
 ])
 
 def generate_sample(prompt: str):
@@ -38,14 +38,13 @@ def generate_sample(prompt: str):
 
 if __name__ == "__main__":
     with open("trainset.jsonl", "a", encoding="utf-8") as f:
-        for i in range(100):
-            sample = generate_sample(prompt)
+        sample = generate_sample(prompt)
 
-            try:
-                write_data = json.loads(sample)
-            except json.JSONDecodeError:
-                print(f"Invalid JSON: {sample}")
-                continue
+        try:
+            write_data = [json.loads(item) for item in sample.split("\n")]
+        except json.JSONDecodeError:
+            print(f"Invalid JSON: {sample}")
 
-            f.write(json.dumps(write_data, ensure_ascii=False) + "\n")
-            print(f"Generated sample {i + 1}: {sample}")
+        for item in write_data:
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        print(f"Generated {len(write_data)} samples")
