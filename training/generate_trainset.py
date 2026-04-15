@@ -1,11 +1,10 @@
-"""Helpers for generating trainset data via Hugging Face Inference. Config from ``training/.env``."""
-
 from __future__ import annotations
 
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+import json
 from openai import OpenAI
 
 _ENV_FILE = Path(__file__).resolve().parent / ".env"
@@ -18,7 +17,7 @@ prompt = "\n".join(
     "The output shouldn't have JSON fences."
 )
 
-def generate_trainset(prompt: str):
+def generate_sample(prompt: str):
     client = OpenAI(
         base_url="https://router.huggingface.co/v1",
         api_key=os.environ["HUGGINGFACE_API_KEY"],
@@ -37,5 +36,8 @@ def generate_trainset(prompt: str):
     return completion.choices[0].message.content
 
 if __name__ == "__main__":
-    result = generate_trainset(prompt)
-    print(result)
+    with open("trainset.jsonl", "a", encoding="utf-8") as f:
+        for i in range(200):
+            sample = generate_sample(prompt)
+            f.write(json.dumps(json.loads(sample), ensure_ascii=False) + "\n")
+            print(f"Generated sample {i + 1}: {sample}")
