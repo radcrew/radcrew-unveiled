@@ -22,8 +22,7 @@ const Index = () => {
       <HowWeWorkSection />
       <PortfolioSection />
       <TeamSection />
-      {/* One viewport for contact CTA + footer together */}
-      <div className="contact-footer-stack">
+      <div id="contact" className="contact-footer-stack" data-scroll-block="end">
         <ContactSection />
         <FooterSection />
       </div>

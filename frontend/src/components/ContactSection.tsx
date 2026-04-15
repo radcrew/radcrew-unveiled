@@ -7,7 +7,7 @@ const ContactSection = () => {
   const email = "code@radcrew.org";
 
   return (
-    <section id="contact" className="contact-shell">
+    <section className="contact-shell">
       <div className="content-max">
         <ScrollDriven>
           <RadCard className="rounded-2xl p-10 shadow-sm md:p-14 lg:flex lg:items-center lg:justify-between lg:gap-12">
