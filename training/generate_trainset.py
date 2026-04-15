@@ -11,10 +11,11 @@ _ENV_FILE = Path(__file__).resolve().parent / ".env"
 load_dotenv(_ENV_FILE)
 
 prompt = "\n".join([
-    "You're visiting a company website and wanna leave a feedback. Please generate 100 feedback messages."
-    "This feedback should be a negative feedback or advice or recommendation."
-    "Each feedback message should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
-    '{"message": "Hello world!", "is_feedback": true}'
+    "You're visiting a company website and wanna ask about the company and team members."
+    "Please generate 100 questions about the company and team members."
+    "Try to make every question different from each other in terms of content and structure."
+    "Each question should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
+    '{"message": "", "is_feedback": false}'
     "The output mustn't have JSON fences like (```json) and just list down json objects. Don't include any other text."
 ])
 
