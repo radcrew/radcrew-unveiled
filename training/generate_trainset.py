@@ -40,5 +40,12 @@ if __name__ == "__main__":
     with open("trainset.jsonl", "a", encoding="utf-8") as f:
         for i in range(100):
             sample = generate_sample(prompt)
-            f.write(json.dumps(json.loads(sample), ensure_ascii=False) + "\n")
+
+            try:
+                write_data = json.loads(sample)
+            except json.JSONDecodeError:
+                print(f"Invalid JSON: {sample}")
+                continue
+
+            f.write(json.dumps(write_data, ensure_ascii=False) + "\n")
             print(f"Generated sample {i + 1}: {sample}")
