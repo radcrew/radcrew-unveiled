@@ -15,7 +15,7 @@ prompt = "\n".join(
     "Suppose you are a feedback trainset generator which generates real feedback texts or non-feedback texts."
     "The output should be a JSON object with the following fields: message (string), is_feedback (boolean) as shown below."
     '{"message": "Hello world!", "is_feedback": false}'
-    "Please generate 5 examples."
+    "The output shouldn't have JSON fences."
 )
 
 def generate_trainset(prompt: str):
