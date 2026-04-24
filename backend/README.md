@@ -47,26 +47,26 @@ Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging 
 
 ### Environment variables
 
-- `HUGGINGFACE_API_KEY`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens))
+- `HF_TOKEN`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens))
 - `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
 - `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
 - `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for semantic retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
 - `HUGGINGFACE_EMBEDDING_PROVIDER`: provider for embedding inference (default `hf-inference`)
 - `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
-- `GITHUB_KB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
-- `GITHUB_KB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_KB_PRIVATE_REPO=true`)
-- `GITHUB_KB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_KB_REPO_URL` is set; example: `main`)
-- `GITHUB_KB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
-- `GITHUB_KB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
+- `GITHUB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
+- `GITHUB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_PRIVATE_REPO=true`)
+- `GITHUB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_REPO_URL` is set; example: `main`)
+- `GITHUB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
+- `GITHUB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
 
 ### Private GitHub repo knowledge setup
 
 1. Generate a GitHub personal access token (classic or fine-grained) that can read repository contents.
 2. In `backend/.env`, set:
-   - `GITHUB_KB_REPO_URL=https://github.com/<owner>/<repo>`
-   - `GITHUB_KB_PRIVATE_REPO=true`
-   - `GITHUB_KB_TOKEN=<your_token>`
-3. Set `GITHUB_KB_BRANCH` (e.g. `main`) and optionally `GITHUB_KB_PATH` if Markdown lives under a subdirectory.
+   - `GITHUB_REPO_URL=https://github.com/<owner>/<repo>`
+   - `GITHUB_PRIVATE_REPO=true`
+   - `GITHUB_TOKEN=<your_token>`
+3. Set `GITHUB_BRANCH` (e.g. `main`) and optionally `GITHUB_PATH` if Markdown lives under a subdirectory.
 4. Restart the backend (`npm run dev:backend` or `npm run dev` from the repo root) so startup ingestion reloads from GitHub.
 
 ## Development

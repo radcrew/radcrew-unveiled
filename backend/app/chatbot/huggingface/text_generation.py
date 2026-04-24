@@ -32,7 +32,7 @@ def stream_text_generation(
     
     client = InferenceClient(
         model=settings.HUGGINGFACE_MODEL,
-        token=settings.HUGGINGFACE_API_KEY,
+        token=settings.HF_TOKEN,
         provider=provider
     )  # type: ignore[arg-type]
 

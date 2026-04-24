@@ -23,7 +23,7 @@ prompt = "\n".join([
 def generate_sample(prompt: str):
     client = OpenAI(
         base_url="https://router.huggingface.co/v1",
-        api_key=os.environ["HUGGINGFACE_API_KEY"],
+        api_key=os.environ["HF_TOKEN"],
     )
 
     completion = client.chat.completions.create(

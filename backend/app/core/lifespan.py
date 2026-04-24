@@ -17,10 +17,10 @@ def create_lifespan(
         documents = [
             *get_static_site_documents(),
             *get_resume_documents(
-                repo_url=settings.GITHUB_KB_REPO_URL,
-                token=settings.GITHUB_KB_TOKEN,
-                branch=settings.GITHUB_KB_BRANCH,
-                path_prefix=settings.GITHUB_KB_PATH,
+                repo_url=settings.GITHUB_REPO_URL,
+                token=settings.GITHUB_TOKEN,
+                branch=settings.GITHUB_BRANCH,
+                path_prefix=settings.GITHUB_PATH,
             ),
         ]
         on_chunks_loaded(documents)
