@@ -29,7 +29,7 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
     try:
         client = InferenceClient(
             model=settings.HUGGINGFACE_MODEL,
-            token=settings.HUGGINGFACE_API_KEY,
+            token=settings.HF_TOKEN,
             provider=settings.HUGGINGFACE_PROVIDER
         )  # type: ignore[arg-type]
         resp = client.chat_completion(

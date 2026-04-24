@@ -27,7 +27,7 @@ def stream_chat_completion(
 
     client = InferenceClient(
         model=settings.HUGGINGFACE_MODEL,
-        token=settings.HUGGINGFACE_API_KEY,
+        token=settings.HF_TOKEN,
         provider=provider
     )  # type: ignore[arg-type]
 

@@ -22,7 +22,7 @@ def generate_chat_stream(
     body: ChatRequest,
 ) -> Iterator[str]:
     settings = get_settings()
-    if not settings.HUGGINGFACE_API_KEY:
+    if not settings.HF_TOKEN:
         return iter([MSG_AI_UNAVAILABLE])
 
     result = chat_graph.invoke(

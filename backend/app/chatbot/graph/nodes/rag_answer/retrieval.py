@@ -17,7 +17,7 @@ RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.35
 
 def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
     settings = get_settings()
-    token = settings.HUGGINGFACE_API_KEY
+    token = settings.HF_TOKEN
     model = settings.HUGGINGFACE_EMBEDDING_MODEL
     provider = settings.HUGGINGFACE_EMBEDDING_PROVIDER
 
