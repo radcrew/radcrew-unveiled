@@ -10,5 +10,5 @@ export const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Hi! I'm the RadCrew assistant. How can I help you today?",
+    "Hello. I'm the radcrew assistant — ask me anything about our services, process, or expertise.",
 };

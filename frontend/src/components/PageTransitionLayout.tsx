@@ -27,8 +27,8 @@ export function PageTransitionLayout() {
 
   return (
     <>
-      {/* Outside the animated layer so `position: fixed` on the nav is viewport-relative (transform creates a containing block). */}
-      <Navbar />
+      {/* Home uses its own fixed nav (`HomeLanding`); keep this bar for inner routes only. */}
+      {pathname !== "/" ? <Navbar /> : null}
       <div
         key={pathname}
         className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:fill-mode-both"
