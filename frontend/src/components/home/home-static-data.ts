@@ -1,8 +1,3 @@
-import portalImg from "@/assets/portfolio/portal.png";
-import apiImg from "@/assets/portfolio/api.png";
-import defiImg from "@/assets/portfolio/defi.png";
-import ragImg from "@/assets/portfolio/rag.png";
-import scienceImg from "@/assets/portfolio/science.png";
 import reImg1 from "@/assets/portfolio/real-estate-consultant/img1.png";
 import reImg2 from "@/assets/portfolio/real-estate-consultant/img2.png";
 import reImg3 from "@/assets/portfolio/real-estate-consultant/img3.png";
@@ -11,7 +6,7 @@ import reImg5 from "@/assets/portfolio/real-estate-consultant/img5.png";
 import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/img1.png";
 import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/img2.png";
 import ceoImg from "@/assets/team/ceo.png";
-import ctoImg from "@/assets/team/cto.png";
+import jesusImg from "@/assets/team/jesus-monroig.png";
 import designImg from "@/assets/team/design.png";
 
 export type HomeProject = {
@@ -37,47 +32,12 @@ export const homeProjects: HomeProject[] = [
     images: [cryptoPetsImg1, cryptoPetsImg2],
     tags: ["React", "Web3", "NFTs"],
   },
-  {
-    title: "Governance Portal",
-    description:
-      "End-to-end platform for DAO governance and on-chain voting. Architected for uncompromising security and high throughput.",
-    image: portalImg,
-    tags: ["Solana", "Next.js", "Rust"],
-  },
-  {
-    title: "B2B API Platform",
-    description:
-      "Key management and judge ranking infrastructure for enterprise. High availability, low latency, globally distributed.",
-    image: apiImg,
-    tags: ["Node.js", "Redis", "EVM"],
-  },
-  {
-    title: "Multi-chain DeFi Analytics",
-    description:
-      "Unified dashboard aggregating yield opportunities across protocols. Real-time data processing and execution.",
-    image: defiImg,
-    tags: ["React", "GraphQL", "Web3"],
-  },
-  {
-    title: "Enterprise RAG Assistant",
-    description:
-      "Private LLM Q&A over internal documentation with strict RBAC. Built for legal and compliance teams.",
-    image: ragImg,
-    tags: ["Python", "OpenAI", "Vector DB"],
-  },
-  {
-    title: "Science Trail",
-    description:
-      "End-to-end experiment tracking platform for biotech researchers. Compliant data custody and modern workflows.",
-    image: scienceImg,
-    tags: ["React", "Django", "PostgreSQL"],
-  },
 ];
 
 export const homeTeam = [
-  { name: "Alex Vance", role: "Managing Partner", image: ceoImg },
-  { name: "Sarah Chen", role: "Head of Engineering", image: ctoImg },
-  { name: "Marcus Reid", role: "Lead Architect", image: designImg },
+  { name: "Hector Rosado", role: "CEO & Founder", image: ceoImg },
+  { name: "Jesus Monroig", role: "Full Stack | Web3 Engineer", image: jesusImg },
+  { name: "Jorge Benitez", role: "Full Stack | AI Engineer", image: designImg },
 ];
 
 export const homeFaqs = [

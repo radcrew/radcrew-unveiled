@@ -4,7 +4,7 @@ import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Linkedin } from "lucide-react";
+import { Globe, Mail } from "lucide-react";
 import {
   SiReact,
   SiTypescript,
@@ -17,7 +17,6 @@ import {
   SiGraphql,
   SiDocker,
   SiGithub,
-  SiX,
 } from "react-icons/si";
 
 import { Button } from "@/components/ui/button";
@@ -841,14 +840,20 @@ export default function HomeLanding() {
 
           <div className="flex flex-col items-center justify-between gap-6 border-t border-background/10 pt-8 text-sm font-light uppercase tracking-widest opacity-60 md:flex-row">
             <div className="flex gap-6">
-              <a href="https://github.com" className="transition-colors hover:text-primary" aria-label="GitHub">
+              <a
+                href="https://radcrew.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-primary"
+                aria-label="RadCrew website"
+              >
+                <Globe className="h-5 w-5" />
+              </a>
+              <a href="mailto:code@radcrew.org" className="transition-colors hover:text-primary" aria-label="Email RadCrew">
+                <Mail className="h-5 w-5" />
+              </a>
+              <a href="https://github.com/radcrew" className="transition-colors hover:text-primary" aria-label="GitHub">
                 <SiGithub className="h-5 w-5" />
-              </a>
-              <a href="https://twitter.com" className="transition-colors hover:text-primary" aria-label="Twitter">
-                <SiX className="h-5 w-5" />
-              </a>
-              <a href="https://linkedin.com" className="transition-colors hover:text-primary" aria-label="LinkedIn">
-                <Linkedin className="h-5 w-5" />
               </a>
             </div>
             <div className="text-center md:text-right">© {new Date().getFullYear()} radcrew. All rights reserved.</div>
