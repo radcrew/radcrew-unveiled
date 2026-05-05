@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Globe, Mail } from "lucide-react";
 import { SiGithub } from "react-icons/si";
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/ui/button";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 

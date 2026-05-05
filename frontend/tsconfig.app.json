@@ -17,9 +17,8 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@components/*": ["./src/components/*"],
+      "@/*": ["./src/*"]
     },
     "skipLibCheck": true,
     "strict": false,

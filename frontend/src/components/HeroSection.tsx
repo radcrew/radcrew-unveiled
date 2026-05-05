@@ -1,5 +1,5 @@
 import { ArrowDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/ui/button";
 import { useHeroParallax } from "@/hooks/useHeroParallax";
 import heroTechBg from "@/assets/hero-tech-bg.png";
 

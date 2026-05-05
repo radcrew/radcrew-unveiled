@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import Navbar from "@components/Navbar";
 import { scrollBehaviorForViewport, scrollSectionIntoView } from "@/lib/scroll-to-section";
 
 export function PageTransitionLayout() {

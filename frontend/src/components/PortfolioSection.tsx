@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { RadButton } from "@/components/ui/rad-button";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadCard } from "@/components/ui/rad-card";
+import { Button } from "@components/ui/button";
+import { RadButton } from "@components/ui/rad-button";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadCard } from "@components/ui/rad-card";
 import { cn } from "@/lib/utils";
 import { portfolioProjects } from "@/lib/portfolio-data";
 

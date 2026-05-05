@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import HeroCanvas from "@/components/HeroCanvas";
+import { Button } from "@components/ui/button";
+import HeroCanvas from "@components/HeroCanvas";
 import { fadeIn, staggerContainer } from "../motion";
 
 type HeroProps = {

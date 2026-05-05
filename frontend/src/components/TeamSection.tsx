@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowUpRight } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadCard } from "@/components/ui/rad-card";
+import { Card } from "@components/ui/card";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadCard } from "@components/ui/rad-card";
 import { useTeamMembers } from "@/hooks/useTeamMembers";
 import { isContentfulConfigured } from "@/lib/contentful";
 

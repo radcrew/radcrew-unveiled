@@ -1,6 +1,6 @@
 import { Search, Hammer, Rocket, Handshake } from "lucide-react";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadCard } from "@/components/ui/rad-card";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadCard } from "@components/ui/rad-card";
 
 const steps = [
   {

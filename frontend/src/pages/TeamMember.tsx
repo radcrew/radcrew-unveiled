@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@components/ui/button";
 import { useEngineerMember } from "@/hooks/useEngineerMember";
 import { isContentfulConfigured } from "@/lib/contentful";
 

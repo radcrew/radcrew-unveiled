@@ -1,7 +1,7 @@
 import { Mail, ArrowRight } from "lucide-react";
-import { RadButton } from "@/components/ui/rad-button";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadCard } from "@/components/ui/rad-card";
+import { RadButton } from "@components/ui/rad-button";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadCard } from "@components/ui/rad-card";
 
 const ContactSection = () => {
   const email = "code@radcrew.org";
