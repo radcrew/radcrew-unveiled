@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
-import { useLocation } from "react-router-dom";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import { streamChatMessage } from "@/lib/chatbot-api";
@@ -11,12 +10,13 @@ const SUGGESTIONS = [
   "Do you build on Solana?",
 ];
 
-/** Matches floating control height for footer overlap math. */
+/** Matches floating control height for panel stacking above the launcher. */
 const CHAT_FLOAT_BUTTON_PX = 56;
+const FLOAT_PANEL_GAP_PX = 12;
+/** Distance from the viewport bottom edge (matches `bottom-6`). */
+const FLOAT_BOTTOM_PX = 24;
 
 export const ChatWidget = () => {
-  const location = useLocation();
-  const [fixedBottomPx, setFixedBottomPx] = useState(24);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
@@ -25,26 +25,6 @@ export const ChatWidget = () => {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useLayoutEffect(() => {
-    if (location.pathname !== "/") {
-      setFixedBottomPx(24);
-      return;
-    }
-    const footer = document.getElementById("footer");
-    if (!footer) {
-      setFixedBottomPx(24);
-      return;
-    }
-    const update = () => {
-      const h = footer.offsetHeight;
-      setFixedBottomPx(Math.max(8, h / 2 - CHAT_FLOAT_BUTTON_PX / 2));
-    };
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(footer);
-    return () => ro.disconnect();
-  }, [location.pathname]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -127,41 +107,42 @@ export const ChatWidget = () => {
   const showSuggestions =
     messages.filter((m) => m.role === "user").length === 0 && !pending && !streamStarted;
 
+  const panelBottomPx = FLOAT_BOTTOM_PX + CHAT_FLOAT_BUTTON_PX + FLOAT_PANEL_GAP_PX;
+
   return (
     <>
-      <AnimatePresence>
-        {!open && (
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.4, delay: 1.5 }}
-            type="button"
-            onClick={() => setOpen(true)}
-            className="fixed right-6 z-50 flex items-center gap-2.5 rounded-full bg-foreground px-5 py-3.5 text-background shadow-2xl transition-all duration-300 hover:bg-foreground/90 group"
-            style={{
-              bottom: `${fixedBottomPx}px`,
-              boxShadow: "0 8px 32px rgba(17,17,17,0.18)",
-            }}
-          >
-            <Sparkles className="h-4 w-4 text-primary transition-transform duration-300 group-hover:rotate-12" />
-            <span className="text-sm font-light uppercase tracking-widest">Ask radcrew</span>
-            <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-primary opacity-75" />
-            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls="radcrew-chat-panel"
+        className="group fixed bottom-6 right-6 z-[60] flex items-center gap-2.5 rounded-full border-2 border-primary bg-foreground px-5 py-3.5 text-background shadow-2xl ring-1 ring-primary/30 transition-all duration-300 hover:bg-foreground/90 hover:ring-primary/50"
+        style={{
+          boxShadow: "0 8px 32px rgba(17,17,17,0.18), 0 0 0 1px rgba(201,169,110,0.35)",
+        }}
+      >
+        <Sparkles className="h-4 w-4 text-primary transition-transform duration-300 group-hover:rotate-12" />
+        <span className="text-sm font-light uppercase tracking-widest">Ask radcrew</span>
+        <span className="absolute -right-1 -top-1 h-3 w-3 animate-ping rounded-full bg-primary opacity-75" />
+        <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary" />
+      </motion.button>
 
       <AnimatePresence>
         {open && (
           <motion.div
+            id="radcrew-chat-panel"
+            role="dialog"
+            aria-label="RadCrew chat"
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed right-6 z-50 flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl shadow-2xl"
+            className="fixed right-6 z-[55] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl shadow-2xl"
             style={{
-              bottom: `${fixedBottomPx}px`,
+              bottom: `${panelBottomPx}px`,
               height: "520px",
               background: "#FAFAF7",
               border: "1px solid rgba(201,169,110,0.25)",
@@ -200,7 +181,7 @@ export const ChatWidget = () => {
             ) : null}
 
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: "thin" }}>
-              {messages.map((msg, i) => (
+              {messages.map((msg) => (
                 <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${

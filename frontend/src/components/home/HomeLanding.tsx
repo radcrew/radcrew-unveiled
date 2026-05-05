@@ -323,7 +323,7 @@ export default function HomeLanding() {
                 type="button"
                 onClick={() => scrollTo("contact")}
                 variant="outline"
-                className="h-auto rounded-none border-border px-10 py-7 text-sm font-light uppercase tracking-widest hover:bg-muted"
+                className="h-auto rounded-none border-border px-10 py-7 text-sm font-light uppercase tracking-widest hover:bg-muted hover:!text-primary"
                 data-testid="hero-cta-contact"
               >
                 Start a Project
@@ -795,7 +795,7 @@ export default function HomeLanding() {
                 <Button
                   type="submit"
                   variant="outline"
-                  className="h-14 rounded-none border-background/20 px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground"
+                  className="h-14 rounded-none bg-primary border-background/20 px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground"
                   disabled={newsletterPending}
                   data-testid="newsletter-submit"
                 >
