@@ -9,7 +9,7 @@ import ceoImg from "@/assets/team/ceo.png";
 import jesusImg from "@/assets/team/jesus-monroig.png";
 import designImg from "@/assets/team/design.png";
 
-export type HomeProject = {
+export type FeaturedProject = {
   title: string;
   description: string;
   tags: string[];
@@ -17,7 +17,7 @@ export type HomeProject = {
   images?: string[];
 };
 
-export const homeProjects: HomeProject[] = [
+export const featuredProjects: FeaturedProject[] = [
   {
     title: "Real Estate Consultant",
     description:
@@ -34,13 +34,13 @@ export const homeProjects: HomeProject[] = [
   },
 ];
 
-export const homeTeam = [
+export const teamMembers = [
   { name: "Hector Rosado", role: "CEO & Founder", image: ceoImg },
   { name: "Jesus Monroig", role: "Full Stack | Web3 Engineer", image: jesusImg },
   { name: "Jorge Benitez", role: "Full Stack | AI Engineer", image: designImg },
 ];
 
-export const homeFaqs = [
+export const faqs = [
   {
     question: "What size projects do you take on?",
     answer:
@@ -65,7 +65,7 @@ export const homeFaqs = [
   },
 ];
 
-export const homeTestimonial = {
+export const testimonial = {
   quote: "An incredible partner that transformed our technical architecture from the ground up.",
   clientName: "Jordan Lee",
   clientRole: "CTO",

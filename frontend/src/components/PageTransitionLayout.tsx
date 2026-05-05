@@ -27,7 +27,7 @@ export function PageTransitionLayout() {
 
   return (
     <>
-      {/* Home uses its own fixed nav (`HomeLanding`); keep this bar for inner routes only. */}
+      {/* Index uses its own fixed nav (`Landing`); keep this bar for inner routes only. */}
       {pathname !== "/" ? <Navbar /> : null}
       <div
         key={pathname}

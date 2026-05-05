@@ -1,5 +1,5 @@
-import HomeLanding from "@/components/home/HomeLanding";
+import Landing from "@/components/home/Landing";
 
-const Index = () => <HomeLanding />;
+const Index = () => <Landing />;
 
 export default Index;
