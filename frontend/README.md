@@ -99,4 +99,4 @@ npm run lint
 
 ## Chatbot from the browser
 
-The app calls `POST /chat` on `VITE_CHATBOT_API_BASE_URL` (default `http://localhost:8787`). Ensure the backend is running and CORS/`FRONTEND_ORIGIN` match your dev origin — see [backend/README.md](../backend/README.md).
+The app calls `POST /chat` on `VITE_CHATBOT_API_BASE_URL` (default `http://localhost:8787`). Ensure the backend is running and CORS matches your site origin (`FRONTEND_ORIGIN` or `FRONTEND_ORIGINS` on the backend) — see [backend/README.md](../backend/README.md).

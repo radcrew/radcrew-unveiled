@@ -52,7 +52,8 @@ Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging 
 - `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
 - `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for semantic retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
 - `HUGGINGFACE_EMBEDDING_PROVIDER`: provider for embedding inference (default `hf-inference`)
-- `FRONTEND_ORIGIN`: frontend origin (default `http://localhost:8080`)
+- `FRONTEND_ORIGIN`: single allowed browser origin for CORS (default `http://localhost:8080`)
+- `FRONTEND_ORIGINS`: optional comma-separated list (e.g. `https://radcrew.org,https://www.radcrew.org`). When set and non-empty, CORS uses this list instead of only `FRONTEND_ORIGIN`. Set this on Vercel for production if the site and API are on different hosts.
 - `GITHUB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
 - `GITHUB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_PRIVATE_REPO=true`)
 - `GITHUB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_REPO_URL` is set; example: `main`)

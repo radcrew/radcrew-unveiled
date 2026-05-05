@@ -22,7 +22,11 @@ class Settings(BaseSettings):
     )
 
     PORT: int = Field(default=8787, ge=1)
-    FRONTEND_ORIGIN: str = Field(default="http://localhost:8080")
+    FRONTEND_ORIGIN: str = Field(default="http://radcrew.org")
+    FRONTEND_ORIGINS: str | None = Field(
+        default=None,
+        description="Optional comma-separated list of browser origins for CORS. If set, replaces FRONTEND_ORIGIN.",
+    )
 
     HF_TOKEN: str | None = None
     HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
@@ -38,6 +42,13 @@ class Settings(BaseSettings):
 
     COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
     WEB3FORMS_ACCESS_KEY: str | None = None
+
+    def cors_allow_origins(self) -> list[str]:
+        """Origins allowed by CORSMiddleware (exact match, include scheme)."""
+        raw = self.FRONTEND_ORIGINS
+        if raw and raw.strip():
+            return [part.strip() for part in raw.split(",") if part.strip()]
+        return [self.FRONTEND_ORIGIN]
 
 
 @lru_cache

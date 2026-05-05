@@ -15,7 +15,7 @@ from app.core.lifespan import create_lifespan
 from app.chatbot.chat import set_knowledge_chunks
 
 
-def create_http_app(frontend_origin: str) -> FastAPI:
+def create_http_app(cors_origins: list[str]) -> FastAPI:
     limiter = Limiter(key_func=get_remote_address, default_limits=["25/minute"])
 
     app = FastAPI(lifespan=create_lifespan(set_knowledge_chunks))
@@ -24,7 +24,7 @@ def create_http_app(frontend_origin: str) -> FastAPI:
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[frontend_origin],
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
