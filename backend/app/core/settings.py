@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     PORT: int = Field(default=8787, ge=1)
-    FRONTEND_ORIGIN: str = Field(default="http://radcrew.org")
+    FRONTEND_ORIGIN: str = Field(default="https://radcrew.org")
     FRONTEND_ORIGINS: str | None = Field(
         default=None,
         description="Optional comma-separated list of browser origins for CORS. If set, replaces FRONTEND_ORIGIN.",
