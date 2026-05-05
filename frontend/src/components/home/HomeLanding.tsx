@@ -44,6 +44,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 import HeroCanvas from "@/components/HeroCanvas";
@@ -483,12 +490,39 @@ export default function HomeLanding() {
               >
                 <div className={`md:col-span-7 ${i % 2 !== 0 ? "md:order-last" : ""}`}>
                   <div className="relative aspect-[4/3] overflow-hidden border border-border bg-background shadow-sm md:aspect-[16/10]">
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
-                    />
-                    <div className="absolute inset-0 mix-blend-multiply bg-primary/5 transition-colors duration-700 group-hover:bg-transparent" />
+                    {project.images && project.images.length > 0 ? (
+                      <Carousel opts={{ loop: true }} className="absolute inset-0 h-full min-h-0 w-full">
+                        <CarouselContent className="-ml-0 h-full min-h-0">
+                          {project.images.map((src, idx) => (
+                            <CarouselItem
+                              key={`${project.title}-${idx}`}
+                              className="relative h-full min-h-full basis-full self-stretch pl-0"
+                            >
+                              <img
+                                src={src}
+                                alt={`${project.title} — screen ${idx + 1}`}
+                                className="absolute inset-0 h-full w-full object-fill opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+                              />
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious
+                          type="button"
+                          className="left-3 top-1/2 z-20 -translate-y-1/2 border-primary/40 bg-background/95 text-foreground shadow-md hover:bg-background"
+                        />
+                        <CarouselNext
+                          type="button"
+                          className="right-3 top-1/2 z-20 -translate-y-1/2 border-primary/40 bg-background/95 text-foreground shadow-md hover:bg-background"
+                        />
+                      </Carousel>
+                    ) : project.image ? (
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
+                      />
+                    ) : null}
+                    <div className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply bg-primary/5 transition-colors duration-700 group-hover:bg-transparent" />
                   </div>
                 </div>
                 <div className={`flex flex-col justify-center md:col-span-5 ${i % 2 !== 0 ? "md:pr-12" : "md:pl-12"}`}>

@@ -3,11 +3,23 @@ import apiImg from "@/assets/portfolio/api.png";
 import defiImg from "@/assets/portfolio/defi.png";
 import ragImg from "@/assets/portfolio/rag.png";
 import scienceImg from "@/assets/portfolio/science.png";
+import reImg1 from "@/assets/portfolio/real-estate-consultant/img1.png";
+import reImg2 from "@/assets/portfolio/real-estate-consultant/img2.png";
+import reImg3 from "@/assets/portfolio/real-estate-consultant/img3.png";
+import reImg4 from "@/assets/portfolio/real-estate-consultant/img4.png";
+import reImg5 from "@/assets/portfolio/real-estate-consultant/img5.png";
 import ceoImg from "@/assets/team/ceo.png";
 import ctoImg from "@/assets/team/cto.png";
 import designImg from "@/assets/team/design.png";
 
 export const homeProjects = [
+  {
+    title: "Real Estate Consultant",
+    description:
+      "Client-facing discovery and advisory experience: property search, market context, and guided consultation flows with a polished, trustworthy UI.",
+    images: [reImg1, reImg2, reImg3, reImg4, reImg5],
+    tags: ["React", "Next.js", "Product UI"],
+  },
   {
     title: "Governance Portal",
     description:
