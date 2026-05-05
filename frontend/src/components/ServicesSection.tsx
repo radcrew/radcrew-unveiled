@@ -1,7 +1,7 @@
 import { Layers, Hexagon, Brain } from "lucide-react";
-import { CardTitle } from "@/components/ui/card";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadCard } from "@/components/ui/rad-card";
+import { CardTitle } from "@components/ui/card";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadCard } from "@components/ui/rad-card";
 
 const pillars = [
   {

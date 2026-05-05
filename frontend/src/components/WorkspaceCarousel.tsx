@@ -1,8 +1,8 @@
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { ScrollDriven } from "@/components/ScrollDriven";
-import { RadButton } from "@/components/ui/rad-button";
+import { ScrollDriven } from "@components/ScrollDriven";
+import { RadButton } from "@components/ui/rad-button";
 
 import workspace1 from "@/assets/workspace-1.jpg";
 import workspace2 from "@/assets/workspace-2.jpg";

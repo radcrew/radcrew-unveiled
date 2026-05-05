@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import Navbar from "@components/Navbar";
 import { scrollBehaviorForViewport, scrollSectionIntoView } from "@/lib/scroll-to-section";
 
 export function PageTransitionLayout() {
@@ -27,8 +27,8 @@ export function PageTransitionLayout() {
 
   return (
     <>
-      {/* Outside the animated layer so `position: fixed` on the nav is viewport-relative (transform creates a containing block). */}
-      <Navbar />
+      {/* Index uses its own fixed nav (`Landing`); keep this bar for inner routes only. */}
+      {pathname !== "/" ? <Navbar /> : null}
       <div
         key={pathname}
         className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300 motion-safe:fill-mode-both"

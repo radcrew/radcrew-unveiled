@@ -1,36 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 40 20% 98%;
-    --foreground: 220 20% 12%;
+    /* RadCrew luxury landing (aligned with Code-UI-Upgrade agency-website) */
+    --background: 60 22% 98%;
+    --foreground: 0 0% 7%;
 
-    --card: 40 15% 96%;
-    --card-foreground: 220 20% 12%;
+    --card: 40 20% 96%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 12%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 220 20% 12%;
-    --primary-foreground: 40 20% 98%;
+    --primary: 38 60% 55%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 40 12% 92%;
-    --secondary-foreground: 220 20% 12%;
+    --secondary-foreground: 0 0% 7%;
 
-    --muted: 40 10% 94%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 40 20% 96%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 16 80% 56%;
+    --accent: 38 45% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 40 12% 88%;
-    --input: 40 12% 88%;
-    --ring: 16 80% 56%;
+    --border: 38 30% 85%;
+    --input: 38 30% 85%;
+    --ring: 38 60% 55%;
 
     --radius: 0.625rem;
 
@@ -43,8 +46,7 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Matches `.nav-inner` height (h-16); used for anchor scroll + snap so content sits flush under the bar */
-    --site-header-height: 4rem;
+    --site-header-height: 5rem;
   }
 }
 
@@ -54,7 +56,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background font-sans text-foreground antialiased;
     font-feature-settings: "cv11", "ss01";
   }
 
@@ -74,22 +76,6 @@
     text-wrap: pretty;
   }
 
-  /* Home only: class toggled from `Index` — full-viewport sections + snap so #hash lands on one “page” */
-  html.home-scroll-sections {
-    scroll-snap-type: y mandatory;
-  }
-
-  html.home-scroll-sections .hero-root,
-  html.home-scroll-sections #services,
-  html.home-scroll-sections #how-we-work,
-  html.home-scroll-sections #portfolio,
-  html.home-scroll-sections #team,
-  /* Contact + footer: snap to end so the footer can sit in view (matches header “Contact” scroll). */
-  html.home-scroll-sections .contact-footer-stack {
-    scroll-snap-align: end;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
 }
 
 @layer components {

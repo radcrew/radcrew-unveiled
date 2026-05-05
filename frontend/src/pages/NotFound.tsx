@@ -1,8 +1,8 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { RadButton } from "@/components/ui/rad-button";
-import { CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadCard } from "@/components/ui/rad-card";
+import { RadButton } from "@components/ui/rad-button";
+import { CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
+import { RadCard } from "@components/ui/rad-card";
 
 const NotFound = () => {
   const location = useLocation();
