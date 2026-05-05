@@ -36,7 +36,7 @@ import {
 /** Shared sizing / hover for Simple Icons in the “Technologies We Master” row */
 const TECH_ICON_CLASS = "h-9 w-9 transition-colors duration-300 hover:text-primary md:h-10 md:w-10";
 
-export function TechStack() {
+export const TechStack = () => {
   return (
     <section className="bg-background px-6 py-24 lg:px-12">
       <div className="mx-auto max-w-7xl text-center">
@@ -81,4 +81,4 @@ export function TechStack() {
       </div>
     </section>
   );
-}
+};

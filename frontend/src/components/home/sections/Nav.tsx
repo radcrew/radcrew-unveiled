@@ -6,7 +6,7 @@ type NavProps = {
   onNavigate: (sectionId: string) => void;
 };
 
-export function Nav({ isScrolled, onNavigate }: NavProps) {
+export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
   return (
     <nav
       className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
@@ -63,4 +63,4 @@ export function Nav({ isScrolled, onNavigate }: NavProps) {
       </div>
     </nav>
   );
-}
+};

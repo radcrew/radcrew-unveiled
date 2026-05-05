@@ -25,7 +25,7 @@ const capabilityCards = [
 const cardClassName =
   "group border border-primary/20 bg-background p-10 transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5";
 
-export function Capabilities() {
+export const Capabilities = () => {
   return (
     <section id="services" className="relative bg-muted px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -57,4 +57,4 @@ export function Capabilities() {
       </div>
     </section>
   );
-}
+};

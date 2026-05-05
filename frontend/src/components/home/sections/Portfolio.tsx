@@ -9,7 +9,7 @@ import {
 import { featuredProjects } from "../static-data";
 import { fadeIn } from "../motion";
 
-export function Portfolio() {
+export const Portfolio = () => {
   return (
     <section id="portfolio" className="border-y border-border bg-muted px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -91,4 +91,4 @@ export function Portfolio() {
       </div>
     </section>
   );
-}
+};

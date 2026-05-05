@@ -5,7 +5,7 @@ import { Button } from "@components/ui/button";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 
-export function Footer() {
+export const Footer = () => {
   const { toast } = useToast();
   const [newsletterPending, setNewsletterPending] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
@@ -103,4 +103,4 @@ export function Footer() {
       </div>
     </footer>
   );
-}
+};

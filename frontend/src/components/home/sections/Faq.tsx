@@ -6,7 +6,7 @@ import {
 } from "@components/ui/accordion";
 import { faqs } from "../static-data";
 
-export function Faq() {
+export const Faq = () => {
   return (
     <section className="border-t border-border bg-muted px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-3xl">
@@ -27,4 +27,4 @@ export function Faq() {
       </div>
     </section>
   );
-}
+};

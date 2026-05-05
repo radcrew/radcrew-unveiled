@@ -36,7 +36,7 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
-export function ContactSection() {
+export const ContactSection = () => {
   const { toast } = useToast();
   const [contactPending, setContactPending] = useState(false);
 
@@ -250,4 +250,4 @@ export function ContactSection() {
       </div>
     </section>
   );
-}
+};

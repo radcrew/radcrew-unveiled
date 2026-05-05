@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { teamMembers } from "../static-data";
 import { fadeIn } from "../motion";
 
-export function Team() {
+export const Team = () => {
   return (
     <section id="team" className="relative border-t border-border bg-background px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -43,4 +43,4 @@ export function Team() {
       </div>
     </section>
   );
-}
+};

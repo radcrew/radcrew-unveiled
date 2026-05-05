@@ -7,7 +7,7 @@ type HeroProps = {
   onNavigate: (sectionId: string) => void;
 };
 
-export function Hero({ onNavigate }: HeroProps) {
+export const Hero = ({ onNavigate }: HeroProps) => {
   return (
     <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-6 pt-24">
       <div className="absolute inset-0 z-0">
@@ -54,4 +54,4 @@ export function Hero({ onNavigate }: HeroProps) {
       </div>
     </section>
   );
-}
+};

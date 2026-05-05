@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { testimonial } from "../static-data";
 
-export function Testimonial() {
+export const Testimonial = () => {
   return (
     <section className="relative overflow-hidden border-t border-border bg-muted px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-4xl text-center">
@@ -20,4 +20,4 @@ export function Testimonial() {
       </div>
     </section>
   );
-}
+};

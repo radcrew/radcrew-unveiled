@@ -13,7 +13,7 @@ import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
 
-export default function Landing() {
+const Landing = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
 
@@ -42,4 +42,6 @@ export default function Landing() {
       <Footer />
     </div>
   );
-}
+};
+
+export default Landing;

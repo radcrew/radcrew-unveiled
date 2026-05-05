@@ -8,7 +8,7 @@ const phases = [
   { num: "IV.", title: "Partner", desc: "Long-term embedded relationship to scale the product forward." },
 ] as const;
 
-export function Process() {
+export const Process = () => {
   return (
     <section id="process" className="border-t border-border bg-background px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
@@ -37,4 +37,4 @@ export function Process() {
       </div>
     </section>
   );
-}
+};
