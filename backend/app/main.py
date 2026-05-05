@@ -13,7 +13,7 @@ configure_logging()
 
 _settings = get_settings()
 
-app = create_http_app(_settings.FRONTEND_ORIGIN)
+app = create_http_app(_settings.cors_allow_origins())
 app.include_router(health.router)
 app.include_router(chat.router)
 
