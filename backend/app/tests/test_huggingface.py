@@ -10,52 +10,46 @@ def _collect_stream(chunks: Iterator[str]) -> str:
     return "".join(chunks)
 
 
-@patch("app.chatbot.huggingface.text_generation.InferenceClient")
-@patch("app.chatbot.huggingface.chat_completion.InferenceClient")
+@patch("app.chatbot.huggingface.generate.stream_text_generation")
+@patch("app.chatbot.huggingface.generate.stream_chat_completion")
 def test_generate_answer_returns_chat_completion_text(
-    mock_client_cls: MagicMock, _mock_tg_cls: MagicMock
+    mock_chat: MagicMock, mock_tg: MagicMock
 ) -> None:
-    mock_inst = MagicMock()
-    mock_client_cls.return_value = mock_inst
-    mock_inst.chat_completion.return_value = [
-        {"choices": [{"delta": {"content": "  Answer"}}]},
-        {"choices": [{"delta": {"content": " from chat.  "}}]},
-    ]
+    mock_chat.return_value = iter(["  Answer", " from chat.  "])
 
-    result = _collect_stream(generate_answer("Qwen/Qwen2.5-1.5B-Instruct", "token", "prompt text", "hf-inference"))
+    result = _collect_stream(generate_answer("prompt text"))
 
     assert result == "  Answer from chat.  "
-    assert mock_inst.chat_completion.call_count >= 1
-    mock_inst.text_generation.assert_not_called()
+    assert mock_chat.call_count >= 1
+    mock_tg.assert_not_called()
 
 
-@patch("app.chatbot.huggingface.text_generation.InferenceClient")
-@patch("app.chatbot.huggingface.chat_completion.InferenceClient")
+@patch("app.chatbot.huggingface.generate.stream_text_generation")
+@patch("app.chatbot.huggingface.generate.stream_chat_completion")
 def test_generate_answer_falls_back_to_text_generation(
-    mock_cc_cls: MagicMock, mock_tg_cls: MagicMock
+    mock_chat: MagicMock, mock_tg: MagicMock
 ) -> None:
-    mock_inst = MagicMock()
-    mock_cc_cls.return_value = mock_inst
-    mock_tg_cls.return_value = mock_inst
-    mock_inst.chat_completion.return_value = []
-    mock_inst.text_generation.return_value = ["  From text gen.  "]
+    mock_chat.return_value = iter([])
+    mock_tg.return_value = iter(["  From text gen.  "])
 
-    result = _collect_stream(generate_answer("m", "t", "p", "auto"))
+    result = _collect_stream(generate_answer("p"))
 
     assert result == "  From text gen.  "
-    mock_inst.text_generation.assert_called()
+    mock_tg.assert_called()
 
 
-@patch("app.chatbot.huggingface.text_generation.InferenceClient")
-@patch("app.chatbot.huggingface.chat_completion.InferenceClient")
+@patch("app.chatbot.huggingface.generate.get_settings")
+@patch("app.chatbot.huggingface.generate.stream_text_generation")
+@patch("app.chatbot.huggingface.generate.stream_chat_completion")
 def test_generate_answer_raises_when_all_paths_fail(
-    mock_cc_cls: MagicMock, mock_tg_cls: MagicMock
+    mock_chat: MagicMock,
+    mock_tg: MagicMock,
+    mock_settings: MagicMock,
 ) -> None:
-    mock_inst = MagicMock()
-    mock_cc_cls.return_value = mock_inst
-    mock_tg_cls.return_value = mock_inst
-    mock_inst.chat_completion.return_value = []
-    mock_inst.text_generation.return_value = []
+    mock_settings.return_value.HUGGINGFACE_MODEL = "my-model"
+    mock_settings.return_value.HUGGINGFACE_PROVIDER = "hf-inference"
+    mock_chat.return_value = iter([])
+    mock_tg.return_value = iter([])
 
-    with pytest.raises(RuntimeError, match="No inference provider could stream model"):
-        list(generate_answer("my-model", "t", "p", "hf-inference"))
+    with pytest.raises(RuntimeError, match='No inference provider could stream model "my-model"'):
+        list(generate_answer("p"))

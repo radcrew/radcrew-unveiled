@@ -1,0 +1,92 @@
+# Frontend CI/CD (Vite) — deploys from repo root (see /vercel.json).
+#
+# Vercel dashboard (frontend project): set Root Directory to "." (repository root),
+# not "frontend", so install can run `npm ci` against package-lock.json.
+#
+# Required GitHub secrets (Vercel → Project → Settings → General):
+#   VERCEL_TOKEN
+#   VERCEL_ORG_ID
+#   VERCEL_FRONTEND_PROJECT_ID
+
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - "vercel.json"
+      - ".github/workflows/frontend.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - "vercel.json"
+      - ".github/workflows/frontend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          # Lockfile may omit Linux native optional deps when generated on Windows (npm/cli#4828)
+          npm install --no-save \
+            @rollup/rollup-linux-x64-gnu@4.24.0 \
+            @swc/core-linux-x64-gnu@1.13.2
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  deploy:
+    needs: ci
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
+          working-directory: .
+          vercel-version: 54.2.0
+          github-comment: ${{ github.event_name == 'pull_request' }}
+          vercel-args: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && '--prod' || '' }}
