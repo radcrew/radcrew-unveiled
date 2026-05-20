@@ -17,6 +17,12 @@
     "test:backend": "cd backend && python -m pytest",
     "build:backend": "cd backend && python -m compileall -q app"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "4.24.0",
+    "@rollup/rollup-darwin-x64": "4.24.0",
+    "@rollup/rollup-linux-x64-gnu": "4.24.0",
+    "@rollup/rollup-win32-x64-msvc": "4.24.0"
+  },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "@eslint/js": "^9.32.0",
