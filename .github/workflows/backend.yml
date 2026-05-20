@@ -72,5 +72,6 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
           working-directory: ./backend
+          vercel-version: 47.2.2
           github-comment: ${{ github.event_name == 'pull_request' }}
           vercel-args: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && '--prod' || '' }}
