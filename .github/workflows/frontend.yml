@@ -48,8 +48,10 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          # Lockfile may omit Linux Rollup optional deps when generated on Windows (npm/cli#4828)
-          npm install --no-save @rollup/rollup-linux-x64-gnu@4.24.0
+          # Lockfile may omit Linux native optional deps when generated on Windows (npm/cli#4828)
+          npm install --no-save \
+            @rollup/rollup-linux-x64-gnu@4.24.0 \
+            @swc/core-linux-x64-gnu@1.13.2
 
       - name: Lint
         run: npm run lint
