@@ -1,4 +1,7 @@
-# Frontend CI/CD (Vite) — monorepo root installs deps; Vercel project root is ./frontend
+# Frontend CI/CD (Vite) — deploys from repo root (see /vercel.json).
+#
+# Vercel dashboard (frontend project): set Root Directory to "." (repository root),
+# not "frontend", so install can run `npm ci` against package-lock.json.
 #
 # Required GitHub secrets (Vercel → Project → Settings → General):
 #   VERCEL_TOKEN
@@ -14,12 +17,14 @@ on:
       - "frontend/**"
       - "package.json"
       - "package-lock.json"
+      - "vercel.json"
       - ".github/workflows/frontend.yml"
   pull_request:
     paths:
       - "frontend/**"
       - "package.json"
       - "package-lock.json"
+      - "vercel.json"
       - ".github/workflows/frontend.yml"
   workflow_dispatch:
 
@@ -81,7 +86,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
-          working-directory: ./frontend
-          vercel-version: latest
+          working-directory: .
+          vercel-version: 54.2.0
           github-comment: ${{ github.event_name == 'pull_request' }}
           vercel-args: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && '--prod' || '' }}
