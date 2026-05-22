@@ -24,7 +24,8 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
     settings = get_settings()
     body = state["body"]
     
-    routing_msgs = build_feedback_routing_messages(body.message)
+    history = [{"role": m.role, "content": m.content} for m in (body.history or [])]
+    routing_msgs = build_feedback_routing_messages(body.message, history)
 
     try:
         client = InferenceClient(

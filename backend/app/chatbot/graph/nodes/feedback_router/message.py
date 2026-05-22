@@ -19,18 +19,45 @@ class FeedbackRoutingReply(BaseModel):
 
 
 _ROUTING_INSTRUCTIONS = (
-    "You route chat intents. Default: no tool. Use send_feedback only when the user clearly "
-    "wants to submit feedback, a bug report, or a message to the company—not for greetings, "
-    "FAQ, or follow-ups about your previous answer.\n\n"
-    "Reply with ONLY one JSON object (no markdown fences) that conforms to this JSON Schema:\n"
+    "You route chat intents for a company website chatbot. Default: no tool.\n"
+    "Use send_feedback ONLY when the user clearly wants to submit feedback, a bug report, "
+    "a complaint, or a direct message to the company.\n"
+    "Do NOT use send_feedback for: greetings, questions about the company or team, "
+    "FAQ queries, or follow-ups about a previous answer.\n"
+    "Use the conversation history to understand context — the user may express intent "
+    "across multiple turns.\n\n"
+    "Reply with ONLY one JSON object (no markdown fences) matching this schema:\n"
+)
+
+_FEW_SHOT_EXAMPLES = (
+    "\n\nExamples:\n"
+    'User: "I want to report a bug on the contact page"\n'
+    '→ {"tool_call": {"name": "send_feedback", "arguments": {"message": "I want to report a bug on the contact page", "subject": "Bug report"}}}\n\n'
+    'User: "What services does RadCrew offer?"\n'
+    '→ {"tool_call": null}\n\n'
+    'User: "The mobile layout is broken on my iPhone"\n'
+    '→ {"tool_call": {"name": "send_feedback", "arguments": {"message": "The mobile layout is broken on my iPhone", "subject": "Mobile layout issue"}}}\n\n'
+    'User: "Who are the team members?"\n'
+    '→ {"tool_call": null}\n\n'
+    'User: "Great website!" (after normal conversation)\n'
+    '→ {"tool_call": null}\n'
 )
 
 TOOL_ROUTING_SYSTEM_MESSAGE = (
-    _ROUTING_INSTRUCTIONS + json.dumps(FeedbackRoutingReply.model_json_schema(), indent=2)
+    _ROUTING_INSTRUCTIONS
+    + json.dumps(FeedbackRoutingReply.model_json_schema(), indent=2)
+    + _FEW_SHOT_EXAMPLES
 )
 
+_MAX_ROUTING_HISTORY = 4
 
-def build_feedback_routing_messages(message: str) -> list[dict[str, Any]]:
+
+def build_feedback_routing_messages(
+    message: str,
+    history: list[dict[str, str]] | None = None,
+) -> list[dict[str, Any]]:
     msgs = [{"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE}]
+    for h in (history or [])[-_MAX_ROUTING_HISTORY:]:
+        msgs.append({"role": h["role"], "content": h["content"]})
     msgs.append({"role": "user", "content": message})
     return msgs
