@@ -84,6 +84,80 @@ decoding is already deterministic, this is **structural**, not randomness.
 
 ---
 
+## Problem 3 — Feedback router intercepts most questions
+
+The intent router misclassifies the large majority of ordinary questions as
+"feedback submissions," so they never reach the RAG answer path. This sits
+*upstream* of every retrieval/prompt/sanitizer improvement above and is the
+biggest single blocker to answer coverage.
+
+### Evidence (live `/chat` run, 2026-05-30)
+
+- ~25 questions sent; only two exact phrasings (`What is RadCrew…?`,
+  `What is the tech stack…?`) reached RAG. The rest routed to feedback.
+- Routing is **deterministic per exact string** (identical message → same
+  route 5/5), so it is not randomness — the classifier is simply biased.
+- Off-topic questions ("capital of France") also routed to feedback and
+  **triggered a real Web3Forms send attempt** (failed only because
+  `WEB3FORMS_ACCESS_KEY` is unset). In production this would email the team
+  spurious "feedback."
+
+### How routing works today
+
+`graph/nodes/feedback_router/router.py`:
+
+1. Every message → `Qwen/Qwen2.5-1.5B-Instruct` with a strict JSON schema
+   (`FeedbackRoutingReply = { tool_call: null | {name, arguments} }`).
+2. Model returns JSON. If `tool_call` is an object → route **feedback**;
+   if `null` or the reply fails schema validation → route **rag**.
+3. On the feedback route, `feedback_handler_node` **immediately** calls
+   `submit_feedback(...)` — there is no user confirmation before the email is
+   sent.
+
+### Causes
+
+1. **A 1.5B model is too weak for reliable intent classification.** Core
+   issue — small models over-populate the "interesting" optional field
+   instead of returning `null`.
+2. **Schema shape fights the model** — "nullable object" (`tool_call: null |
+   {...}`) is harder for a small model than a flat enum; it leans toward
+   emitting the object.
+3. **No few-shot examples** — the prompt states a rule but shows no concrete
+   question→`null` vs feedback→`tool_call` examples.
+4. **No cheap deterministic pre-filter** — every message, including obvious
+   questions ending in "?", pays the LLM-classifier lottery.
+5. **Irreversible action on a coin-flip** — a misclassification doesn't just
+   fail to answer; it sends an email, with nothing to recover from it.
+
+### Fixes (layered — combine, don't pick one)
+
+- [ ] **A — Deterministic pre-gate before the LLM** ★ highest ROI. Route
+      obvious questions (ends with `?`, or starts with
+      who/what/when/where/why/how/which/is/are/do/does/can/could/should/tell
+      me) straight to **rag** in code; only *consider* feedback on explicit
+      signals ("feedback", "report a bug", "suggestion", "complaint",
+      "message to the team"); ambiguous → fall through to the LLM.
+- [ ] **D — Confirm before sending** ★ removes irreversible harm. On detected
+      feedback intent, ask "want me to forward this to the team?" and only
+      call `submit_feedback` after the user confirms.
+- [ ] **B — Make the LLM stage reliable** for the ambiguous remainder: flip
+      the schema to a flat enum `{ "intent": "question" | "feedback" }`
+      (default `"question"`), add few-shot examples, lead with the strong
+      default and put the schema last. Keep parse/validation failure → **rag**.
+- [ ] **C — Bias toward RAG on low confidence** — free with the enum default
+      of `"question"`; treat anything short of an explicit feedback signal as
+      a question.
+- [ ] **F — Log routing decisions** (message + chosen route) at INFO so the
+      false-positive rate is measurable.
+- [ ] **E — (optional, only if A–D fall short)** a dedicated zero-shot/NLI or
+      embeddings-similarity classifier — still small HF, but purpose-built
+      for classification rather than a 1.5B chat model.
+
+`A + D` alone should recover most lost coverage and stop spurious emails,
+with small well-tested changes and no model swap.
+
+---
+
 ## The three proposed concepts, evaluated for this stack
 
 | Concept | Verdict |
@@ -97,9 +171,14 @@ decoding is already deterministic, this is **structural**, not randomness.
 ## Suggested order of work
 
 1. **System/user prompt split + threshold and top-k tuning** — smallest
-   diff, addresses both problems.
-2. **Lexical retrieval fallback** — recovers name-based questions.
-3. **Deterministic output guardrail** — locks in format consistency.
+   diff, addresses both problems. *(done)*
+2. **Lexical retrieval fallback** — recovers name-based questions. *(done)*
+3. **Deterministic output guardrail** — locks in format consistency. *(done)*
+4. **Feedback-router pre-gate + confirm-before-send (A + D)** — Problem 3;
+   the biggest remaining coverage win, since most questions currently never
+   reach RAG at all.
+5. **Router enum schema + few-shot + decision logging (B + C + F)** — clean
+   up the ambiguous remainder and make the fix measurable.
 
 ## Out of scope (deliberately)
 
