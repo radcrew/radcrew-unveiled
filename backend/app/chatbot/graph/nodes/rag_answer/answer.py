@@ -6,6 +6,7 @@ from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
 from .prompt import build_chat_prompt
 from .retrieval import retrieve_relevant_chunks
+from .sanitize import sanitize_answer_stream
 from .cache import (
     get_cached_response,
     prompt_cache_key,
@@ -42,7 +43,7 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
 
     return {
         "output_stream": stream_answer_with_cache(
-            generate_answer(prompt.system, prompt.user),
+            sanitize_answer_stream(generate_answer(prompt.system, prompt.user)),
             cache_key,
         )
     }

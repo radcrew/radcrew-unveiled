@@ -46,8 +46,8 @@ when relevant information exists.
 
 - [x] Lower the threshold to ~0.25 and raise top-k from 5 → 8
       (`retrieval.py`, `answer.py`).
-- [ ] Add a lexical / keyword (or BM25) fallback alongside embeddings so
-      name-based questions match on profile titles.
+- [x] Add a lexical / keyword (or BM25) fallback alongside embeddings so
+      name-based questions match on profile titles (`retrieval.py`).
 - [x] Soften the escape-hatch wording: answer from whatever relevant
       sources exist first; only suggest email when nothing matches
       (`prompt.py`).
@@ -77,9 +77,10 @@ decoding is already deterministic, this is **structural**, not randomness.
       format rules, identical every call) and a `user` message (context +
       question, varies). Highest-leverage tone fix.
 - [x] Collapse the contradictory length rules into one coherent tone spec.
-- [ ] Add a deterministic output guardrail (post-processing) to enforce
+- [x] Add a deterministic output guardrail (post-processing) to enforce
       format rules the model drifts on: convert `*` bullets to `-`, strip
-      URLs / markdown links — rather than relying on the model.
+      URLs / markdown links — rather than relying on the model
+      (`sanitize.py`).
 
 ---
 
