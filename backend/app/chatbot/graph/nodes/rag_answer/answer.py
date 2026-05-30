@@ -27,7 +27,7 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     relevant_chunks = retrieve_relevant_chunks(
         knowledge_chunks,
         retrieval_query,
-        5,
+        8,
     )
 
     if not relevant_chunks and not history:
@@ -35,14 +35,14 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
 
     prompt = build_chat_prompt(message, knowledge_chunks, history)
 
-    cache_key = prompt_cache_key(prompt)
+    cache_key = prompt_cache_key(prompt.cache_text())
     cached = get_cached_response(cache_key)
     if cached is not None:
         return {"output_stream": get_text_chunk_stream(cached)}
 
     return {
         "output_stream": stream_answer_with_cache(
-            generate_answer(prompt),
+            generate_answer(prompt.system, prompt.user),
             cache_key,
         )
     }

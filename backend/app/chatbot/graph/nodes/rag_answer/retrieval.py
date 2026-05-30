@@ -12,7 +12,7 @@ from app.core.settings import get_settings
 logger = logging.getLogger(__name__)
 
 # Best semantic similarity among returned docs; below this → low-context fallback (no history).
-RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.35
+RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.25
 
 
 def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
@@ -44,8 +44,8 @@ def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[
 def retrieve_relevant_chunks(
     corpus: list[KnowledgeDocument],
     query: str,
-    limit: int = 5,
-) -> tuple[list[KnowledgeDocument], float]:
+    limit: int = 8,
+) -> list[KnowledgeDocument]:
     scores = _semantic_similarities(corpus, query)
 
     ranked = sorted(enumerate(scores), key=lambda x: -x[1])

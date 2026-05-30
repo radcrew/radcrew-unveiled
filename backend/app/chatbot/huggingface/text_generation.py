@@ -25,11 +25,15 @@ def extract_stream_content(chunk: Any) -> str:
 
 
 def stream_text_generation(
-    prompt: str,
+    system: str,
+    user: str,
     provider: str,
 ) -> Iterator[str]:
     settings = get_settings()
-    
+
+    # text_generation has no role concept; fold the system message into the prompt.
+    prompt = f"{system}\n\n{user}"
+
     client = InferenceClient(
         model=settings.HUGGINGFACE_MODEL,
         token=settings.HF_TOKEN,

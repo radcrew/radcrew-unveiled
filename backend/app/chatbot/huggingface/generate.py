@@ -6,7 +6,7 @@ from app.chatbot.huggingface.common import logger, providers_to_try
 from app.chatbot.huggingface.text_generation import stream_text_generation
 
 
-def generate_answer(prompt: str) -> Iterator[str]:
+def generate_answer(system: str, user: str) -> Iterator[str]:
     settings = get_settings()
     model = settings.HUGGINGFACE_MODEL
     provider_policy = settings.HUGGINGFACE_PROVIDER
@@ -16,7 +16,7 @@ def generate_answer(prompt: str) -> Iterator[str]:
     for provider in providers:
         try:
             yielded_any = False
-            for content in stream_chat_completion(prompt, provider):
+            for content in stream_chat_completion(system, user, provider):
                 yielded_any = True
                 yield content
             if yielded_any:
@@ -27,7 +27,7 @@ def generate_answer(prompt: str) -> Iterator[str]:
     for provider in providers:
         try:
             yielded_any = False
-            for content in stream_text_generation(prompt, provider):
+            for content in stream_text_generation(system, user, provider):
                 yielded_any = True
                 yield content
             if yielded_any:

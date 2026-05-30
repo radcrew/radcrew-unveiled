@@ -44,11 +44,11 @@ when relevant information exists.
 
 ### Fixes
 
-- [ ] Lower the threshold to ~0.25 and raise top-k from 5 → 8
-      (`retrieval.py`).
+- [x] Lower the threshold to ~0.25 and raise top-k from 5 → 8
+      (`retrieval.py`, `answer.py`).
 - [ ] Add a lexical / keyword (or BM25) fallback alongside embeddings so
       name-based questions match on profile titles.
-- [ ] Soften the escape-hatch wording: answer from whatever relevant
+- [x] Soften the escape-hatch wording: answer from whatever relevant
       sources exist first; only suggest email when nothing matches
       (`prompt.py`).
 
@@ -73,10 +73,10 @@ decoding is already deterministic, this is **structural**, not randomness.
 
 ### Fixes
 
-- [ ] Split the prompt into a stable `system` message (persona + tone +
+- [x] Split the prompt into a stable `system` message (persona + tone +
       format rules, identical every call) and a `user` message (context +
       question, varies). Highest-leverage tone fix.
-- [ ] Collapse the contradictory length rules into one coherent tone spec.
+- [x] Collapse the contradictory length rules into one coherent tone spec.
 - [ ] Add a deterministic output guardrail (post-processing) to enforce
       format rules the model drifts on: convert `*` bullets to `-`, strip
       URLs / markdown links — rather than relying on the model.
