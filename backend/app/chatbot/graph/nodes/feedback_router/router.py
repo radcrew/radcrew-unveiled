@@ -13,6 +13,7 @@ from app.chatbot.graph.state import ChatState
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
 from .message import build_feedback_routing_messages
 from .parse import parse_tool_call_reply
+from .pregate import should_skip_llm_route_to_rag
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,13 @@ def route_feedback_or_rag(state: ChatState) -> Literal["feedback", "rag"]:
 def feedback_router_node(state: ChatState) -> dict[str, object]:
     settings = get_settings()
     body = state["body"]
-    
+
+    # Deterministic pre-gate (Solution A): a plain question with no feedback
+    # signal goes straight to RAG, bypassing the over-eager LLM classifier.
+    if should_skip_llm_route_to_rag(body.message):
+        logger.info("[feedback routing] pre-gate → rag (question)")
+        return {"route": "rag"}
+
     routing_msgs = build_feedback_routing_messages(body.message)
 
     try:
