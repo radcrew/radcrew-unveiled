@@ -17,4 +17,5 @@ class ChatState(TypedDict, total=False):
     knowledge_chunks: list[KnowledgeDocument]
     route: Literal["feedback", "rag"]
     feedback_call: ParsedToolCall
+    feedback_phase: Literal["ask", "send", "cancel"]
     output_stream: Iterator[str]

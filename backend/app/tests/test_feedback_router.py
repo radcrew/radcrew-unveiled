@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from app.schemas import ChatRequest
+from app.schemas import ChatHistoryMessage, ChatRequest
+from app.chatbot.messages import MSG_FEEDBACK_CONFIRM
 from app.chatbot.graph.nodes.feedback_router import router
+from app.chatbot.graph.nodes.feedback_router.parse import ParsedToolCall
+from app.chatbot.graph.nodes.feedback_router.confirm import is_affirmation, is_negation
 from app.chatbot.graph.nodes.feedback_router.pregate import (
     has_feedback_signal,
     looks_like_question,
@@ -69,3 +73,54 @@ def test_non_question_consults_llm(mock_client: MagicMock, _parse: MagicMock) ->
     out = router.feedback_router_node(_state("Here is some feedback for the team."))
     assert out == {"route": "rag"}  # parse returned None → rag, but LLM ran
     mock_client.assert_called_once()
+
+
+# --- Solution D: confirm before sending ---
+
+
+@pytest.mark.parametrize("yes", ["yes", "yes please", "sure", "ok", "go ahead", "send it"])
+def test_affirmations(yes: str) -> None:
+    assert is_affirmation(yes)
+
+
+@pytest.mark.parametrize("no", ["no", "nope", "cancel", "don't", "never mind", "not now"])
+def test_negations(no: str) -> None:
+    assert is_negation(no)
+
+
+@patch.object(router, "parse_tool_call_reply")
+@patch.object(router, "InferenceClient")
+def test_detected_feedback_asks_before_sending(mock_client: MagicMock, mock_parse: MagicMock) -> None:
+    mock_parse.return_value = ParsedToolCall(id="x", name="send_feedback", arguments="{}")
+    mock_client.return_value.chat_completion.return_value.choices = [
+        MagicMock(message=MagicMock(content="{}"))
+    ]
+    out = router.feedback_router_node(_state("Here is some feedback for the team."))
+    assert out["route"] == "feedback"
+    assert out["feedback_phase"] == "ask"  # does NOT send on first contact
+    assert json.loads(out["feedback_call"].arguments)["message"] == "Here is some feedback for the team."
+
+
+def _confirm_history(original: str):
+    return [
+        ChatHistoryMessage(role="user", content=original),
+        ChatHistoryMessage(role="assistant", content=MSG_FEEDBACK_CONFIRM.format(body=original)),
+    ]
+
+
+@patch.object(router, "InferenceClient")
+def test_confirmation_yes_sends_original(mock_client: MagicMock) -> None:
+    body = ChatRequest(message="yes please", history=_confirm_history("The contact form is broken."))
+    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    assert out["route"] == "feedback"
+    assert out["feedback_phase"] == "send"
+    assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
+    mock_client.assert_not_called()  # no LLM re-classification on confirm
+
+
+@patch.object(router, "InferenceClient")
+def test_confirmation_no_cancels(mock_client: MagicMock) -> None:
+    body = ChatRequest(message="no thanks", history=_confirm_history("The contact form is broken."))
+    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    assert out == {"route": "feedback", "feedback_phase": "cancel"}
+    mock_client.assert_not_called()
