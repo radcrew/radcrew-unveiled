@@ -19,7 +19,7 @@ TRAIN_JSONL = _TRAIN_DIR / "trainset.jsonl"
 OUTPUT_DIR = _TRAIN_DIR / "outputs" / "qlora-feedback-router"
 
 # --- model / training ---
-MODEL_ID = "meta-llama/Meta-Llama-3-8B-Instruct"
+MODEL_ID = "Qwen/Qwen3.5-4B"
 SEED = 42
 EPOCHS = 1.0
 LEARNING_RATE = 2e-4

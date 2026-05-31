@@ -18,9 +18,17 @@ _BULLET_RE = re.compile(r"^(\s*)(?:\*(?=\s)|[•·])(\s*)")
 _MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
 # href="..." / href='...'
 _HREF_RE = re.compile(r"""\s*href\s*=\s*(?:"[^"]*"|'[^']*')""", re.IGNORECASE)
-# Official website — normalize any scheme/www form to the bare domain so it
-# survives URL stripping (the one link we intentionally allow).
-_OFFICIAL_URL_RE = re.compile(r"(?:https?://)?(?:www\.)?radcrew\.org\b", re.IGNORECASE)
+# Approved official links — normalize any scheme/www form to a canonical bare
+# form so they survive URL stripping. These are the only links we let through;
+# everything else (arbitrary http(s)/www URLs) is removed below.
+_OFFICIAL_LINK_RES: tuple[tuple[re.Pattern[str], str], ...] = (
+    # GitHub org — match optional scheme/www and any trailing path on the org.
+    (re.compile(r"(?:https?://)?(?:www\.)?github\.com/radcrew\b[^\s)]*", re.IGNORECASE), "github.com/radcrew"),
+    # Official website.
+    (re.compile(r"(?:https?://)?(?:www\.)?radcrew\.org\b", re.IGNORECASE), "radcrew.org"),
+)
+# mailto:addr → addr (keep the address, drop the scheme).
+_MAILTO_RE = re.compile(r"\bmailto:([^\s)]+)", re.IGNORECASE)
 # Bare URLs
 _URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 _WWW_RE = re.compile(r"\bwww\.\S+", re.IGNORECASE)
@@ -32,7 +40,9 @@ def _sanitize_line(line: str) -> str:
     line = _BULLET_RE.sub(r"\1-\2", line)
     line = _MD_LINK_RE.sub(r"\1", line)
     line = _HREF_RE.sub("", line)
-    line = _OFFICIAL_URL_RE.sub("radcrew.org", line)
+    line = _MAILTO_RE.sub(r"\1", line)
+    for pattern, canonical in _OFFICIAL_LINK_RES:
+        line = pattern.sub(canonical, line)
     line = _URL_RE.sub("", line)
     line = _WWW_RE.sub("", line)
     line = _INTERIOR_SPACES_RE.sub(" ", line)

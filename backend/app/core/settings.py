@@ -43,6 +43,15 @@ class Settings(BaseSettings):
     COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
     WEB3FORMS_ACCESS_KEY: str | None = None
 
+    # Deep search: a web-search fallback used only when the static knowledge base
+    # can't confidently answer. Inert until WEB_SEARCH_API_KEY is set.
+    DEEP_SEARCH_ENABLED: bool = Field(default=True)
+    WEB_SEARCH_PROVIDER: str = Field(default="tavily")
+    WEB_SEARCH_API_KEY: str | None = None
+    WEB_SEARCH_MAX_RESULTS: int = Field(default=5, ge=1, le=20)
+    # Trigger deep search when the best KB similarity is below this.
+    DEEP_SEARCH_SIMILARITY_THRESHOLD: float = Field(default=0.30, ge=0.0, le=1.0)
+
     def cors_allow_origins(self) -> list[str]:
         """Origins allowed by CORSMiddleware (exact match, include scheme)."""
         raw = self.FRONTEND_ORIGINS

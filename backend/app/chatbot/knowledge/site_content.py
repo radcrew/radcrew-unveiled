@@ -127,4 +127,15 @@ def get_static_site_documents() -> list[KnowledgeDocument]:
                 "They usually respond within one to two business days."
             ),
         ),
+        KnowledgeDocument(
+            id="social-links",
+            title="Social media, links, and where to find RadCrew",
+            url="/#footer",
+            text=(
+                "RadCrew's official links: the website is radcrew.org, the contact email is code@radcrew.org, "
+                "and their GitHub is github.com/radcrew. "
+                "These are the only official channels listed on the site; RadCrew does not advertise other "
+                "social media accounts (such as Twitter/X, LinkedIn, Discord, or Instagram)."
+            ),
+        ),
     ]

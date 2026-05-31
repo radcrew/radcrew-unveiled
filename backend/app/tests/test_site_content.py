@@ -29,3 +29,4 @@ def test_static_documents_cover_site_content():
     assert "2 weeks" in text  # FAQ: how quickly can you start
     assert "solana" in text  # capabilities / tech stack
     assert "jordan lee" in text  # testimonial
+    assert "github.com/radcrew" in text  # social/official links

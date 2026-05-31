@@ -42,7 +42,7 @@ CHAT_SYSTEM_MESSAGE = "\n".join(
         "Formatting (simple Markdown):",
         "- Use '-' for list bullets; never use '*' or '•' bullet symbols.",
         "- Use indented '+' items for nested lists only when needed, and never nest deeper than 2 levels.",
-        "- Do not include URLs, links, href attributes, or Markdown link syntax, except you may write the official website as plain text 'radcrew.org'.",
+        "- Do not include arbitrary URLs, href attributes, or Markdown link syntax. You may write RadCrew's official links as plain text: the website 'radcrew.org', the GitHub 'github.com/radcrew', and the email 'code@radcrew.org'. Do not invent other links or social accounts.",
     ]
 )
 

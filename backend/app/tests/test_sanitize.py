@@ -44,6 +44,20 @@ def test_feedback_email_is_preserved() -> None:
     assert sanitize_answer_text("Email code@radcrew.org") == "Email code@radcrew.org"
 
 
+def test_official_github_is_preserved_as_bare_link() -> None:
+    assert sanitize_answer_text("Our GitHub is https://github.com/radcrew") == "Our GitHub is github.com/radcrew"
+    assert sanitize_answer_text("See www.github.com/radcrew") == "See github.com/radcrew"
+    assert sanitize_answer_text("Repos at github.com/radcrew/foo") == "Repos at github.com/radcrew"
+
+
+def test_non_official_github_url_is_stripped() -> None:
+    assert sanitize_answer_text("Visit https://github.com/someoneelse now") == "Visit now"
+
+
+def test_mailto_scheme_is_dropped() -> None:
+    assert sanitize_answer_text("Email mailto:code@radcrew.org") == "Email code@radcrew.org"
+
+
 def test_href_attribute_is_stripped() -> None:
     assert sanitize_answer_text('<a href="https://x.com">x</a>') == "<a>x</a>"
 

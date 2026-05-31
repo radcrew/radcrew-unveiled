@@ -59,6 +59,26 @@ Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging 
 - `GITHUB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_REPO_URL` is set; example: `main`)
 - `GITHUB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
 - `GITHUB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
+- `DEEP_SEARCH_ENABLED`: enable the web-search fallback (default `true`; only active when `WEB_SEARCH_API_KEY` is set)
+- `WEB_SEARCH_PROVIDER`: web-search provider for deep search (default `tavily`)
+- `WEB_SEARCH_API_KEY`: API key for the search provider. Without it, deep search stays inert and the bot answers from the knowledge base only
+- `WEB_SEARCH_MAX_RESULTS`: max results pulled per deep search (default `5`)
+- `DEEP_SEARCH_SIMILARITY_THRESHOLD`: deep search runs only when the best knowledge-base similarity is below this (default `0.30`)
+
+### Deep search (web-search fallback)
+
+When the static knowledge base can't confidently answer a question (best retrieval
+similarity below `DEEP_SEARCH_SIMILARITY_THRESHOLD`), the chatbot can fall back to a
+web search and answer from those results. It is **off unless `WEB_SEARCH_API_KEY` is
+set**, so by default behavior is unchanged. To enable with [Tavily](https://tavily.com):
+
+1. Get an API key from your search provider.
+2. In `backend/.env`, set `WEB_SEARCH_API_KEY=<your_key>` (and optionally `WEB_SEARCH_PROVIDER`).
+3. Restart the backend.
+
+Note: deep search answers from external results, so they are less controlled than
+knowledge-base answers. For facts you want answered reliably (e.g. official links),
+prefer adding them to the knowledge base.
 
 ### Private GitHub repo knowledge setup
 

@@ -91,17 +91,35 @@ def _top_documents(
     return [corpus[i] for i, _ in positive[:limit]]
 
 
+def retrieve_with_confidence(
+    corpus: list[KnowledgeDocument],
+    query: str,
+    limit: int = 8,
+) -> tuple[list[KnowledgeDocument], float]:
+    """Retrieve top docs and report a confidence score.
+
+    Confidence is the best semantic similarity found (0.0–1.0). Callers use it to
+    decide whether the knowledge base actually covers the question or a fallback
+    (e.g. deep search) is warranted. When semantic retrieval is weak, results come
+    from the lexical keyword fallback but confidence still reflects the (low)
+    semantic signal.
+    """
+    semantic_scores = _semantic_similarities(corpus, query)
+    semantic_ranked = sorted(enumerate(semantic_scores), key=lambda pair: -pair[1])
+    positive = [(i, s) for i, s in semantic_ranked if s > 0.0]
+    best_similarity = positive[0][1] if positive else 0.0
+
+    if positive and best_similarity >= RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD:
+        return [corpus[i] for i, _ in positive[:limit]], best_similarity
+
+    # Semantic retrieval came up empty/weak — fall back to lexical keyword matching.
+    return _top_documents(corpus, _lexical_scores(corpus, query), limit), best_similarity
+
+
 def retrieve_relevant_chunks(
     corpus: list[KnowledgeDocument],
     query: str,
     limit: int = 8,
 ) -> list[KnowledgeDocument]:
-    semantic_scores = _semantic_similarities(corpus, query)
-    semantic_ranked = sorted(enumerate(semantic_scores), key=lambda pair: -pair[1])
-    positive = [(i, s) for i, s in semantic_ranked if s > 0.0]
-
-    if positive and positive[0][1] >= RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD:
-        return [corpus[i] for i, _ in positive[:limit]]
-
-    # Semantic retrieval came up empty/weak — fall back to lexical keyword matching.
-    return _top_documents(corpus, _lexical_scores(corpus, query), limit)
+    documents, _ = retrieve_with_confidence(corpus, query, limit)
+    return documents
