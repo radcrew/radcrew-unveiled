@@ -20,8 +20,7 @@ def extract_stream_content(chunk: Any) -> str:
 
 
 def stream_chat_completion(
-    system: str,
-    user: str,
+    messages: list[dict[str, str]],
     provider: str,
 ) -> Iterator[str]:
     settings = get_settings()
@@ -33,10 +32,7 @@ def stream_chat_completion(
     )  # type: ignore[arg-type]
 
     stream = client.chat_completion(
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        messages=messages,
         max_tokens=512,
         temperature=0,
         top_p=1,

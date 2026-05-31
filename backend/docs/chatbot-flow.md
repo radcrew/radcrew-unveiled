@@ -63,11 +63,11 @@ flowchart TD
     TOPK --> CHK{"chunks found?"}
     LEX --> CHK
     CHK -->|"none & no history"| LOWCTX["MSG_FALLBACK_LOW_CONTEXT"]
-    CHK -->|yes| PROMPT["build_chat_prompt&#10;→ ChatPrompt(system, user)&#10;(prompt.py)"]
+    CHK -->|yes| PROMPT["build_chat_prompt&#10;→ ChatPrompt(system, user, history)&#10;(prompt.py)"]
 
-    PROMPT --> CACHE{"response cached?&#10;sha256(prompt) (cache.py)"}
+    PROMPT --> CACHE{"response cached?&#10;sha256(system+history+user) (cache.py)"}
     CACHE -->|hit| CACHED["stream cached text"]
-    CACHE -->|miss| GEN["generate_answer(system, user)&#10;(see section 4)"]
+    CACHE -->|miss| GEN["generate_answer(system, user, history)&#10;(see section 4)"]
     GEN --> SAN["sanitize_answer_stream&#10;* → - , strip URLs/links (sanitize.py)"]
     SAN --> CACHEW["stream_answer_with_cache&#10;(yields chunks, stores result)"]
 ```
@@ -76,9 +76,9 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    GA["generate_answer(system, user)&#10;(generate.py)"] --> CC["stream_chat_completion&#10;per provider (chat_completion.py)"]
+    GA["generate_answer(system, user, history)&#10;builds [system, *history, user] (generate.py)"] --> CC["stream_chat_completion(messages)&#10;per provider (chat_completion.py)"]
     CC -->|"yields tokens"| OUT(["answer token stream"])
-    CC -->|"all providers fail / empty"| TG["stream_text_generation&#10;per provider (text_generation.py)"]
+    CC -->|"all providers fail / empty"| TG["stream_text_generation(messages)&#10;folds turns into one prompt (text_generation.py)"]
     TG -->|"yields tokens"| OUT
     TG -->|"all fail"| ERR["RuntimeError&#10;(caught upstream → MSG_AI_UNAVAILABLE)"]
 ```

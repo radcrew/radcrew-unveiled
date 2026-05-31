@@ -49,6 +49,15 @@ def _feedback_call(message: str, call_id: str) -> ParsedToolCall:
     )
 
 
+def _log_decision(stage: str, route: str, message: str) -> None:
+    """Solution F: one parseable line per routing decision.
+
+    Grep '[routing]' and filter by ``route=``/``stage=`` to measure how often
+    questions are misrouted to feedback (false positives) and where.
+    """
+    logger.info("[routing] route=%s stage=%s message=%r", route, stage, message[:120])
+
+
 def feedback_router_node(state: ChatState) -> dict[str, object]:
     settings = get_settings()
     body = state["body"]
@@ -58,7 +67,7 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
     # instead of re-classifying it.
     if _awaiting_feedback_confirmation(history):
         if is_affirmation(body.message):
-            logger.info("[feedback routing] confirmation → send")
+            _log_decision("confirm_send", "feedback", body.message)
             original = _last_user_message(history)
             return {
                 "route": "feedback",
@@ -66,14 +75,14 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
                 "feedback_phase": "send",
             }
         if is_negation(body.message):
-            logger.info("[feedback routing] confirmation → cancel")
+            _log_decision("confirm_cancel", "feedback", body.message)
             return {"route": "feedback", "feedback_phase": "cancel"}
         # Neither yes nor no — drop the pending feedback and route normally.
 
     # Deterministic pre-gate (Solution A): a plain question with no feedback
     # signal goes straight to RAG, bypassing the over-eager LLM classifier.
     if should_skip_llm_route_to_rag(body.message):
-        logger.info("[feedback routing] pre-gate → rag (question)")
+        _log_decision("pregate_question", "rag", body.message)
         return {"route": "rag"}
 
     routing_msgs = build_feedback_routing_messages(body.message)
@@ -105,14 +114,17 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
 
         if intent == "feedback":
             # Solution D: don't send yet — ask the user to confirm first.
-            logger.info("[feedback routing] llm → feedback (ask to confirm)")
+            _log_decision("llm_feedback", "feedback", body.message)
             return {
                 "route": "feedback",
                 "feedback_call": _feedback_call(body.message, "ask"),
                 "feedback_phase": "ask",
             }
 
+        _log_decision("llm_question", "rag", body.message)
+        return {"route": "rag"}
+
     except Exception as err:
         logger.error("[HF feedback routing] %s", err)
-
-    return {"route": "rag"}
+        _log_decision("llm_error", "rag", body.message)
+        return {"route": "rag"}

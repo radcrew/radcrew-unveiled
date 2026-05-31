@@ -1,8 +1,9 @@
-"""Grounded system + user messages for the RAG answer node.
+"""Grounded chat messages for the RAG answer node.
 
 The system message is stable on every call (persona, tone, format rules) so a
-small instruction model follows it reliably. The user message carries the
-per-turn conversation history, retrieved context, and question.
+small instruction model follows it reliably. Prior turns are passed as real
+``user``/``assistant`` messages so the model tracks the conversation, and the
+final user message carries the retrieved context and the current question.
 """
 
 from __future__ import annotations
@@ -18,13 +19,15 @@ MAX_HISTORY_MESSAGES = 10
 CHAT_SYSTEM_MESSAGE = "\n".join(
     [
         "You are RadCrew's website assistant.",
-        "Answer using only the conversation history and the context sources provided in the user message.",
-        "Context sources are a mix of RadCrew website content (company overview, services, how they work, contact) and individual team-member profiles. Use each source for what it actually describes.",
+        "Answer using the conversation history and the context sources provided.",
+        "The earlier user and assistant turns are the real conversation. Treat them as the authoritative record of what the user said, asked, or shared earlier in this chat.",
+        "Use that history to resolve references like 'that', 'it', 'they', or 'the previous one', and to answer questions about the conversation itself (such as what the user just asked or told you). Do not claim the conversation just started when earlier turns are present.",
+        "Context sources are a mix of RadCrew website content (company overview, services, how they work, contact) and individual team-member profiles. Use each source for what it actually describes. They are background reference, not part of the conversation.",
         "Do not infer person names from source titles or file names; use only names explicitly written in the source content.",
-        "Answer from whatever relevant sources are available, even if they only partially cover the question.",
+        "Answer from whatever relevant history or sources are available, even if they only partially cover the question.",
         "RadCrew's official website is radcrew.org; when helpful you may point users to radcrew.org or to code@radcrew.org.",
-        "Only if nothing in the history or context is relevant, say you do not have enough information and suggest emailing code@radcrew.org.",
-        "Never contradict yourself or the sources.",
+        "Only if neither the history nor the context is relevant, say you do not have enough information and suggest emailing code@radcrew.org.",
+        "Never contradict yourself, the conversation history, or the sources.",
         "",
         "Tone and length:",
         "- Be factual, helpful, and accurate. Do not pad.",
@@ -48,10 +51,14 @@ CHAT_SYSTEM_MESSAGE = "\n".join(
 class ChatPrompt:
     system: str
     user: str
+    # Prior turns as real chat messages ({"role", "content"}); passed to the
+    # model between the system and the final user message.
+    history: tuple[dict[str, str], ...] = ()
 
     def cache_text(self) -> str:
-        """Stable text identifying this prompt for response caching."""
-        return f"{self.system}\n\n{self.user}"
+        """Stable text identifying this prompt (incl. history) for response caching."""
+        turns = "\n".join(f"{m['role']}: {m['content']}" for m in self.history)
+        return f"{self.system}\n\n{turns}\n\n{self.user}"
 
 
 def build_chat_prompt(
@@ -64,18 +71,13 @@ def build_chat_prompt(
         for index, chunk in enumerate(context_chunks)
     )
 
-    history = (history or [])[-MAX_HISTORY_MESSAGES:]
-
-    history_block = "\n".join(
-        f"{'User' if msg.role == 'user' else 'Assistant'}: {msg.content}" for msg in history
+    recent = (history or [])[-MAX_HISTORY_MESSAGES:]
+    history_turns = tuple(
+        {"role": msg.role, "content": msg.content} for msg in recent
     )
-    history_section = history_block if history_block else "No prior conversation."
 
     user = "\n".join(
         [
-            "Conversation history:",
-            history_section,
-            "",
             "Context sources:",
             context or "No context found.",
             "",
@@ -83,4 +85,4 @@ def build_chat_prompt(
         ]
     )
 
-    return ChatPrompt(system=CHAT_SYSTEM_MESSAGE, user=user)
+    return ChatPrompt(system=CHAT_SYSTEM_MESSAGE, user=user, history=history_turns)

@@ -43,7 +43,9 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
 
     return {
         "output_stream": stream_answer_with_cache(
-            sanitize_answer_stream(generate_answer(prompt.system, prompt.user)),
+            sanitize_answer_stream(
+                generate_answer(prompt.system, prompt.user, list(prompt.history))
+            ),
             cache_key,
         )
     }

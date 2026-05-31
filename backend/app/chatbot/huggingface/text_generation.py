@@ -24,15 +24,29 @@ def extract_stream_content(chunk: Any) -> str:
     return ""
 
 
+def _fold_messages_to_prompt(messages: list[dict[str, str]]) -> str:
+    """text_generation has no role concept; flatten the turns into one prompt."""
+    parts: list[str] = []
+    for msg in messages:
+        role = msg.get("role")
+        content = msg.get("content", "")
+        if role == "system":
+            parts.append(content)
+        elif role == "assistant":
+            parts.append(f"Assistant: {content}")
+        else:
+            parts.append(f"User: {content}")
+    parts.append("Assistant:")
+    return "\n\n".join(parts)
+
+
 def stream_text_generation(
-    system: str,
-    user: str,
+    messages: list[dict[str, str]],
     provider: str,
 ) -> Iterator[str]:
     settings = get_settings()
 
-    # text_generation has no role concept; fold the system message into the prompt.
-    prompt = f"{system}\n\n{user}"
+    prompt = _fold_messages_to_prompt(messages)
 
     client = InferenceClient(
         model=settings.HUGGINGFACE_MODEL,

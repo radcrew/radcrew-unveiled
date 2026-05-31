@@ -6,17 +6,27 @@ from app.chatbot.huggingface.common import logger, providers_to_try
 from app.chatbot.huggingface.text_generation import stream_text_generation
 
 
-def generate_answer(system: str, user: str) -> Iterator[str]:
+def generate_answer(
+    system: str,
+    user: str,
+    history: list[dict[str, str]] | None = None,
+) -> Iterator[str]:
     settings = get_settings()
     model = settings.HUGGINGFACE_MODEL
     provider_policy = settings.HUGGINGFACE_PROVIDER
 
     providers = providers_to_try(provider_policy)
 
+    # Real multi-turn messages: system, prior turns, then the current question.
+    messages: list[dict[str, str]] = [{"role": "system", "content": system}]
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": user})
+
     for provider in providers:
         try:
             yielded_any = False
-            for content in stream_chat_completion(system, user, provider):
+            for content in stream_chat_completion(messages, provider):
                 yielded_any = True
                 yield content
             if yielded_any:
@@ -27,7 +37,7 @@ def generate_answer(system: str, user: str) -> Iterator[str]:
     for provider in providers:
         try:
             yielded_any = False
-            for content in stream_text_generation(system, user, provider):
+            for content in stream_text_generation(messages, provider):
                 yielded_any = True
                 yield content
             if yielded_any:

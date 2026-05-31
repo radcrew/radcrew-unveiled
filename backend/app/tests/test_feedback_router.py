@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -136,3 +137,15 @@ def test_confirmation_no_cancels(mock_client: MagicMock) -> None:
     out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
     assert out == {"route": "feedback", "feedback_phase": "cancel"}
     mock_client.assert_not_called()
+
+
+# --- Solution F: routing decisions are logged ---
+
+
+def test_routing_decision_is_logged(caplog) -> None:
+    with caplog.at_level(logging.INFO, logger="app.chatbot.graph.nodes.feedback_router.router"):
+        router.feedback_router_node(_state("What does RadCrew build?"))
+    assert any(
+        "[routing]" in m and "route=rag" in m and "stage=pregate_question" in m
+        for m in caplog.messages
+    )
