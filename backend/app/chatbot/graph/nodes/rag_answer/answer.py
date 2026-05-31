@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.graph.state import ChatState
+from app.chatbot.graph.nodes.feedback_router.pregate import looks_like_question
 from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.huggingface import generate_answer
 from app.core.settings import get_settings
@@ -37,10 +38,18 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
         8,
     )
 
-    # Deep search fallback: only when the knowledge base can't confidently answer.
+    # Deep search fallback: only when the knowledge base can't confidently answer
+    # AND the message is an actual information request. Chit-chat, corrections, or
+    # identity claims ("you were created by X") must not pull in web results —
+    # that injects irrelevant junk the model then parrots.
     context_chunks = list(knowledge_chunks)
     web_chunks = []
-    if confidence < settings.DEEP_SEARCH_SIMILARITY_THRESHOLD and is_deep_search_available():
+    deep_search_eligible = (
+        confidence < settings.DEEP_SEARCH_SIMILARITY_THRESHOLD
+        and looks_like_question(message)
+        and is_deep_search_available()
+    )
+    if deep_search_eligible:
         web_chunks = deep_search_documents(message)
         logger.info(
             "[deepsearch] triggered confidence=%.3f results=%d message=%r",

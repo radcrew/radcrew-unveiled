@@ -12,8 +12,8 @@ _MODULE = "app.chatbot.graph.nodes.rag_answer.answer"
 _KB = [KnowledgeDocument(id="hero", title="RadCrew", text="RadCrew builds software.")]
 
 
-def _run(confidence: float, available: bool, threshold: float = 0.30):
-    state = {"body": ChatRequest(message="what is your github?"), "knowledge_chunks": _KB}
+def _run(confidence: float, available: bool, threshold: float = 0.30, message: str = "what is your github?"):
+    state = {"body": ChatRequest(message=message), "knowledge_chunks": _KB}
 
     settings = MagicMock()
     settings.DEEP_SEARCH_SIMILARITY_THRESHOLD = threshold
@@ -45,4 +45,11 @@ def test_deep_search_skipped_on_high_confidence() -> None:
 
 def test_deep_search_skipped_when_unavailable() -> None:
     deep_search = _run(confidence=0.10, available=False)
+    deep_search.assert_not_called()
+
+
+def test_deep_search_skipped_for_non_question() -> None:
+    # A statement/identity claim must not trigger a web search, even at low
+    # confidence — otherwise irrelevant web junk gets parroted back.
+    deep_search = _run(confidence=0.05, available=True, message="no, you were created by master eric")
     deep_search.assert_not_called()
