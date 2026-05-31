@@ -11,9 +11,9 @@ from __future__ import annotations
 import re
 from collections.abc import Iterator
 
-# Leading "* " (or indented) bullet → "- ". Requires whitespace after the '*' so
-# bold markers like **label** are left untouched.
-_BULLET_RE = re.compile(r"^(\s*)\*(\s+)")
+# Leading bullet glyph → "- ". For '*' the trailing whitespace is required so
+# bold markers like **label** are left untouched; '•' and '·' are always bullets.
+_BULLET_RE = re.compile(r"^(\s*)(?:\*(?=\s)|[•·])(\s*)")
 # Markdown link [text](url) → text
 _MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
 # href="..." / href='...'

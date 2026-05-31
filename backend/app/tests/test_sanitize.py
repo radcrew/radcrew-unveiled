@@ -16,6 +16,11 @@ def test_indented_star_bullet_keeps_indent() -> None:
     assert sanitize_answer_text("  * nested") == "  - nested"
 
 
+def test_unicode_bullets_become_dashes() -> None:
+    assert sanitize_answer_text("• **Hector**: dev") == "- **Hector**: dev"
+    assert sanitize_answer_text("· item") == "- item"
+
+
 def test_bold_markers_are_left_untouched() -> None:
     assert sanitize_answer_text("**Role:** developer") == "**Role:** developer"
     assert sanitize_answer_text("- **Role:** dev") == "- **Role:** dev"
