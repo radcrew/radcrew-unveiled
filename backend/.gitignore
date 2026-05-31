@@ -1,1 +1,15 @@
+# Deployment
 .vercel
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual environment
+.venv/
+
+# Local environment
+.env
+
+
