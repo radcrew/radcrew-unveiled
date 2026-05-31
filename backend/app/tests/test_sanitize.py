@@ -31,7 +31,17 @@ def test_markdown_link_reduced_to_text() -> None:
 
 
 def test_bare_url_is_stripped() -> None:
-    assert sanitize_answer_text("Visit https://radcrew.org now") == "Visit now"
+    assert sanitize_answer_text("Visit https://example.com now") == "Visit now"
+
+
+def test_official_website_is_preserved_as_bare_domain() -> None:
+    assert sanitize_answer_text("Visit https://radcrew.org for more") == "Visit radcrew.org for more"
+    assert sanitize_answer_text("See www.radcrew.org") == "See radcrew.org"
+    assert sanitize_answer_text("Go to radcrew.org") == "Go to radcrew.org"
+
+
+def test_feedback_email_is_preserved() -> None:
+    assert sanitize_answer_text("Email code@radcrew.org") == "Email code@radcrew.org"
 
 
 def test_href_attribute_is_stripped() -> None:

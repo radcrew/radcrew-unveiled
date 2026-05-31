@@ -18,6 +18,9 @@ _BULLET_RE = re.compile(r"^(\s*)(?:\*(?=\s)|[•·])(\s*)")
 _MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
 # href="..." / href='...'
 _HREF_RE = re.compile(r"""\s*href\s*=\s*(?:"[^"]*"|'[^']*')""", re.IGNORECASE)
+# Official website — normalize any scheme/www form to the bare domain so it
+# survives URL stripping (the one link we intentionally allow).
+_OFFICIAL_URL_RE = re.compile(r"(?:https?://)?(?:www\.)?radcrew\.org\b", re.IGNORECASE)
 # Bare URLs
 _URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 _WWW_RE = re.compile(r"\bwww\.\S+", re.IGNORECASE)
@@ -29,6 +32,7 @@ def _sanitize_line(line: str) -> str:
     line = _BULLET_RE.sub(r"\1-\2", line)
     line = _MD_LINK_RE.sub(r"\1", line)
     line = _HREF_RE.sub("", line)
+    line = _OFFICIAL_URL_RE.sub("radcrew.org", line)
     line = _URL_RE.sub("", line)
     line = _WWW_RE.sub("", line)
     line = _INTERIOR_SPACES_RE.sub(" ", line)
