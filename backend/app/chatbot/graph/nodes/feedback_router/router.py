@@ -8,14 +8,14 @@ from huggingface_hub.inference._generated.types.chat_completion import (
     ChatCompletionInputJSONSchema
 )
 
-from .message import FeedbackRoutingReply
+from .message import RoutingReply
 from app.core.settings import get_settings
 from app.chatbot.graph.state import ChatState
 from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM_MARKER
 from app.schemas import ChatHistoryMessage
 from .message import build_feedback_routing_messages
-from .parse import ParsedToolCall, parse_tool_call_reply
+from .parse import ParsedToolCall, parse_routing_intent
 from .pregate import should_skip_llm_route_to_rag
 from .confirm import is_affirmation, is_negation
 
@@ -93,17 +93,17 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
             response_format=ChatCompletionInputResponseFormatJSONSchema(
                 type="json_schema",
                 json_schema=ChatCompletionInputJSONSchema(
-                    name="feedback_routing_reply",
-                    description="Route to feedback tool call or default to RAG.",
-                    schema=FeedbackRoutingReply.model_json_schema(),
+                    name="routing_reply",
+                    description="Label the message intent: question (→ RAG) or feedback.",
+                    schema=RoutingReply.model_json_schema(),
                     strict=True,
                 ),
             )
         )
 
-        feedback_call = parse_tool_call_reply(resp.choices[0].message.content)
+        intent = parse_routing_intent(resp.choices[0].message.content)
 
-        if feedback_call is not None:
+        if intent == "feedback":
             # Solution D: don't send yet — ask the user to confirm first.
             logger.info("[feedback routing] llm → feedback (ask to confirm)")
             return {

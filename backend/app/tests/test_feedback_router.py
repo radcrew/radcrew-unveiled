@@ -10,7 +10,7 @@ import pytest
 from app.schemas import ChatHistoryMessage, ChatRequest
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM
 from app.chatbot.graph.nodes.feedback_router import router
-from app.chatbot.graph.nodes.feedback_router.parse import ParsedToolCall
+from app.chatbot.graph.nodes.feedback_router.parse import parse_routing_intent
 from app.chatbot.graph.nodes.feedback_router.confirm import is_affirmation, is_negation
 from app.chatbot.graph.nodes.feedback_router.pregate import (
     has_feedback_signal,
@@ -64,15 +64,28 @@ def test_plain_question_skips_llm_and_routes_to_rag(mock_client: MagicMock) -> N
     mock_client.assert_not_called()  # the LLM was never consulted
 
 
-@patch.object(router, "parse_tool_call_reply", return_value=None)
+@patch.object(router, "parse_routing_intent", return_value="question")
 @patch.object(router, "InferenceClient")
 def test_non_question_consults_llm(mock_client: MagicMock, _parse: MagicMock) -> None:
     mock_client.return_value.chat_completion.return_value.choices = [
         MagicMock(message=MagicMock(content="{}"))
     ]
-    out = router.feedback_router_node(_state("Here is some feedback for the team."))
-    assert out == {"route": "rag"}  # parse returned None → rag, but LLM ran
+    out = router.feedback_router_node(_state("The new homepage layout looks great."))
+    assert out == {"route": "rag"}  # classifier said question → rag, but LLM ran
     mock_client.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ('{"intent": "feedback"}', "feedback"),
+        ('{"intent": "question"}', "question"),
+        ("not json at all", "question"),  # malformed → safe default
+        (None, "question"),
+    ],
+)
+def test_parse_routing_intent(text, expected) -> None:
+    assert parse_routing_intent(text) == expected
 
 
 # --- Solution D: confirm before sending ---
@@ -88,17 +101,16 @@ def test_negations(no: str) -> None:
     assert is_negation(no)
 
 
-@patch.object(router, "parse_tool_call_reply")
+@patch.object(router, "parse_routing_intent", return_value="feedback")
 @patch.object(router, "InferenceClient")
-def test_detected_feedback_asks_before_sending(mock_client: MagicMock, mock_parse: MagicMock) -> None:
-    mock_parse.return_value = ParsedToolCall(id="x", name="send_feedback", arguments="{}")
+def test_detected_feedback_asks_before_sending(mock_client: MagicMock, _parse: MagicMock) -> None:
     mock_client.return_value.chat_completion.return_value.choices = [
         MagicMock(message=MagicMock(content="{}"))
     ]
-    out = router.feedback_router_node(_state("Here is some feedback for the team."))
+    out = router.feedback_router_node(_state("Pass this note to the crew about the layout."))
     assert out["route"] == "feedback"
     assert out["feedback_phase"] == "ask"  # does NOT send on first contact
-    assert json.loads(out["feedback_call"].arguments)["message"] == "Here is some feedback for the team."
+    assert json.loads(out["feedback_call"].arguments)["message"] == "Pass this note to the crew about the layout."
 
 
 def _confirm_history(original: str):

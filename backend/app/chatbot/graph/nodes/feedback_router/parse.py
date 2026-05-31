@@ -1,10 +1,12 @@
 from dataclasses import dataclass
+from typing import Literal
 from pydantic import ValidationError
 import logging
 
-from app.chatbot.graph.nodes.feedback_router.message import FeedbackRoutingReply
+from app.chatbot.graph.nodes.feedback_router.message import RoutingReply
 
 logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class ParsedToolCall:
@@ -12,19 +14,14 @@ class ParsedToolCall:
     name: str
     arguments: str
 
-def parse_tool_call_reply(text: str) -> ParsedToolCall | None:
+
+def parse_routing_intent(text: str | None) -> Literal["question", "feedback"]:
+    """Intent from the classifier reply; any malformed reply defaults to question (→ RAG)."""
+    if not text:
+        return "question"
     try:
-        reply = FeedbackRoutingReply.model_validate_json(text)
+        reply = RoutingReply.model_validate_json(text)
     except ValidationError:
         logger.warning("[feedback routing] model reply does not match routing schema")
-        raise ValueError("invalid routing reply") from None
-
-    tool_call = reply.tool_call
-    if tool_call is None:
-        return None
-
-    return ParsedToolCall(
-        id="route-reply",
-        name=tool_call.name,
-        arguments=tool_call.arguments.model_dump_json(),
-    )
+        return "question"
+    return reply.intent
