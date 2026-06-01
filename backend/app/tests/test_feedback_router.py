@@ -12,7 +12,12 @@ from app.schemas import ChatHistoryMessage, ChatRequest
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM
 from app.chatbot.graph.nodes.feedback_router import router
 from app.chatbot.graph.nodes.feedback_router.parse import parse_routing_intent
-from app.chatbot.graph.nodes.feedback_router.confirm import is_affirmation, is_negation
+from app.chatbot.graph.nodes.feedback_router.confirm import (
+    classify_confirmation,
+    is_affirmation,
+    is_negation,
+)
+from app.chatbot.graph.nodes.feedback_router.fuzzy import damerau_levenshtein, fuzzy_in
 from app.chatbot.graph.nodes.feedback_router.pregate import (
     has_feedback_signal,
     looks_like_question,
@@ -30,10 +35,18 @@ from app.chatbot.graph.nodes.feedback_router.pregate import (
         "Does RadCrew work with Solana?",
         "how do you handle testing?",
         "What's the contact email?",
+        # Option 1: typo tolerance — "waht"/"explian" still read as questions.
+        "waht does RadCrew build",
+        "explian the tech stack",
     ],
 )
 def test_questions_detected(message: str) -> None:
     assert looks_like_question(message)
+
+
+def test_typo_question_does_not_overmatch_feedback() -> None:
+    # A short non-question first word must not fuzzy-match a question starter.
+    assert not looks_like_question("the homepage looks great")
 
 
 @pytest.mark.parametrize(
@@ -92,14 +105,65 @@ def test_parse_routing_intent(text, expected) -> None:
 # --- Solution D: confirm before sending ---
 
 
-@pytest.mark.parametrize("yes", ["yes", "yes please", "sure", "ok", "go ahead", "send it"])
+@pytest.mark.parametrize(
+    "yes",
+    [
+        "yes", "yes please", "sure", "ok", "go ahead", "send it",
+        # Option 2: terse single tokens.
+        "y", "ya", "k", "yeah!",
+        # Option 1: typo tolerance for longer tokens.
+        "definitley", "confrim", "absolutley",
+    ],
+)
 def test_affirmations(yes: str) -> None:
     assert is_affirmation(yes)
 
 
-@pytest.mark.parametrize("no", ["no", "nope", "cancel", "don't", "never mind", "not now"])
+@pytest.mark.parametrize(
+    "no",
+    [
+        "no", "nope", "cancel", "don't", "never mind", "not now",
+        # Option 2: terse single tokens.
+        "n", "nvm",
+        # Option 1: typo tolerance for longer tokens.
+        "cancl", "cancel",
+    ],
+)
 def test_negations(no: str) -> None:
     assert is_negation(no)
+
+
+def test_short_tokens_are_not_fuzzed_across_intents() -> None:
+    # "go" must not become "no": short tokens require an exact match.
+    assert not is_negation("go")
+    assert not is_affirmation("not really")
+
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [("yes", "yes", 0), ("yse", "yes", 1), ("cancl", "cancel", 1), ("abc", "xyz", 3)],
+)
+def test_damerau_levenshtein(a: str, b: str, expected: int) -> None:
+    assert damerau_levenshtein(a, b) == expected
+
+
+def test_fuzzy_in_respects_min_length() -> None:
+    assert fuzzy_in("definitley", {"definitely"})
+    assert not fuzzy_in("go", {"no"})  # too short to fuzzy-match
+
+
+@pytest.mark.parametrize(
+    "message, expected",
+    [
+        ("yes please", "yes"),
+        ("no thanks", "no"),
+        ("definitley", "yes"),
+        ("yse", "unknown"),      # transposed typo on a 3-char token → defer to LLM
+        ("tell me more", "unknown"),
+    ],
+)
+def test_classify_confirmation(message: str, expected: str) -> None:
+    assert classify_confirmation(message) == expected
 
 
 @patch.object(router, "parse_routing_intent", return_value="feedback")
@@ -137,6 +201,49 @@ def test_confirmation_no_cancels(mock_client: MagicMock) -> None:
     out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
     assert out == {"route": "feedback", "feedback_phase": "cancel"}
     mock_client.assert_not_called()
+
+
+# --- Option 3: LLM fallback for ambiguous confirmation replies ---
+
+
+@patch.object(router, "classify_confirmation_via_llm")
+@patch.object(router, "InferenceClient")
+def test_clear_confirmation_skips_llm_fallback(
+    mock_client: MagicMock, mock_llm: MagicMock
+) -> None:
+    # A deterministic "yes" must not pay for the LLM round-trip.
+    body = ChatRequest(message="yes please", history=_confirm_history("x"))
+    router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    mock_llm.assert_not_called()
+
+
+@patch.object(router, "classify_confirmation_via_llm", return_value="yes")
+@patch.object(router, "InferenceClient")
+def test_ambiguous_confirmation_uses_llm_and_sends(
+    mock_client: MagicMock, mock_llm: MagicMock
+) -> None:
+    # "yse" is unknown to the deterministic gate → LLM resolves it → send.
+    body = ChatRequest(message="yse", history=_confirm_history("The contact form is broken."))
+    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    assert out["route"] == "feedback"
+    assert out["feedback_phase"] == "send"
+    assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
+    mock_llm.assert_called_once()
+    mock_client.assert_not_called()  # main routing LLM never consulted
+
+
+@patch.object(router, "classify_confirmation_via_llm", return_value="unsure")
+@patch.object(router, "parse_routing_intent", return_value="question")
+@patch.object(router, "InferenceClient")
+def test_ambiguous_confirmation_llm_unsure_routes_normally(
+    mock_client: MagicMock, _parse: MagicMock, _llm: MagicMock
+) -> None:
+    mock_client.return_value.chat_completion.return_value.choices = [
+        MagicMock(message=MagicMock(content="{}"))
+    ]
+    body = ChatRequest(message="hmm what about it", history=_confirm_history("x"))
+    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    assert out == {"route": "rag"}  # pending feedback dropped, re-classified
 
 
 # --- Solution F: routing decisions are logged ---

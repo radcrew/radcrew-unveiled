@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import re
 
+from .fuzzy import fuzzy_in
+
 # First word (or a trailing "?") that marks a message as a question or an
 # information request — these should be answered, never treated as feedback.
 _QUESTION_STARTERS = frozenset(
@@ -66,7 +68,15 @@ def looks_like_question(message: str) -> bool:
     if text.endswith("?"):
         return True
     match = _FIRST_WORD_RE.match(text)
-    return bool(match) and match.group(0) in _QUESTION_STARTERS
+    if not match:
+        return False
+    word = match.group(0)
+    # Exact, then a tight (single-edit) typo tolerance so "waht"/"explian" still
+    # read as questions. Capped at distance 1 because this gate sees open-ended
+    # first messages — a looser budget would misroute feedback to RAG.
+    return word in _QUESTION_STARTERS or fuzzy_in(
+        word, _QUESTION_STARTERS, max_distance=1
+    )
 
 
 def has_feedback_signal(message: str) -> bool:

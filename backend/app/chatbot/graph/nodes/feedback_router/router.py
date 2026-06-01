@@ -17,7 +17,8 @@ from app.schemas import ChatHistoryMessage
 from .message import build_feedback_routing_messages
 from .parse import ParsedToolCall, parse_routing_intent
 from .pregate import should_skip_llm_route_to_rag
-from .confirm import is_affirmation, is_negation
+from .confirm import classify_confirmation
+from .confirm_llm import classify_confirmation_via_llm
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +67,14 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
     # Solution D: if we just asked the user to confirm, act on their reply
     # instead of re-classifying it.
     if _awaiting_feedback_confirmation(history):
-        if is_affirmation(body.message):
+        decision = classify_confirmation(body.message)
+        if decision == "unknown":
+            # Deterministic gate is unsure (terse typo, bare token, free-form) —
+            # let the LLM label it before we give up and re-route.
+            llm = classify_confirmation_via_llm(body.message, settings)
+            if llm != "unsure":
+                decision = llm
+        if decision == "yes":
             _log_decision("confirm_send", "feedback", body.message)
             original = _last_user_message(history)
             return {
@@ -74,7 +82,7 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
                 "feedback_call": _feedback_call(original, "confirmed"),
                 "feedback_phase": "send",
             }
-        if is_negation(body.message):
+        if decision == "no":
             _log_decision("confirm_cancel", "feedback", body.message)
             return {"route": "feedback", "feedback_phase": "cancel"}
         # Neither yes nor no — drop the pending feedback and route normally.
