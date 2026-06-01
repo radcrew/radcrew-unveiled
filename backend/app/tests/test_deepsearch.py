@@ -8,7 +8,7 @@ import urllib.error
 from unittest.mock import MagicMock, patch
 
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
-from app.chatbot.deepsearch.web_search import _results_to_documents
+from app.chatbot.utils.documents import search_results_to_documents
 
 
 def _settings(**overrides):
@@ -36,8 +36,8 @@ def test_blank_query_returns_empty() -> None:
         assert deep_search_documents("   ") == []
 
 
-def test_results_to_documents_filters_and_maps() -> None:
-    docs = _results_to_documents(
+def test_search_results_to_documents_filters_and_maps() -> None:
+    docs = search_results_to_documents(
         [
             {"title": "RadCrew", "content": "We build software.", "url": "https://radcrew.org"},
             {"title": "no content", "content": "  ", "url": "https://x.com"},  # dropped

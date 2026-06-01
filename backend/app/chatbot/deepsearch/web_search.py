@@ -16,15 +16,16 @@ import urllib.error
 import urllib.request
 
 from app.chatbot.knowledge.models import KnowledgeDocument
+from app.chatbot.utils.documents import (
+    DEFAULT_SEARCH_RESULT_MAX_CHARS,
+    search_results_to_documents,
+)
 from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
 _TAVILY_ENDPOINT = "https://api.tavily.com/search"
 _REQUEST_TIMEOUT_SECONDS = 8
-# Cap each result's text so deep search adds focused context, not whole articles
-# (the prompt already carries the full knowledge base). Keeps token use bounded.
-_MAX_RESULT_CHARS = 600
 
 
 def is_deep_search_available() -> bool:
@@ -82,30 +83,7 @@ def _search_tavily(query: str, api_key: str, max_results: int) -> list[Knowledge
     with urllib.request.urlopen(request, timeout=_REQUEST_TIMEOUT_SECONDS) as response:
         body = json.loads(response.read().decode("utf-8"))
 
-    return _results_to_documents(body.get("results", []))
-
-
-def _results_to_documents(results: object) -> list[KnowledgeDocument]:
-    if not isinstance(results, list):
-        return []
-
-    documents: list[KnowledgeDocument] = []
-    for index, result in enumerate(results):
-        if not isinstance(result, dict):
-            continue
-        content = (result.get("content") or "").strip()
-        title = (result.get("title") or "").strip()
-        if not content:
-            continue
-        if len(content) > _MAX_RESULT_CHARS:
-            content = content[:_MAX_RESULT_CHARS].rstrip() + "…"
-        url = result.get("url") if isinstance(result.get("url"), str) else None
-        documents.append(
-            KnowledgeDocument(
-                id=f"web-{index}",
-                title=title or "Web result",
-                text=content,
-                url=url,
-            )
-        )
-    return documents
+    return search_results_to_documents(
+        body.get("results", []),
+        max_text_chars=DEFAULT_SEARCH_RESULT_MAX_CHARS,
+    )
