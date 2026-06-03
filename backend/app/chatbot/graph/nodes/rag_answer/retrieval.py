@@ -11,10 +11,8 @@ from __future__ import annotations
 import logging
 import re
 
-from huggingface_hub import InferenceClient
-
+from app.chatbot.knowledge.embeddings import semantic_similarities
 from app.chatbot.knowledge.models import KnowledgeDocument
-from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -41,30 +39,13 @@ def _tokenize(text: str) -> list[str]:
 
 
 def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
-    settings = get_settings()
-    token = settings.HF_TOKEN
-    model = settings.HUGGINGFACE_EMBEDDING_MODEL
-    provider = settings.HUGGINGFACE_EMBEDDING_PROVIDER
+    """Cosine of the query against the cached corpus vectors (query-only embed).
 
-    if not corpus:
-        return []
-
-    if not token or not model:
-        return [0.0] * len(corpus)
-
-    client = InferenceClient(
-        model=model,
-        token=token,
-        provider=provider,  # type: ignore[arg-type]
-    )
-
-    candidates = [f"{doc.title}\n{doc.text}" for doc in corpus]
-    similarities = client.sentence_similarity(
-        sentence=query,
-        other_sentences=candidates,
-        model=model,
-    )
-    return [max(0.0, float(s)) for s in similarities]
+    Document vectors are embedded once at startup (see knowledge/embeddings.py);
+    here we embed only the query and score locally. Returns zeros when embeddings
+    are unavailable so the lexical fallback below still applies.
+    """
+    return semantic_similarities(corpus, query)
 
 
 def _lexical_scores(corpus: list[KnowledgeDocument], query: str) -> list[float]:
