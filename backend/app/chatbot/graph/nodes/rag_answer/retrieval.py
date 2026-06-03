@@ -38,6 +38,23 @@ def _tokenize(text: str) -> list[str]:
     return [t for t in _TOKEN_RE.findall(text.lower()) if len(t) > 1 and t not in _STOPWORDS]
 
 
+def query_matches_known_title(corpus: list[KnowledgeDocument], query: str) -> bool:
+    """True when a distinctive query token appears in any document title.
+
+    Titles name the entities and topics the knowledge base explicitly covers
+    (team members like "Jesus Monroig", plus "Services", "Technologies", and so
+    on). A match means the KB already covers the question, so a web-search
+    fallback would only inject off-topic noise — e.g. "who is Jesus?" matches the
+    "Jesus Monroig" profile and must not pull general web results about a
+    same-named public figure. Stopwords and one-character tokens are ignored, so
+    only meaningful overlaps count.
+    """
+    query_tokens = set(_tokenize(query))
+    if not query_tokens:
+        return False
+    return any(query_tokens & set(_tokenize(doc.title)) for doc in corpus)
+
+
 def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
     """Cosine of the query against the cached corpus vectors (query-only embed).
 

@@ -10,7 +10,7 @@ from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.chatbot.huggingface import generate_answer
 from app.core.settings import get_settings
 from .prompt import build_chat_prompt
-from .retrieval import retrieve_with_confidence
+from .retrieval import query_matches_known_title, retrieve_with_confidence
 from .sanitize import sanitize_answer_stream
 from .cache import (
     get_cached_response,
@@ -52,9 +52,14 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     # that injects irrelevant junk the model then parrots.
     context_chunks = list(knowledge_chunks)
     web_chunks = []
+    # A low semantic score alone is not "out of scope": short name lookups like
+    # "who is Jesus?" always score low yet match a profile title. If a query token
+    # hits a known title, the KB covers it — skip the web fallback so it can't
+    # override the right answer with same-named web noise (e.g. Jesus Christ).
     deep_search_eligible = (
         confidence < settings.DEEP_SEARCH_SIMILARITY_THRESHOLD
         and looks_like_question(message)
+        and not query_matches_known_title(knowledge_chunks, message)
         and is_deep_search_available()
     )
     if deep_search_eligible:
