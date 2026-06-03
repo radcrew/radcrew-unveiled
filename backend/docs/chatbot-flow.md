@@ -19,8 +19,11 @@ flowchart TD
 
     subgraph startup["Startup — runs once (core/lifespan.py)"]
         LOAD["get_static_site_documents()&#10;+ get_resume_documents() from GitHub"] --> KC[("knowledge_chunks&#10;in-memory list")]
+        KC --> IDX["index_documents()&#10;embed corpus once (HF)&#10;(knowledge/embeddings.py)"]
+        IDX --> VEC[("document vectors&#10;L2-normalized, in-memory")]
     end
     KC -.->|"passed into graph state"| GRAPH
+    VEC -.->|"reused by retrieval"| GRAPH
 ```
 
 ## 2. Routing graph (graph/build.py)
@@ -55,7 +58,7 @@ flowchart TD
     IN["message + history"] --> Q["retrieval_query =&#10;message + last 2 user messages"]
     Q --> RET["retrieve_relevant_chunks(k=8)&#10;(retrieval.py)"]
 
-    RET --> SEM["semantic similarities&#10;MiniLM embeddings (HF)"]
+    RET --> SEM["semantic similarities&#10;embed query only,&#10;cosine vs cached vectors&#10;(embeddings.py)"]
     SEM --> THR{"top score ≥ 0.25?"}
     THR -->|yes| TOPK["top-k semantic docs"]
     THR -->|"no / weak"| LEX["lexical fallback&#10;title-weighted token overlap"]
@@ -86,6 +89,32 @@ flowchart LR
 Generation is deterministic: `temperature=0`, `top_p=1`, `do_sample=False`,
 fixed `seed=42`.
 
+## Embedding cache
+
+Document embeddings are computed **once at startup** (`knowledge/embeddings.py`,
+called from `core/lifespan.py`): the corpus is embedded via HF
+`feature_extraction`, L2-normalized, and kept in an in-memory `id → vector`
+store. Per request, retrieval embeds **only the query** and scores it locally
+(cosine = dot product) against the cached vectors, so per-request embedding cost
+is constant rather than scaling with the knowledge-base size. If embeddings are
+unconfigured or the startup embed fails, the store stays empty and
+`semantic_similarities` returns zeros, so retrieval falls back to the lexical
+keyword path.
+
+## Timing logs
+
+Per-stage latency is logged at INFO so request cost is measurable:
+
+| Log line | Stage |
+|---|---|
+| `[timing] retrieval=…s confidence=… chunks=…` | query embed + scoring |
+| `[deepsearch] … elapsed=…s …` | web search (only when it fires) |
+| `[timing] cache=hit chars=…` | cached response short-circuit |
+| `[timing] generation ttft=…s` / `total=…s chars=…` | time-to-first-token + full stream |
+
+Generation timing is measured from when the client starts consuming the stream
+(`utils/streaming.py:timed_stream`), so it reflects real generation latency.
+
 ## File map
 
 | Stage | File |
@@ -93,10 +122,12 @@ fixed `seed=42`.
 | HTTP endpoint + SSE framing | `app/api/chat.py` |
 | Stream entry, HF_TOKEN guard | `app/chatbot/chat.py` |
 | Knowledge load at startup | `app/core/lifespan.py`, `app/chatbot/knowledge/` |
+| Embedding cache (startup index + query embed) | `app/chatbot/knowledge/embeddings.py` |
 | Graph wiring | `app/chatbot/graph/build.py`, `graph/state.py` |
 | Router + pre-gate | `graph/nodes/feedback_router/router.py`, `pregate.py`, `message.py`, `parse.py` |
 | Feedback handler | `graph/nodes/feedback_handler/handler.py`, `submit.py` |
 | Retrieval (semantic + lexical) | `graph/nodes/rag_answer/retrieval.py` |
+| Per-stage timing logs | `graph/nodes/rag_answer/answer.py`, `utils/streaming.py` |
 | Prompt (system/user) | `graph/nodes/rag_answer/prompt.py` |
 | Response cache | `graph/nodes/rag_answer/cache.py` |
 | Output sanitizer | `graph/nodes/rag_answer/sanitize.py` |

@@ -1,11 +1,12 @@
 import logging
 from collections.abc import Iterator
+from time import perf_counter
 
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.graph.state import ChatState
 from app.chatbot.graph.nodes.feedback_router.pregate import looks_like_question
-from app.chatbot.utils import get_text_chunk_stream
+from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.chatbot.huggingface import generate_answer
 from app.core.settings import get_settings
 from .prompt import build_chat_prompt
@@ -32,10 +33,17 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     recent_context = "\n".join(user_messages[-2:])
     retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
+    retrieval_start = perf_counter()
     relevant_chunks, confidence = retrieve_with_confidence(
         knowledge_chunks,
         retrieval_query,
         8,
+    )
+    logger.info(
+        "[timing] retrieval=%.3fs confidence=%.3f chunks=%d",
+        perf_counter() - retrieval_start,
+        confidence,
+        len(relevant_chunks),
     )
 
     # Deep search fallback: only when the knowledge base can't confidently answer
@@ -50,11 +58,13 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
         and is_deep_search_available()
     )
     if deep_search_eligible:
+        deep_search_start = perf_counter()
         web_chunks = deep_search_documents(message)
         logger.info(
-            "[deepsearch] triggered confidence=%.3f results=%d message=%r",
+            "[deepsearch] triggered confidence=%.3f results=%d elapsed=%.3fs message=%r",
             confidence,
             len(web_chunks),
+            perf_counter() - deep_search_start,
             message[:120],
         )
         context_chunks += web_chunks
@@ -67,13 +77,17 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     cache_key = prompt_cache_key(prompt.cache_text())
     cached = get_cached_response(cache_key)
     if cached is not None:
+        logger.info("[timing] cache=hit chars=%d", len(cached))
         return {"output_stream": get_text_chunk_stream(cached)}
 
     return {
-        "output_stream": stream_answer_with_cache(
-            sanitize_answer_stream(
-                generate_answer(prompt.system, prompt.user, list(prompt.history))
+        "output_stream": timed_stream(
+            stream_answer_with_cache(
+                sanitize_answer_stream(
+                    generate_answer(prompt.system, prompt.user, list(prompt.history))
+                ),
+                cache_key,
             ),
-            cache_key,
+            "generation",
         )
     }
