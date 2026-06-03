@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from app.chatbot.knowledge.models import KnowledgeDocument
 from app.core.settings import get_settings
 from app.chatbot.knowledge import get_static_site_documents
+from app.chatbot.knowledge.embeddings import index_documents
 from app.chatbot.knowledge.github_loader import get_resume_documents
 
 def create_lifespan(
@@ -24,6 +25,9 @@ def create_lifespan(
             ),
         ]
         on_chunks_loaded(documents)
+        # Embed the corpus once so per-request retrieval only embeds the query.
+        # Safe no-op when embeddings are unconfigured (falls back to lexical).
+        index_documents(documents)
         yield
 
     return lifespan
