@@ -1,10 +1,39 @@
 """LangChain-compatible LLM wrappers used by NeMo Guardrails rail instances."""
 from __future__ import annotations
 
+import re
+
 from langchain_core.language_models.llms import BaseLLM
 from langchain_core.outputs import Generation, LLMResult
 
 from app.chatbot.huggingface import generate_answer
+
+# ---------------------------------------------------------------------------
+# PII patterns
+# Matches common phone number formats (US and international) while avoiding
+# false positives on version strings, years, or zip codes.
+# A separator (space / dash / dot) between the digit groups is required so
+# bare 10-digit runs like "2024123456" are not caught.
+# ---------------------------------------------------------------------------
+_PHONE_RE = re.compile(
+    r"""
+    (?<!\d)              # not preceded by a digit
+    (?:
+        \+?\d{1,3}       # optional country code: +1, +44, +61 …
+        [\s.\-]          # separator after country code
+    )?
+    [\(\[]?              # optional opening paren/bracket for area code
+    \d{2,4}              # area code or first block
+    [\)\]]?              # optional closing paren/bracket
+    [\s.\-]              # separator (required — prevents matching bare numbers)
+    \d{2,4}              # second block
+    [\s.\-]              # separator
+    \d{4}                # final four digits
+    (?!\d)               # not followed by a digit
+    """,
+    re.VERBOSE,
+)
+_PHONE_PLACEHOLDER = "[phone]"
 
 # Returned by SentinelLLM when no input rail pattern matches — tells
 # apply_input_rail that the message passed all checks cleanly.
@@ -52,6 +81,16 @@ class SentinelLLM(BaseLLM):
         return LLMResult(
             generations=[[Generation(text=SENTINEL)] for _ in prompts]
         )
+
+
+def scrub_pii_output(text: str) -> str:
+    """Replace phone numbers in the bot response with a placeholder.
+
+    The knowledge base contains team-member profiles that may include personal
+    phone numbers. This ensures they are never echoed back to end users.
+    Email scrubbing is already handled upstream by sanitize_answer_stream.
+    """
+    return _PHONE_RE.sub(_PHONE_PLACEHOLDER, text)
 
 
 def check_harmful_input(message: str) -> bool:

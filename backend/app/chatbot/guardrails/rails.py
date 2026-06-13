@@ -12,6 +12,7 @@ from app.chatbot.guardrails.hf_llm_adapter import (
     SentinelLLM,
     check_groundedness,
     check_harmful_input,
+    scrub_pii_output,
 )
 from app.chatbot.knowledge.models import KnowledgeDocument
 
@@ -94,4 +95,4 @@ def apply_output_rail_stream(
         yield _GROUNDEDNESS_FALLBACK
         return
 
-    yield full_answer
+    yield scrub_pii_output(full_answer)

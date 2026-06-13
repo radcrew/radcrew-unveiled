@@ -15,6 +15,7 @@ from app.chatbot.guardrails.hf_llm_adapter import (
     SentinelLLM,
     check_groundedness,
     check_harmful_input,
+    scrub_pii_output,
 )
 from app.chatbot.guardrails.rails import (
     RailResult,
@@ -252,6 +253,56 @@ class TestApplyOutputRailStream:
                 apply_output_rail_stream(_stream("safe answer"), [])
             )
         assert output == "safe answer"
+
+
+# ---------------------------------------------------------------------------
+# scrub_pii_output
+# ---------------------------------------------------------------------------
+
+class TestScrubPiiOutput:
+    def test_us_dashed_phone_is_redacted(self) -> None:
+        assert scrub_pii_output("Call me at 555-867-5309.") == "Call me at [phone]."
+
+    def test_us_dotted_phone_is_redacted(self) -> None:
+        assert scrub_pii_output("Reach us at 555.867.5309") == "Reach us at [phone]"
+
+    def test_us_spaced_phone_is_redacted(self) -> None:
+        assert scrub_pii_output("Number: 555 867 5309") == "Number: [phone]"
+
+    def test_us_parenthesised_area_code_is_redacted(self) -> None:
+        assert scrub_pii_output("Call (555) 867-5309.") == "Call [phone]."
+
+    def test_international_phone_is_redacted(self) -> None:
+        assert scrub_pii_output("UK: +44 20 1234 5678") == "UK: [phone]"
+
+    def test_multiple_phones_all_redacted(self) -> None:
+        text = "Office: 555-123-4567 or mobile: 555-987-6543"
+        assert scrub_pii_output(text) == "Office: [phone] or mobile: [phone]"
+
+    def test_year_not_redacted(self) -> None:
+        assert scrub_pii_output("Founded in 2019.") == "Founded in 2019."
+
+    def test_version_number_not_redacted(self) -> None:
+        assert scrub_pii_output("Version 1.2.3 released.") == "Version 1.2.3 released."
+
+    def test_text_without_phone_unchanged(self) -> None:
+        original = "RadCrew builds web apps and APIs."
+        assert scrub_pii_output(original) == original
+
+    def test_output_rail_stream_scrubs_phone_in_grounded_answer(self) -> None:
+        chunk = _chunk("Contact", "Call our office.")
+        with patch(
+            "app.chatbot.guardrails.rails.check_groundedness",
+            return_value=True,
+        ):
+            output = "".join(
+                apply_output_rail_stream(
+                    _stream("Call 555-867-5309 for help."),
+                    [chunk],
+                )
+            )
+        assert "[phone]" in output
+        assert "555-867-5309" not in output
 
 
 # ---------------------------------------------------------------------------

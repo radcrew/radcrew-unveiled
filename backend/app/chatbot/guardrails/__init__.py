@@ -1,5 +1,9 @@
 from app.chatbot.guardrails.rails import RailResult, apply_input_rail, apply_output_rail_stream
-from app.chatbot.guardrails.hf_llm_adapter import check_harmful_input, check_groundedness
+from app.chatbot.guardrails.hf_llm_adapter import (
+    check_harmful_input,
+    check_groundedness,
+    scrub_pii_output,
+)
 
 __all__ = [
     "RailResult",
@@ -7,4 +11,5 @@ __all__ = [
     "apply_output_rail_stream",
     "check_harmful_input",
     "check_groundedness",
+    "scrub_pii_output",
 ]
