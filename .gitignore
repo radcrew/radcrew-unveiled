@@ -20,6 +20,11 @@ dist
 dist-ssr
 *.local
 
+# Playwright
+test-results
+playwright-report
+.playwright
+
 # Env (Contentful tokens, etc.)
 .env
 .env.local
@@ -35,3 +40,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude
