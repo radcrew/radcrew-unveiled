@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     )
 
     HF_TOKEN: str | None = None
-    HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
-    HUGGINGFACE_PROVIDER: str = Field(default="hf-inference")
+    HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-7B-Instruct")
+    HUGGINGFACE_PROVIDER: str = Field(default="auto")
     HUGGINGFACE_EMBEDDING_MODEL: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     HUGGINGFACE_EMBEDDING_PROVIDER: str = Field(default="hf-inference")
 
