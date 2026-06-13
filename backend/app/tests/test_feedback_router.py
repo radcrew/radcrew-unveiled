@@ -1,4 +1,4 @@
-"""Feedback router pre-gate (Solution A): questions bypass the LLM."""
+"""Feedback router: pre-gate, confirmation flow, and routing-decision tests."""
 
 from __future__ import annotations
 
@@ -292,3 +292,9 @@ def test_routing_decision_is_logged(caplog) -> None:
         "[routing]" in m and "route=rag" in m and "stage=pregate_question" in m
         for m in caplog.messages
     )
+
+
+# Ported from main: route_feedback_or_rag is a pure passthrough of state["route"].
+def test_route_feedback_or_rag_returns_state_route() -> None:
+    assert router.route_feedback_or_rag({"route": "feedback"}) == "feedback"
+    assert router.route_feedback_or_rag({"route": "rag"}) == "rag"

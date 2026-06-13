@@ -42,10 +42,17 @@ _FEWSHOT: tuple[tuple[str, str], ...] = (
 )
 
 
-def build_feedback_routing_messages(message: str) -> list[dict[str, Any]]:
+def build_feedback_routing_messages(
+    message: str,
+    history: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     msgs: list[dict[str, Any]] = [{"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE}]
+    # Few-shot demonstrations steer the small model toward the RAG-biased default,
+    # then any real prior turns, then the message being classified.
     for example_message, example_intent in _FEWSHOT:
         msgs.append({"role": "user", "content": example_message})
         msgs.append({"role": "assistant", "content": json.dumps({"intent": example_intent})})
+    if history:
+        msgs.extend(history)
     msgs.append({"role": "user", "content": message})
     return msgs
