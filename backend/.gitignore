@@ -6,6 +6,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 
+# NeMo Guardrails config-loading temp files
+app/chatbot/guardrails/config/*.tmp.*
+
 # Virtual environment
 .venv/
 

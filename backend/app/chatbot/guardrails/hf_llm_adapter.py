@@ -77,7 +77,11 @@ class SentinelLLM(BaseLLM):
         return SENTINEL
 
     def _generate(
-        self, prompts: list[str], stop: list[str] | None = None, **_: object
+        self,
+        prompts: list[str],
+        stop: list[str] | None = None,
+        run_manager: object | None = None,
+        **_: object,
     ) -> LLMResult:
         return LLMResult(
             generations=[[Generation(text=SENTINEL)] for _ in prompts]

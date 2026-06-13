@@ -60,6 +60,9 @@ def apply_input_rail(message: str) -> RailResult:
             response = _rails().generate(
                 messages=[{"role": "user", "content": message}]
             )
+            # NeMo ≥0.11 returns {"role": "assistant", "content": "..."} instead of a plain str.
+            if isinstance(response, dict):
+                response = response.get("content", "")
             if response.strip() != SENTINEL:
                 return RailResult(blocked=True, response=response)
         except Exception:
