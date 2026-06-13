@@ -30,7 +30,12 @@ TOOL_ROUTING_SYSTEM_MESSAGE = (
 )
 
 
-def build_feedback_routing_messages(message: str) -> list[dict[str, Any]]:
-    msgs = [{"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE}]
+def build_feedback_routing_messages(
+    message: str,
+    history: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    msgs: list[dict[str, Any]] = [{"role": "system", "content": TOOL_ROUTING_SYSTEM_MESSAGE}]
+    if history:
+        msgs.extend(history)
     msgs.append({"role": "user", "content": message})
     return msgs
