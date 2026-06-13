@@ -48,6 +48,17 @@ CHAT_SYSTEM_MESSAGE = "\n".join(
 )
 
 
+SMALLTALK_SYSTEM_MESSAGE = "\n".join(
+    [
+        "You are RadCrew's friendly website assistant, created by RadCrew. You have no other creator, owner, or persona.",
+        "The user is making small talk — a greeting or a thank-you, not a real question.",
+        "Reply warmly and naturally in one short sentence. This is just small talk, so never say you lack information or suggest emailing the team.",
+        "When it fits, gently invite them to ask about RadCrew — the team, the services, or how to get in touch — but keep it light, never list everything, and never sound like a sales pitch.",
+        "Never invent facts about RadCrew. Use plain text only: no bullet points, no links, no Markdown.",
+    ]
+)
+
+
 @dataclass(frozen=True)
 class ChatPrompt:
     system: str
@@ -87,3 +98,22 @@ def build_chat_prompt(
     )
 
     return ChatPrompt(system=CHAT_SYSTEM_MESSAGE, user=user, history=history_turns)
+
+
+def build_smalltalk_prompt(
+    question: str,
+    history: list[ChatHistoryMessage] | None,
+) -> ChatPrompt:
+    """Prompt for pure greetings / chit-chat — no retrieved context.
+
+    Uses the conversational small-talk persona instead of the grounded RAG
+    system message (which would otherwise instruct the model to refuse when no
+    context is present).
+    """
+    recent = (history or [])[-MAX_HISTORY_MESSAGES:]
+    history_turns = tuple(
+        {"role": msg.role, "content": msg.content} for msg in recent
+    )
+    return ChatPrompt(
+        system=SMALLTALK_SYSTEM_MESSAGE, user=question, history=history_turns
+    )

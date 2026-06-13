@@ -20,9 +20,45 @@ from app.chatbot.graph.nodes.feedback_router.confirm import (
 from app.chatbot.graph.nodes.feedback_router.fuzzy import damerau_levenshtein, fuzzy_in
 from app.chatbot.graph.nodes.feedback_router.pregate import (
     has_feedback_signal,
+    is_smalltalk,
     looks_like_question,
     should_skip_llm_route_to_rag,
 )
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "hi", "hello", "hey", "Hello!", "hey there", "Hi there!",
+        "good morning", "good evening", "thanks", "thank you",
+        "Thanks a lot!", "thank you so much", "cheers", "ok cool",
+        "hiya", "yo", "how are you?", "what's up", "HELLO", "   hi   ",
+    ],
+)
+def test_smalltalk_detected(message: str) -> None:
+    assert is_smalltalk(message)
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "hi, what does RadCrew do?",
+        "who is on the team?",
+        "tell me about radcrew",
+        "hello can you help me build an app",
+        "thanks for the info, who is jesus?",
+        "team",  # ambiguous single word, not a greeting token
+        "is this thing on?",
+    ],
+)
+def test_non_smalltalk_not_detected(message: str) -> None:
+    assert not is_smalltalk(message)
+
+
+def test_smalltalk_skips_llm_and_routes_to_rag() -> None:
+    # Greetings should bypass the LLM classifier and go straight to RAG.
+    assert should_skip_llm_route_to_rag("hello")
+    assert should_skip_llm_route_to_rag("thanks!")
 
 
 @pytest.mark.parametrize(

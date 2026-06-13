@@ -78,6 +78,7 @@ def apply_input_rail(message: str) -> RailResult:
 def apply_output_rail_stream(
     stream: Iterator[str],
     context_chunks: list[KnowledgeDocument],
+    skip_groundedness: bool = False,
 ) -> Iterator[str]:
     """Apply output guardrails controlled by feature flags in settings.
 
@@ -89,10 +90,15 @@ def apply_output_rail_stream(
       disabled this runs as a streaming transform (no buffering, no extra HF
       call). When groundedness is enabled the PII scrub is applied to the
       buffered text before yielding.
+
+    skip_groundedness — bypass the groundedness check for this call regardless
+      of the flag. Used for replies that are intentionally not grounded in the
+      knowledge base (e.g. greetings / small talk), which the check would always
+      flag as ungrounded. PII scrubbing still applies.
     """
     settings = get_settings()
     pii = settings.GUARDRAIL_OUTPUT_PII_ENABLED
-    groundedness = settings.GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED
+    groundedness = settings.GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED and not skip_groundedness
 
     if not groundedness:
         # Fast path: no buffering required.

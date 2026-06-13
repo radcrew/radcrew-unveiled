@@ -280,6 +280,32 @@ class TestApplyOutputRailStream:
             "".join(apply_output_rail_stream(_stream("answer"), []))
         mock_check.assert_not_called()
 
+    def test_skip_groundedness_bypasses_check_even_when_enabled(self) -> None:
+        # Small-talk replies pass skip_groundedness=True: the check must not run
+        # (and the greeting must not be replaced by the fallback) even though the
+        # groundedness flag is on.
+        with patch(_SETTINGS_PATH, return_value=_settings(groundedness=True, pii=False)), \
+             patch("app.chatbot.guardrails.rails.check_groundedness") as mock_check:
+            output = "".join(
+                apply_output_rail_stream(
+                    _stream("Hi there!"), [], skip_groundedness=True
+                )
+            )
+        mock_check.assert_not_called()
+        assert output == "Hi there!"
+
+    def test_skip_groundedness_still_scrubs_pii(self) -> None:
+        with patch(_SETTINGS_PATH, return_value=_settings(groundedness=True, pii=True)), \
+             patch("app.chatbot.guardrails.rails.check_groundedness") as mock_check:
+            output = "".join(
+                apply_output_rail_stream(
+                    _stream("Reach me at 555-123-4567"), [], skip_groundedness=True
+                )
+            )
+        mock_check.assert_not_called()
+        assert "[phone]" in output
+        assert "555-123-4567" not in output
+
 
 # ---------------------------------------------------------------------------
 # scrub_pii_output

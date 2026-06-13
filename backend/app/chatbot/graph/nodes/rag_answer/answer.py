@@ -5,12 +5,15 @@ from time import perf_counter
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.graph.state import ChatState
-from app.chatbot.graph.nodes.feedback_router.pregate import looks_like_question
+from app.chatbot.graph.nodes.feedback_router.pregate import (
+    is_smalltalk,
+    looks_like_question,
+)
 from app.chatbot.guardrails import apply_output_rail_stream
 from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.chatbot.huggingface import generate_answer
 from app.core.settings import get_settings
-from .prompt import build_chat_prompt
+from .prompt import build_chat_prompt, build_smalltalk_prompt
 from .retrieval import query_matches_known_title, retrieve_with_confidence
 from .sanitize import sanitize_answer_stream
 from .cache import (
@@ -29,6 +32,15 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
 
     message = body.message
     history = body.history or []
+
+    # Pure greetings / chit-chat are not grounded in the knowledge base. Answer
+    # them conversationally with the small-talk persona, skipping retrieval, the
+    # low-context fallback, and the groundedness rail (which would always flag a
+    # greeting as ungrounded).
+    if is_smalltalk(message):
+        prompt = build_smalltalk_prompt(message, history)
+        return _stream_prompt(prompt, context_chunks=[], skip_groundedness=True)
+
     user_messages = [m.content for m in history if m.role == "user" and m.content]
 
     recent_context = "\n".join(user_messages[-2:])
@@ -79,7 +91,15 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
         return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
     prompt = build_chat_prompt(message, context_chunks, history)
+    return _stream_prompt(prompt, context_chunks, skip_groundedness=False)
 
+
+def _stream_prompt(
+    prompt,
+    context_chunks: list,
+    skip_groundedness: bool,
+) -> dict[str, Iterator[str]]:
+    """Serve a built prompt: cache hit → replay, else stream through the rails."""
     cache_key = prompt_cache_key(prompt.cache_text())
     cached = get_cached_response(cache_key)
     if cached is not None:
@@ -94,6 +114,7 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
                         generate_answer(prompt.system, prompt.user, list(prompt.history))
                     ),
                     context_chunks,
+                    skip_groundedness=skip_groundedness,
                 ),
                 cache_key,
             ),
