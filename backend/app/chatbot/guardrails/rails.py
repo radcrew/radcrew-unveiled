@@ -13,12 +13,15 @@ from app.chatbot.guardrails.hf_llm_adapter import (
     SENTINEL,
     SentinelLLM,
     check_groundedness,
+    check_harmful_input,
 )
 from app.chatbot.knowledge.models import KnowledgeDocument
 
 logger = logging.getLogger(__name__)
 
 _CONFIG_DIR = Path(__file__).parent / "config"
+
+_HARMFUL_INPUT_RESPONSE = "I'm not able to help with that."
 
 _GROUNDEDNESS_FALLBACK = (
     "I don't have enough reliable information to answer that accurately. "
@@ -39,23 +42,28 @@ def _rails() -> LLMRails:
 
 
 def apply_input_rail(message: str) -> RailResult:
-    """Run NeMo input rails against the user message.
+    """Run NeMo input rails then a harmful-content check against the user message.
 
-    Colang pattern-matched flows (jailbreak, off-topic) resolve before NeMo
-    ever calls the main LLM, so blocked messages incur no HuggingFace cost.
-    When no rail fires, SentinelLLM returns SENTINEL and we pass the message
-    through to the normal LangGraph pipeline.
+    Order matters for cost:
+    1. Colang pattern-matched flows (jailbreak, off-topic) — no HuggingFace call.
+    2. Only if all patterns pass: HuggingFace harmful-content classifier.
+
+    Both stages fail-open so a transient error never silences a legitimate question.
     """
     try:
         response = _rails().generate(
             messages=[{"role": "user", "content": message}]
         )
-        if response.strip() == SENTINEL:
-            return RailResult(blocked=False)
-        return RailResult(blocked=True, response=response)
+        if response.strip() != SENTINEL:
+            return RailResult(blocked=True, response=response)
     except Exception:
-        logger.exception("[guardrail] input rail check failed — passing through")
-        return RailResult(blocked=False)
+        logger.exception("[guardrail] NeMo input rail check failed — continuing")
+
+    if check_harmful_input(message):
+        logger.info("[guardrail] harmful input blocked message=%r", message[:120])
+        return RailResult(blocked=True, response=_HARMFUL_INPUT_RESPONSE)
+
+    return RailResult(blocked=False)
 
 
 def apply_output_rail_stream(

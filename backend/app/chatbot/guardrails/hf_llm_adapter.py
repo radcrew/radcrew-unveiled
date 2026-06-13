@@ -21,6 +21,16 @@ _GROUNDEDNESS_PROMPT = (
     "Answer with only 'yes' or 'no'."
 )
 
+_HARMFUL_SYSTEM = (
+    "You are a content safety classifier. "
+    "You only answer with 'yes' or 'no'."
+)
+_HARMFUL_PROMPT = (
+    "Is the following user message harmful, abusive, illegal, or sexually explicit?\n\n"
+    "Message: {message}\n\n"
+    "Answer with only 'yes' or 'no'."
+)
+
 
 class SentinelLLM(BaseLLM):
     """Stub that returns SENTINEL as the main LLM response.
@@ -42,6 +52,23 @@ class SentinelLLM(BaseLLM):
         return LLMResult(
             generations=[[Generation(text=SENTINEL)] for _ in prompts]
         )
+
+
+def check_harmful_input(message: str) -> bool:
+    """Ask the HuggingFace model whether the user message is harmful.
+
+    Returns True when the message should be blocked, False when it is safe.
+    Defaults to False (safe) on any inference failure so a transient error
+    never silences a legitimate question.
+    """
+    prompt = _HARMFUL_PROMPT.format(message=message)
+    try:
+        result = "".join(
+            generate_answer(system=_HARMFUL_SYSTEM, user=prompt, history=[])
+        )
+        return "yes" in result.strip().lower()
+    except Exception:
+        return False
 
 
 def check_groundedness(answer: str, context: str) -> bool:
