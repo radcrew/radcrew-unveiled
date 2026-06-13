@@ -1,3 +1,5 @@
+"""Parse GitHub repo URLs and derive document titles from markdown paths/content."""
+
 from __future__ import annotations
 
 from pathlib import PurePosixPath

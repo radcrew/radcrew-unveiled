@@ -1,3 +1,5 @@
+"""HuggingFace inference: streaming answer generation with provider fallback."""
+
 from __future__ import annotations
 
 from app.chatbot.huggingface.generate import generate_answer

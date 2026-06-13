@@ -1,9 +1,15 @@
-import json
+"""LangGraph node: handle the three feedback phases — ask, cancel, send.
 
+Feedback is never sent on first detection. The router asks the user to confirm
+("ask"); the next turn resolves to "send" (submit) or "cancel" (acknowledge,
+send nothing). See the confirmation flow in feedback_router/confirm.py.
+"""
+
+from __future__ import annotations
+
+import json
 from collections.abc import Iterator
 
-from app.core.settings import get_settings
-from app.chatbot.utils import get_text_chunk_stream
 from app.chatbot.graph.state import ChatState
 from app.chatbot.messages import (
     MSG_FEEDBACK_CANCELLED,
@@ -11,16 +17,22 @@ from app.chatbot.messages import (
     MSG_FEEDBACK_SEND_FAILED,
     MSG_FEEDBACK_THANKS,
 )
+from app.chatbot.utils import get_text_chunk_stream
+from app.core.settings import get_settings
+
 from .submit import submit_feedback
 
-def get_message_stream(message: str) -> Iterator[str]:
+
+def _formatted_message_stream(template: str) -> Iterator[str]:
+    """Stream a message template with the company feedback email filled in."""
     settings = get_settings()
-    return get_text_chunk_stream(message.format(email=settings.COMPANY_FEEDBACK_EMAIL))
+    return get_text_chunk_stream(template.format(email=settings.COMPANY_FEEDBACK_EMAIL))
+
 
 def feedback_handler_node(state: ChatState) -> dict[str, Iterator[str]]:
     phase = state.get("feedback_phase", "send")
 
-    # Solution D: cancelled confirmation — acknowledge, send nothing.
+    # Cancelled confirmation — acknowledge, send nothing.
     if phase == "cancel":
         return {"output_stream": get_text_chunk_stream(MSG_FEEDBACK_CANCELLED)}
 
@@ -29,13 +41,13 @@ def feedback_handler_node(state: ChatState) -> dict[str, Iterator[str]]:
     body = args["message"]
     subject = args.get("subject")
 
-    # Solution D: first contact — ask the user to confirm before sending.
+    # First contact — ask the user to confirm before sending.
     if phase == "ask":
         return {"output_stream": get_text_chunk_stream(MSG_FEEDBACK_CONFIRM.format(body=body))}
 
     try:
         submit_feedback(body, subject)
     except Exception:
-        return {"output_stream": get_message_stream(MSG_FEEDBACK_SEND_FAILED)}
+        return {"output_stream": _formatted_message_stream(MSG_FEEDBACK_SEND_FAILED)}
 
-    return {"output_stream": get_message_stream(MSG_FEEDBACK_THANKS)}
+    return {"output_stream": _formatted_message_stream(MSG_FEEDBACK_THANKS)}

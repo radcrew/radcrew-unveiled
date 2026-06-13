@@ -48,8 +48,8 @@ class Settings(BaseSettings):
     # safe to enable by default. The HF-based checks each add one inference
     # round-trip; enable them incrementally once latency is acceptable.
     GUARDRAIL_INPUT_PATTERNS_ENABLED: bool = Field(default=True)
-    GUARDRAIL_INPUT_HARMFUL_ENABLED: bool = Field(default=False)
-    GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED: bool = Field(default=False)
+    GUARDRAIL_INPUT_HARMFUL_ENABLED: bool = Field(default=True)
+    GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED: bool = Field(default=True)
     GUARDRAIL_OUTPUT_PII_ENABLED: bool = Field(default=True)
 
     # Deep search: a web-search fallback used only when the static knowledge base

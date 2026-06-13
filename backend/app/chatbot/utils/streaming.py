@@ -1,3 +1,7 @@
+"""Streaming helpers: chunk text into a stream and time stream latency."""
+
+from __future__ import annotations
+
 import logging
 from collections.abc import Iterator
 from time import perf_counter

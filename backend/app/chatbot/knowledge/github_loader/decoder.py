@@ -1,3 +1,5 @@
+"""Decode base64-encoded GitHub blob payloads into text."""
+
 from __future__ import annotations
 
 import base64

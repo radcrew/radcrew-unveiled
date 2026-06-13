@@ -1,7 +1,12 @@
+"""Parse the routing classifier's JSON reply into an intent label."""
+
+from __future__ import annotations
+
+import logging
 from dataclasses import dataclass
 from typing import Literal
+
 from pydantic import ValidationError
-import logging
 
 from app.chatbot.graph.nodes.feedback_router.message import RoutingReply
 

@@ -1,11 +1,15 @@
+"""Streaming text-generation wrapper (fallback for providers without chat support)."""
+
 from __future__ import annotations
 
 from collections.abc import Iterator
 from typing import Any
 
-from huggingface_hub import InferenceClient
-from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED, safe_get
-from app.core.settings import get_settings
+from app.chatbot.huggingface.common import (
+    DETERMINISTIC_GENERATION_SEED,
+    build_inference_client,
+    safe_get,
+)
 
 
 def extract_stream_content(chunk: Any) -> str:
@@ -44,15 +48,8 @@ def stream_text_generation(
     messages: list[dict[str, str]],
     provider: str,
 ) -> Iterator[str]:
-    settings = get_settings()
-
     prompt = _fold_messages_to_prompt(messages)
-
-    client = InferenceClient(
-        model=settings.HUGGINGFACE_MODEL,
-        token=settings.HF_TOKEN,
-        provider=provider
-    )  # type: ignore[arg-type]
+    client = build_inference_client(provider)
 
     stream = client.text_generation(
         prompt,

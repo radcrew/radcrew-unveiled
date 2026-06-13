@@ -1,3 +1,5 @@
+"""Thin GitHub REST helpers: authenticated GET returning parsed JSON."""
+
 from __future__ import annotations
 
 import json

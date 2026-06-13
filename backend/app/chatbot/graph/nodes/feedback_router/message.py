@@ -1,6 +1,10 @@
-import json
+"""Routing-classifier schema, instructions, and few-shot message builder."""
 
+from __future__ import annotations
+
+import json
 from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 
