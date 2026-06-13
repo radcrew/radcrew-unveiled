@@ -16,3 +16,15 @@ MSG_FEEDBACK_SEND_FAILED = (
 MSG_FEEDBACK_THANKS = (
     "Thanks — your feedback has been sent. If you need to follow up, contact {email}."
 )
+
+# Stable phrase used to recognise our own confirmation prompt in chat history.
+MSG_FEEDBACK_CONFIRM_MARKER = "Should I forward it to the team?"
+MSG_FEEDBACK_CONFIRM = (
+    "It sounds like you want to send this message to the RadCrew team:\n\n"
+    "“{body}”\n\n"
+    + MSG_FEEDBACK_CONFIRM_MARKER
+    + ' Reply "yes" to send or "no" to cancel.'
+)
+MSG_FEEDBACK_CANCELLED = (
+    "No problem — I won't send that. Is there anything else I can help you with?"
+)

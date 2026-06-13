@@ -1,11 +1,16 @@
+"""Streaming chat-completion wrapper around the HuggingFace InferenceClient."""
+
 from __future__ import annotations
 
 from collections.abc import Iterator
 from typing import Any
 
-from huggingface_hub import InferenceClient
-from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED, safe_get
-from app.core.settings import get_settings
+from app.chatbot.huggingface.common import (
+    DEFAULT_MAX_TOKENS,
+    DETERMINISTIC_DECODING,
+    build_inference_client,
+    safe_get,
+)
 
 
 def extract_stream_content(chunk: Any) -> str:
@@ -20,24 +25,16 @@ def extract_stream_content(chunk: Any) -> str:
 
 
 def stream_chat_completion(
-    prompt: str,
+    messages: list[dict[str, str]],
     provider: str,
 ) -> Iterator[str]:
-    settings = get_settings()
-
-    client = InferenceClient(
-        model=settings.HUGGINGFACE_MODEL,
-        token=settings.HF_TOKEN,
-        provider=provider
-    )  # type: ignore[arg-type]
+    client = build_inference_client(provider)
 
     stream = client.chat_completion(
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=512,
-        temperature=0,
-        top_p=1,
-        seed=DETERMINISTIC_GENERATION_SEED,
+        messages=messages,
+        max_tokens=DEFAULT_MAX_TOKENS,
         stream=True,
+        **DETERMINISTIC_DECODING,
     )
 
     for chunk in stream:

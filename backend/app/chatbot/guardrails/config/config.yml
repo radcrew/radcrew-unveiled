@@ -1,0 +1,12 @@
+models:
+  # Placeholder — the actual LLM is injected via LLMRails(config, llm=...)
+  # at runtime so no API key is needed for the rail config itself.
+  - type: main
+    engine: openai
+    model: gpt-3.5-turbo
+
+rails:
+  input:
+    flows:
+      - block jailbreak
+      - block off topic

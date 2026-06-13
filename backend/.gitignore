@@ -1,1 +1,18 @@
+# Deployment
 .vercel
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editor/linter and NeMo config-loading temp files (e.g. foo.py.tmp.1234.abcd)
+*.tmp.*
+
+# Virtual environment
+.venv/
+
+# Local environment
+.env
+
+

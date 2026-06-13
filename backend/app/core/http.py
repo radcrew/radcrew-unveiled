@@ -12,19 +12,21 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 
 from app.core.lifespan import create_lifespan
-from app.chatbot.chat import set_knowledge_chunks
+from app.chatbot.chat import set_knowledge_documents
 
 
-def create_http_app(cors_origins: list[str]) -> FastAPI:
-    limiter = Limiter(key_func=get_remote_address, default_limits=["25/minute"])
+def create_http_app(cors_origins: list[str], rate_limit: str) -> FastAPI:
+    limiter = Limiter(key_func=get_remote_address, default_limits=[rate_limit])
 
-    app = FastAPI(lifespan=create_lifespan(set_knowledge_chunks))
+    app = FastAPI(lifespan=create_lifespan(set_knowledge_documents))
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+    # Restrict to the configured frontend origins. A wildcard cannot be combined
+    # with allow_credentials (browsers reject it), so the explicit list matters.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

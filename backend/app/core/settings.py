@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     )
 
     PORT: int = Field(default=8787, ge=1)
+    # Per-client request budget for the API (slowapi limit string, e.g. "25/minute").
+    RATE_LIMIT: str = Field(default="25/minute")
     FRONTEND_ORIGIN: str = Field(default="https://radcrew.org")
     FRONTEND_ORIGINS: str | None = Field(
         default=None,
@@ -29,8 +31,8 @@ class Settings(BaseSettings):
     )
 
     HF_TOKEN: str | None = None
-    HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-1.5B-Instruct")
-    HUGGINGFACE_PROVIDER: str = Field(default="hf-inference")
+    HUGGINGFACE_MODEL: str = Field(default="Qwen/Qwen2.5-7B-Instruct")
+    HUGGINGFACE_PROVIDER: str = Field(default="auto")
     HUGGINGFACE_EMBEDDING_MODEL: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     HUGGINGFACE_EMBEDDING_PROVIDER: str = Field(default="hf-inference")
 
@@ -42,6 +44,28 @@ class Settings(BaseSettings):
 
     COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
     WEB3FORMS_ACCESS_KEY: str | None = None
+
+    # Guardrails: NeMo-based safety rails around the chatbot.
+    # Pattern matching and PII scrubbing are regex/Colang only (no HF call) —
+    # safe to enable by default. The HF-based checks each add one inference
+    # round-trip; enable them incrementally once latency is acceptable.
+    GUARDRAIL_INPUT_PATTERNS_ENABLED: bool = Field(default=True)
+    GUARDRAIL_INPUT_HARMFUL_ENABLED: bool = Field(default=True)
+    GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED: bool = Field(default=True)
+    GUARDRAIL_OUTPUT_PII_ENABLED: bool = Field(default=True)
+
+    # Deep search: a web-search fallback used only when the static knowledge base
+    # can't confidently answer. Inert until WEB_SEARCH_API_KEY is set.
+    DEEP_SEARCH_ENABLED: bool = Field(default=True)
+    WEB_SEARCH_PROVIDER: str = Field(default="tavily")
+    WEB_SEARCH_API_KEY: str | None = None
+    WEB_SEARCH_MAX_RESULTS: int = Field(default=5, ge=1, le=20)
+
+    # Retrieval similarity thresholds (best semantic score, 0.0–1.0).
+    # Below the fallback threshold, retrieval switches from semantic to lexical
+    # keyword matching; below the deep-search threshold, the web fallback runs.
+    RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD: float = Field(default=0.25, ge=0.0, le=1.0)
+    DEEP_SEARCH_SIMILARITY_THRESHOLD: float = Field(default=0.30, ge=0.0, le=1.0)
 
     def cors_allow_origins(self) -> list[str]:
         """Origins allowed by CORSMiddleware (exact match, include scheme)."""

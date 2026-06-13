@@ -1,3 +1,5 @@
+"""Load markdown files from a GitHub repo tree into knowledge documents."""
+
 from __future__ import annotations
 
 import json

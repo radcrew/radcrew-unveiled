@@ -1,0 +1,29 @@
+# ---------------------------------------------------------------------------
+# Input rails
+#
+# These run unconditionally for every user message (registered under
+# rails.input.flows in config.yml). The pattern matching itself lives in
+# actions.py — see _JAILBREAK_PATTERNS and _OFF_TOPIC_PATTERNS there.
+#
+# Each blocked case uses a distinct named bot intent (not `bot say "..."`,
+# which NeMo buckets all literal messages under a single "say" intent and
+# picks between them at random).
+# ---------------------------------------------------------------------------
+
+define bot refuse jailbreak
+  "I'm RadCrew's assistant and I'm not able to follow instructions that ask me to change my role or ignore my guidelines."
+
+define bot redirect to radcrew
+  "I can only help with questions about RadCrew — the team, services, or how to get in touch. Is there something along those lines I can help with?"
+
+define flow block jailbreak
+  $is_jailbreak = execute check_jailbreak_patterns(message=$user_message)
+  if $is_jailbreak
+    bot refuse jailbreak
+    stop
+
+define flow block off topic
+  $is_off_topic = execute check_off_topic_patterns(message=$user_message)
+  if $is_off_topic
+    bot redirect to radcrew
+    stop

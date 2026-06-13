@@ -10,12 +10,12 @@ from app.chatbot.graph.build import chat_graph
 from app.chatbot.messages import MSG_AI_UNAVAILABLE
 from app.schemas import ChatRequest
 
-knowledge_chunks: list[KnowledgeDocument] = []
+knowledge_documents: list[KnowledgeDocument] = []
 
 
-def set_knowledge_chunks(chunks: list[KnowledgeDocument]) -> None:
-    global knowledge_chunks
-    knowledge_chunks = chunks
+def set_knowledge_documents(documents: list[KnowledgeDocument]) -> None:
+    global knowledge_documents
+    knowledge_documents = documents
 
 
 def generate_chat_stream(
@@ -28,7 +28,7 @@ def generate_chat_stream(
     result = chat_graph.invoke(
         {
             "body": body,
-            "knowledge_chunks": knowledge_chunks,
+            "knowledge_documents": knowledge_documents,
         }
     )
     return result["output_stream"]

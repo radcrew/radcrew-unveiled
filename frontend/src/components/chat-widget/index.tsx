@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { streamChatMessage } from "@/lib/chatbot-api";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
 
@@ -9,6 +11,20 @@ const SUGGESTIONS = [
   "How quickly can you start a project?",
   "Do you build on Solana?",
 ];
+
+/** Renders the assistant's Markdown (summary + bullet lists) as real HTML. */
+const MARKDOWN_COMPONENTS: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="my-1.5 list-disc space-y-1 pl-4 last:mb-0">{children}</ul>,
+  ol: ({ children }) => <ol className="my-1.5 list-decimal space-y-1 pl-4 last:mb-0">{children}</ol>,
+  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+  // Backend strips links/URLs; render any stray anchor text without a navigable link.
+  a: ({ children }) => <span className="underline">{children}</span>,
+  h1: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
+  h2: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
+  h3: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
+};
 
 /** Matches floating control height for panel stacking above the launcher. */
 const CHAT_FLOAT_BUTTON_PX = 56;
@@ -197,22 +213,32 @@ export const ChatWidget = () => {
                           }
                     }
                   >
-                    {msg.content || (msg.role === "assistant" && pending && !streamStarted ? (
-                      <span className="flex items-center gap-1 py-0.5">
-                        <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                          style={{ animationDelay: "150ms" }}
-                        />
-                        <span
-                          className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                          style={{ animationDelay: "300ms" }}
-                        />
-                      </span>
-                    ) : null)}
+                    {msg.role === "assistant" ? (
+                      msg.content ? (
+                        <div className="break-words">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+                            {msg.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : pending && !streamStarted ? (
+                        <span className="flex items-center gap-1 py-0.5">
+                          <span
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                            style={{ animationDelay: "0ms" }}
+                          />
+                          <span
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                            style={{ animationDelay: "150ms" }}
+                          />
+                          <span
+                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                            style={{ animationDelay: "300ms" }}
+                          />
+                        </span>
+                      ) : null
+                    ) : (
+                      msg.content
+                    )}
                   </div>
                 </div>
               ))}

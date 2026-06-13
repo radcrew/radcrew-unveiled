@@ -17,7 +17,7 @@ def test_generate_answer_returns_chat_completion_text(
 ) -> None:
     mock_chat.return_value = iter(["  Answer", " from chat.  "])
 
-    result = _collect_stream(generate_answer("prompt text"))
+    result = _collect_stream(generate_answer("system text", "prompt text"))
 
     assert result == "  Answer from chat.  "
     assert mock_chat.call_count >= 1
@@ -32,7 +32,7 @@ def test_generate_answer_falls_back_to_text_generation(
     mock_chat.return_value = iter([])
     mock_tg.return_value = iter(["  From text gen.  "])
 
-    result = _collect_stream(generate_answer("p"))
+    result = _collect_stream(generate_answer("s", "p"))
 
     assert result == "  From text gen.  "
     mock_tg.assert_called()
@@ -52,4 +52,4 @@ def test_generate_answer_raises_when_all_paths_fail(
     mock_tg.return_value = iter([])
 
     with pytest.raises(RuntimeError, match='No inference provider could stream model "my-model"'):
-        list(generate_answer("p"))
+        list(generate_answer("s", "p"))

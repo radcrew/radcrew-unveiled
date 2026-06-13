@@ -14,7 +14,8 @@ class ChatState(TypedDict, total=False):
     """State passed through classify → feedback | RAG terminal nodes."""
 
     body: ChatRequest
-    knowledge_chunks: list[KnowledgeDocument]
-    route: Literal["feedback", "rag"]
+    knowledge_documents: list[KnowledgeDocument]
+    route: Literal["feedback", "rag", "guardrail_blocked"]
     feedback_call: ParsedToolCall
+    feedback_phase: Literal["ask", "send", "cancel"]
     output_stream: Iterator[str]
