@@ -7,8 +7,6 @@ from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
 
-from nemoguardrails import LLMRails, RailsConfig
-
 from app.chatbot.guardrails.hf_llm_adapter import (
     SENTINEL,
     SentinelLLM,
@@ -36,7 +34,9 @@ class RailResult:
 
 
 @lru_cache(maxsize=1)
-def _rails() -> LLMRails:
+def _rails():  # -> LLMRails (imported lazily to avoid hard dep at import time)
+    from nemoguardrails import LLMRails, RailsConfig
+
     config = RailsConfig.from_path(str(_CONFIG_DIR))
     return LLMRails(config, llm=SentinelLLM())
 
