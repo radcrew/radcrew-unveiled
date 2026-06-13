@@ -104,7 +104,7 @@ def test_question_with_feedback_word_defers_to_llm() -> None:
 
 
 def _state(message: str) -> dict:
-    return {"body": ChatRequest(message=message), "knowledge_chunks": []}
+    return {"body": ChatRequest(message=message), "knowledge_documents": []}
 
 
 @patch.object(router, "InferenceClient")
@@ -224,7 +224,7 @@ def _confirm_history(original: str):
 @patch.object(router, "InferenceClient")
 def test_confirmation_yes_sends_original(mock_client: MagicMock) -> None:
     body = ChatRequest(message="yes please", history=_confirm_history("The contact form is broken."))
-    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out["route"] == "feedback"
     assert out["feedback_phase"] == "send"
     assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
@@ -234,7 +234,7 @@ def test_confirmation_yes_sends_original(mock_client: MagicMock) -> None:
 @patch.object(router, "InferenceClient")
 def test_confirmation_no_cancels(mock_client: MagicMock) -> None:
     body = ChatRequest(message="no thanks", history=_confirm_history("The contact form is broken."))
-    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out == {"route": "feedback", "feedback_phase": "cancel"}
     mock_client.assert_not_called()
 
@@ -249,7 +249,7 @@ def test_clear_confirmation_skips_llm_fallback(
 ) -> None:
     # A deterministic "yes" must not pay for the LLM round-trip.
     body = ChatRequest(message="yes please", history=_confirm_history("x"))
-    router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    router.feedback_router_node({"body": body, "knowledge_documents": []})
     mock_llm.assert_not_called()
 
 
@@ -260,7 +260,7 @@ def test_ambiguous_confirmation_uses_llm_and_sends(
 ) -> None:
     # "yse" is unknown to the deterministic gate → LLM resolves it → send.
     body = ChatRequest(message="yse", history=_confirm_history("The contact form is broken."))
-    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out["route"] == "feedback"
     assert out["feedback_phase"] == "send"
     assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
@@ -278,7 +278,7 @@ def test_ambiguous_confirmation_llm_unsure_routes_normally(
         MagicMock(message=MagicMock(content="{}"))
     ]
     body = ChatRequest(message="hmm what about it", history=_confirm_history("x"))
-    out = router.feedback_router_node({"body": body, "knowledge_chunks": []})
+    out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out == {"route": "rag"}  # pending feedback dropped, re-classified
 
 

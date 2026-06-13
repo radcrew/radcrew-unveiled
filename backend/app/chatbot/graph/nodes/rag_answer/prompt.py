@@ -75,12 +75,12 @@ class ChatPrompt:
 
 def build_chat_prompt(
     question: str,
-    context_chunks: list[KnowledgeDocument],
+    context_documents: list[KnowledgeDocument],
     history: list[ChatHistoryMessage] | None,
 ) -> ChatPrompt:
     context = "\n".join(
-        f"Source {index + 1} ({chunk.title}): {chunk.text}"
-        for index, chunk in enumerate(context_chunks)
+        f"Source {index + 1} ({document.title}): {document.text}"
+        for index, document in enumerate(context_documents)
     )
 
     recent = (history or [])[-MAX_HISTORY_MESSAGES:]

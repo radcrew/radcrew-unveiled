@@ -81,44 +81,44 @@ def _embed(texts: list[str]) -> np.ndarray | None:
     return vectors / norms
 
 
-def index_documents(corpus: list[KnowledgeDocument]) -> None:
-    """Embed the corpus once and cache the normalized vectors by document id.
+def index_documents(documents: list[KnowledgeDocument]) -> None:
+    """Embed the documents once and cache the normalized vectors by document id.
 
     Safe to call when embeddings are unconfigured: it simply leaves the store
     empty, and ``semantic_similarities`` will report zeros (→ lexical fallback).
     """
-    candidates = [f"{doc.title}\n{doc.text}" for doc in corpus]
+    candidates = [f"{doc.title}\n{doc.text}" for doc in documents]
     vectors = _embed(candidates)
 
     with _lock:
         _document_vectors.clear()
         if vectors is None:
-            logger.warning("[embeddings] corpus not indexed (embeddings unavailable)")
+            logger.warning("[embeddings] documents not indexed (embeddings unavailable)")
             return
-        for doc, vector in zip(corpus, vectors):
+        for doc, vector in zip(documents, vectors):
             _document_vectors[doc.id] = vector
 
     logger.info("[embeddings] indexed %d documents", len(_document_vectors))
 
 
-def semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
-    """Cosine similarity of ``query`` against each doc in ``corpus`` order.
+def semantic_similarities(documents: list[KnowledgeDocument], query: str) -> list[float]:
+    """Cosine similarity of ``query`` against each document, in input order.
 
     Uses the cached document vectors and embeds only the query. Returns 0.0 for
     any document missing from the store (or all zeros when unavailable), matching
     the old behaviour so the lexical fallback still kicks in.
     """
-    if not corpus:
+    if not documents:
         return []
 
     query_vectors = _embed([query])
     if query_vectors is None:
-        return [0.0] * len(corpus)
+        return [0.0] * len(documents)
     query_vector = query_vectors[0]
 
     with _lock:
         scores: list[float] = []
-        for doc in corpus:
+        for doc in documents:
             stored = _document_vectors.get(doc.id)
             if stored is None:
                 scores.append(0.0)

@@ -13,7 +13,7 @@ _KB = [KnowledgeDocument(id="hero", title="RadCrew", text="RadCrew builds softwa
 
 
 def _run(confidence: float, available: bool, threshold: float = 0.30, message: str = "what is your github?"):
-    state = {"body": ChatRequest(message=message), "knowledge_chunks": _KB}
+    state = {"body": ChatRequest(message=message), "knowledge_documents": _KB}
 
     settings = MagicMock()
     settings.DEEP_SEARCH_SIMILARITY_THRESHOLD = threshold

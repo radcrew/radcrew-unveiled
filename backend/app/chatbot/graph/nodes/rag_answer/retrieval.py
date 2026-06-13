@@ -38,7 +38,7 @@ def _tokenize(text: str) -> list[str]:
     return [t for t in _TOKEN_RE.findall(text.lower()) if len(t) > 1 and t not in _STOPWORDS]
 
 
-def query_matches_known_title(corpus: list[KnowledgeDocument], query: str) -> bool:
+def query_matches_known_title(documents: list[KnowledgeDocument], query: str) -> bool:
     """True when a distinctive query token appears in any document title.
 
     Titles name the entities and topics the knowledge base explicitly covers
@@ -52,27 +52,27 @@ def query_matches_known_title(corpus: list[KnowledgeDocument], query: str) -> bo
     query_tokens = set(_tokenize(query))
     if not query_tokens:
         return False
-    return any(query_tokens & set(_tokenize(doc.title)) for doc in corpus)
+    return any(query_tokens & set(_tokenize(doc.title)) for doc in documents)
 
 
-def _semantic_similarities(corpus: list[KnowledgeDocument], query: str) -> list[float]:
-    """Cosine of the query against the cached corpus vectors (query-only embed).
+def _semantic_similarities(documents: list[KnowledgeDocument], query: str) -> list[float]:
+    """Cosine of the query against the cached document vectors (query-only embed).
 
     Document vectors are embedded once at startup (see knowledge/embeddings.py);
     here we embed only the query and score locally. Returns zeros when embeddings
     are unavailable so the lexical fallback below still applies.
     """
-    return semantic_similarities(corpus, query)
+    return semantic_similarities(documents, query)
 
 
-def _lexical_scores(corpus: list[KnowledgeDocument], query: str) -> list[float]:
+def _lexical_scores(documents: list[KnowledgeDocument], query: str) -> list[float]:
     """Distinct-token overlap with each doc; title matches weighted over body."""
     query_tokens = set(_tokenize(query))
     if not query_tokens:
-        return [0.0] * len(corpus)
+        return [0.0] * len(documents)
 
     scores: list[float] = []
-    for doc in corpus:
+    for doc in documents:
         title_hits = len(query_tokens & set(_tokenize(doc.title)))
         text_hits = len(query_tokens & set(_tokenize(doc.text)))
         scores.append(float(2 * title_hits + text_hits))
@@ -80,21 +80,21 @@ def _lexical_scores(corpus: list[KnowledgeDocument], query: str) -> list[float]:
 
 
 def _top_documents(
-    corpus: list[KnowledgeDocument],
+    documents: list[KnowledgeDocument],
     scores: list[float],
     limit: int,
 ) -> list[KnowledgeDocument]:
     ranked = sorted(enumerate(scores), key=lambda pair: -pair[1])
     positive = [(i, s) for i, s in ranked if s > 0.0]
-    return [corpus[i] for i, _ in positive[:limit]]
+    return [documents[i] for i, _ in positive[:limit]]
 
 
 def retrieve_with_confidence(
-    corpus: list[KnowledgeDocument],
+    documents: list[KnowledgeDocument],
     query: str,
     limit: int = 8,
 ) -> tuple[list[KnowledgeDocument], float]:
-    """Retrieve top docs and report a confidence score.
+    """Retrieve the top documents and report a confidence score.
 
     Confidence is the best semantic similarity found (0.0–1.0). Callers use it to
     decide whether the knowledge base actually covers the question or a fallback
@@ -102,22 +102,22 @@ def retrieve_with_confidence(
     from the lexical keyword fallback but confidence still reflects the (low)
     semantic signal.
     """
-    semantic_scores = _semantic_similarities(corpus, query)
+    semantic_scores = _semantic_similarities(documents, query)
     semantic_ranked = sorted(enumerate(semantic_scores), key=lambda pair: -pair[1])
     positive = [(i, s) for i, s in semantic_ranked if s > 0.0]
     best_similarity = positive[0][1] if positive else 0.0
 
     if positive and best_similarity >= RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD:
-        return [corpus[i] for i, _ in positive[:limit]], best_similarity
+        return [documents[i] for i, _ in positive[:limit]], best_similarity
 
     # Semantic retrieval came up empty/weak — fall back to lexical keyword matching.
-    return _top_documents(corpus, _lexical_scores(corpus, query), limit), best_similarity
+    return _top_documents(documents, _lexical_scores(documents, query), limit), best_similarity
 
 
-def retrieve_relevant_chunks(
-    corpus: list[KnowledgeDocument],
+def retrieve_relevant_documents(
+    documents: list[KnowledgeDocument],
     query: str,
     limit: int = 8,
 ) -> list[KnowledgeDocument]:
-    documents, _ = retrieve_with_confidence(corpus, query, limit)
-    return documents
+    retrieved, _ = retrieve_with_confidence(documents, query, limit)
+    return retrieved

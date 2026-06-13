@@ -77,14 +77,14 @@ def apply_input_rail(message: str) -> RailResult:
 
 def apply_output_rail_stream(
     stream: Iterator[str],
-    context_chunks: list[KnowledgeDocument],
+    context_documents: list[KnowledgeDocument],
     skip_groundedness: bool = False,
 ) -> Iterator[str]:
     """Apply output guardrails controlled by feature flags in settings.
 
     GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED — buffers the full answer, asks the
-      HF model whether it is grounded in the retrieved chunks, and replaces an
-      ungrounded answer with a safe fallback. Requires one extra HF call.
+      HF model whether it is grounded in the retrieved documents, and replaces
+      an ungrounded answer with a safe fallback. Requires one extra HF call.
 
     GUARDRAIL_OUTPUT_PII_ENABLED — redacts phone numbers. When groundedness is
       disabled this runs as a streaming transform (no buffering, no extra HF
@@ -108,7 +108,7 @@ def apply_output_rail_stream(
     # Groundedness check requires the full answer up front.
     full_answer = "".join(stream)
     context_text = "\n".join(
-        f"({chunk.title}): {chunk.text}" for chunk in context_chunks
+        f"({document.title}): {document.text}" for document in context_documents
     )
 
     try:

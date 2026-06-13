@@ -1,34 +1,39 @@
+"""LangGraph node: retrieve context, optionally web-search, and stream the answer."""
+
+from __future__ import annotations
+
 import logging
 from collections.abc import Iterator
 from time import perf_counter
 
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
-from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
-from app.chatbot.graph.state import ChatState
 from app.chatbot.graph.nodes.feedback_router.pregate import (
     is_smalltalk,
     looks_like_question,
 )
+from app.chatbot.graph.state import ChatState
 from app.chatbot.guardrails import apply_output_rail_stream
-from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.chatbot.huggingface import generate_answer
-from app.core.settings import get_settings
-from .prompt import build_chat_prompt, build_smalltalk_prompt
+from app.chatbot.knowledge.models import KnowledgeDocument
+from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
+from app.chatbot.utils import get_text_chunk_stream, timed_stream
+from app.core.settings import Settings, get_settings
+
+from .cache import get_cached_response, prompt_cache_key, stream_answer_with_cache
+from .prompt import ChatPrompt, build_chat_prompt, build_smalltalk_prompt
 from .retrieval import query_matches_known_title, retrieve_with_confidence
 from .sanitize import sanitize_answer_stream
-from .cache import (
-    get_cached_response,
-    prompt_cache_key,
-    stream_answer_with_cache,
-)
 
 logger = logging.getLogger(__name__)
+
+# How many knowledge documents to retrieve as context for an answer.
+RETRIEVAL_DOCUMENT_LIMIT = 8
 
 
 def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     settings = get_settings()
     body = state["body"]
-    knowledge_chunks = state["knowledge_chunks"]
+    knowledge_documents = state["knowledge_documents"]
 
     message = body.message
     history = body.history or []
@@ -39,64 +44,75 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     # greeting as ungrounded).
     if is_smalltalk(message):
         prompt = build_smalltalk_prompt(message, history)
-        return _stream_prompt(prompt, context_chunks=[], skip_groundedness=True)
+        return _stream_prompt(prompt, context_documents=[], skip_groundedness=True)
 
     user_messages = [m.content for m in history if m.role == "user" and m.content]
-
     recent_context = "\n".join(user_messages[-2:])
     retrieval_query = f"{message}\n\nPrevious user context:\n{recent_context}"
 
     retrieval_start = perf_counter()
-    relevant_chunks, confidence = retrieve_with_confidence(
-        knowledge_chunks,
+    retrieved_documents, confidence = retrieve_with_confidence(
+        knowledge_documents,
         retrieval_query,
-        8,
+        RETRIEVAL_DOCUMENT_LIMIT,
     )
     logger.info(
-        "[timing] retrieval=%.3fs confidence=%.3f chunks=%d",
+        "[timing] retrieval=%.3fs confidence=%.3f documents=%d",
         perf_counter() - retrieval_start,
         confidence,
-        len(relevant_chunks),
+        len(retrieved_documents),
     )
 
-    # Deep search fallback: only when the knowledge base can't confidently answer
-    # AND the message is an actual information request. Chit-chat, corrections, or
-    # identity claims ("you were created by X") must not pull in web results —
-    # that injects irrelevant junk the model then parrots.
-    context_chunks = list(knowledge_chunks)
-    web_chunks = []
-    # A low semantic score alone is not "out of scope": short name lookups like
-    # "who is Jesus?" always score low yet match a profile title. If a query token
-    # hits a known title, the KB covers it — skip the web fallback so it can't
-    # override the right answer with same-named web noise (e.g. Jesus Christ).
-    deep_search_eligible = (
-        confidence < settings.DEEP_SEARCH_SIMILARITY_THRESHOLD
-        and looks_like_question(message)
-        and not query_matches_known_title(knowledge_chunks, message)
-        and is_deep_search_available()
-    )
-    if deep_search_eligible:
-        deep_search_start = perf_counter()
-        web_chunks = deep_search_documents(message)
-        logger.info(
-            "[deepsearch] triggered confidence=%.3f results=%d elapsed=%.3fs message=%r",
-            confidence,
-            len(web_chunks),
-            perf_counter() - deep_search_start,
-            message[:120],
-        )
-        context_chunks += web_chunks
+    context_documents = list(knowledge_documents)
+    web_documents = _maybe_deep_search(message, confidence, knowledge_documents, settings)
+    context_documents += web_documents
 
-    if not relevant_chunks and not web_chunks and not history:
+    if not retrieved_documents and not web_documents and not history:
         return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
 
-    prompt = build_chat_prompt(message, context_chunks, history)
-    return _stream_prompt(prompt, context_chunks, skip_groundedness=False)
+    prompt = build_chat_prompt(message, context_documents, history)
+    return _stream_prompt(prompt, context_documents, skip_groundedness=False)
+
+
+def _maybe_deep_search(
+    message: str,
+    confidence: float,
+    knowledge_documents: list[KnowledgeDocument],
+    settings: Settings,
+) -> list[KnowledgeDocument]:
+    """Web-search fallback, used only when the knowledge base can't confidently answer.
+
+    Restricted to genuine information requests. Chit-chat, corrections, or
+    identity claims ("you were created by X") must not pull in web results —
+    that injects irrelevant junk the model then parrots. A low semantic score
+    alone is not "out of scope" either: short name lookups like "who is Jesus?"
+    score low yet match a profile title, so a known-title hit suppresses the
+    fallback to avoid same-named web noise (e.g. Jesus Christ).
+    """
+    eligible = (
+        confidence < settings.DEEP_SEARCH_SIMILARITY_THRESHOLD
+        and looks_like_question(message)
+        and not query_matches_known_title(knowledge_documents, message)
+        and is_deep_search_available()
+    )
+    if not eligible:
+        return []
+
+    start = perf_counter()
+    web_documents = deep_search_documents(message)
+    logger.info(
+        "[deepsearch] triggered confidence=%.3f results=%d elapsed=%.3fs message=%r",
+        confidence,
+        len(web_documents),
+        perf_counter() - start,
+        message[:120],
+    )
+    return web_documents
 
 
 def _stream_prompt(
-    prompt,
-    context_chunks: list,
+    prompt: ChatPrompt,
+    context_documents: list[KnowledgeDocument],
     skip_groundedness: bool,
 ) -> dict[str, Iterator[str]]:
     """Serve a built prompt: cache hit → replay, else stream through the rails."""
@@ -113,7 +129,7 @@ def _stream_prompt(
                     sanitize_answer_stream(
                         generate_answer(prompt.system, prompt.user, list(prompt.history))
                     ),
-                    context_chunks,
+                    context_documents,
                     skip_groundedness=skip_groundedness,
                 ),
                 cache_key,
