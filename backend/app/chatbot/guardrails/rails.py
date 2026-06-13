@@ -75,7 +75,13 @@ def apply_output_rail_stream(
         f"({chunk.title}): {chunk.text}" for chunk in context_chunks
     )
 
-    if not check_groundedness(full_answer, context_text):
+    try:
+        grounded = check_groundedness(full_answer, context_text)
+    except Exception:
+        logger.exception("[guardrail] output rail check failed — returning answer as-is")
+        grounded = True
+
+    if not grounded:
         logger.warning("[guardrail] output grounding check failed — returning fallback")
         yield _GROUNDEDNESS_FALLBACK
         return
