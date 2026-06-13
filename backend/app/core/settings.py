@@ -43,6 +43,15 @@ class Settings(BaseSettings):
     COMPANY_FEEDBACK_EMAIL: str = Field(default="code@radcrew.org")
     WEB3FORMS_ACCESS_KEY: str | None = None
 
+    # Guardrails: NeMo-based safety rails around the chatbot.
+    # Pattern matching and PII scrubbing are regex/Colang only (no HF call) —
+    # safe to enable by default. The HF-based checks each add one inference
+    # round-trip; enable them incrementally once latency is acceptable.
+    GUARDRAIL_INPUT_PATTERNS_ENABLED: bool = Field(default=True)
+    GUARDRAIL_INPUT_HARMFUL_ENABLED: bool = Field(default=False)
+    GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED: bool = Field(default=False)
+    GUARDRAIL_OUTPUT_PII_ENABLED: bool = Field(default=True)
+
     # Deep search: a web-search fallback used only when the static knowledge base
     # can't confidently answer. Inert until WEB_SEARCH_API_KEY is set.
     DEEP_SEARCH_ENABLED: bool = Field(default=True)

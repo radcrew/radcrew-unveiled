@@ -13,8 +13,10 @@ from app.chatbot.guardrails.hf_llm_adapter import (
     check_groundedness,
     check_harmful_input,
     scrub_pii_output,
+    scrub_pii_stream,
 )
 from app.chatbot.knowledge.models import KnowledgeDocument
+from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -45,22 +47,25 @@ def _rails():  # -> LLMRails (imported lazily to avoid hard dep at import time)
 def apply_input_rail(message: str) -> RailResult:
     """Run NeMo input rails then a harmful-content check against the user message.
 
-    Order matters for cost:
-    1. Colang pattern-matched flows (jailbreak, off-topic) — no HuggingFace call.
-    2. Only if all patterns pass: HuggingFace harmful-content classifier.
+    Each stage is controlled by a feature flag in settings:
+    1. GUARDRAIL_INPUT_PATTERNS_ENABLED — Colang jailbreak/off-topic patterns (no HF call).
+    2. GUARDRAIL_INPUT_HARMFUL_ENABLED  — HF harmful-content classifier (one HF call).
 
     Both stages fail-open so a transient error never silences a legitimate question.
     """
-    try:
-        response = _rails().generate(
-            messages=[{"role": "user", "content": message}]
-        )
-        if response.strip() != SENTINEL:
-            return RailResult(blocked=True, response=response)
-    except Exception:
-        logger.exception("[guardrail] NeMo input rail check failed — continuing")
+    settings = get_settings()
 
-    if check_harmful_input(message):
+    if settings.GUARDRAIL_INPUT_PATTERNS_ENABLED:
+        try:
+            response = _rails().generate(
+                messages=[{"role": "user", "content": message}]
+            )
+            if response.strip() != SENTINEL:
+                return RailResult(blocked=True, response=response)
+        except Exception:
+            logger.exception("[guardrail] NeMo input rail check failed — continuing")
+
+    if settings.GUARDRAIL_INPUT_HARMFUL_ENABLED and check_harmful_input(message):
         logger.info("[guardrail] harmful input blocked message=%r", message[:120])
         return RailResult(blocked=True, response=_HARMFUL_INPUT_RESPONSE)
 
@@ -71,15 +76,28 @@ def apply_output_rail_stream(
     stream: Iterator[str],
     context_chunks: list[KnowledgeDocument],
 ) -> Iterator[str]:
-    """Buffer the answer stream, run a groundedness check, then re-yield.
+    """Apply output guardrails controlled by feature flags in settings.
 
-    If the HuggingFace model decides the answer is not grounded in the
-    retrieved context chunks, a safe fallback message is yielded instead.
-    On any inference failure the original answer is returned as-is so a
-    transient error never silences a correct response.
+    GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED — buffers the full answer, asks the
+      HF model whether it is grounded in the retrieved chunks, and replaces an
+      ungrounded answer with a safe fallback. Requires one extra HF call.
+
+    GUARDRAIL_OUTPUT_PII_ENABLED — redacts phone numbers. When groundedness is
+      disabled this runs as a streaming transform (no buffering, no extra HF
+      call). When groundedness is enabled the PII scrub is applied to the
+      buffered text before yielding.
     """
-    full_answer = "".join(stream)
+    settings = get_settings()
+    pii = settings.GUARDRAIL_OUTPUT_PII_ENABLED
+    groundedness = settings.GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED
 
+    if not groundedness:
+        # Fast path: no buffering required.
+        yield from (scrub_pii_stream(stream) if pii else stream)
+        return
+
+    # Groundedness check requires the full answer up front.
+    full_answer = "".join(stream)
     context_text = "\n".join(
         f"({chunk.title}): {chunk.text}" for chunk in context_chunks
     )
@@ -95,4 +113,4 @@ def apply_output_rail_stream(
         yield _GROUNDEDNESS_FALLBACK
         return
 
-    yield scrub_pii_output(full_answer)
+    yield scrub_pii_output(full_answer) if pii else full_answer

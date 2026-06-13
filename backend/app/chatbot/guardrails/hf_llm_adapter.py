@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 
 from langchain_core.language_models.llms import BaseLLM
 from langchain_core.outputs import Generation, LLMResult
@@ -81,6 +82,22 @@ class SentinelLLM(BaseLLM):
         return LLMResult(
             generations=[[Generation(text=SENTINEL)] for _ in prompts]
         )
+
+
+def scrub_pii_stream(stream: Iterator[str]) -> Iterator[str]:
+    """Apply PII scrubbing per line so it works directly on a token stream.
+
+    Phone numbers never span newlines, so line-by-line processing is safe and
+    avoids buffering the entire answer before yielding.
+    """
+    buffer = ""
+    for chunk in stream:
+        buffer += chunk
+        while "\n" in buffer:
+            line, buffer = buffer.split("\n", 1)
+            yield _PHONE_RE.sub(_PHONE_PLACEHOLDER, line) + "\n"
+    if buffer:
+        yield _PHONE_RE.sub(_PHONE_PLACEHOLDER, buffer)
 
 
 def scrub_pii_output(text: str) -> str:
