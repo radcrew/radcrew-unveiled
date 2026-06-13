@@ -64,6 +64,14 @@ jobs:
       - name: Test
         run: npm run test
 
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: E2E tests
+        run: npm run test:e2e
+        working-directory: frontend
+
       - name: Build
         run: npm run build
 
