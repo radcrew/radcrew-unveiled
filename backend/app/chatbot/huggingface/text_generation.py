@@ -6,7 +6,8 @@ from collections.abc import Iterator
 from typing import Any
 
 from app.chatbot.huggingface.common import (
-    DETERMINISTIC_GENERATION_SEED,
+    DEFAULT_MAX_TOKENS,
+    DETERMINISTIC_DECODING,
     build_inference_client,
     safe_get,
 )
@@ -53,13 +54,11 @@ def stream_text_generation(
 
     stream = client.text_generation(
         prompt,
-        max_new_tokens=512,
+        max_new_tokens=DEFAULT_MAX_TOKENS,
         return_full_text=False,
         do_sample=False,
-        temperature=0,
-        top_p=1,
-        seed=DETERMINISTIC_GENERATION_SEED,
         stream=True,
+        **DETERMINISTIC_DECODING,
     )
 
     for chunk in stream:

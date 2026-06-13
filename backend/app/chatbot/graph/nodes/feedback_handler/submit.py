@@ -6,6 +6,7 @@ from urllib import request
 from app.core.settings import get_settings
 
 WEB3FORMS_SUBMIT_URL = "https://api.web3forms.com/submit"
+_REQUEST_TIMEOUT_SECONDS = 30
 
 def submit_feedback(
     body: str,
@@ -35,5 +36,5 @@ def submit_feedback(
         },
     )
 
-    with request.urlopen(req, timeout=30) as response:
+    with request.urlopen(req, timeout=_REQUEST_TIMEOUT_SECONDS) as response:
         response.read()

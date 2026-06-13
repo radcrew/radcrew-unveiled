@@ -7,6 +7,7 @@ from urllib import request
 
 API_BASE = "https://api.github.com"
 ACCEPT_JSON = "application/vnd.github+json"
+_REQUEST_TIMEOUT_SECONDS = 20
 
 
 def get_json(url: str, *, token: str | None) -> dict[str, object]:
@@ -16,7 +17,7 @@ def get_json(url: str, *, token: str | None) -> dict[str, object]:
         method="GET",
     )
 
-    with request.urlopen(req, timeout=20) as response:
+    with request.urlopen(req, timeout=_REQUEST_TIMEOUT_SECONDS) as response:
         payload = response.read()
 
     parsed = json.loads(payload.decode("utf-8"))

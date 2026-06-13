@@ -15,8 +15,8 @@ from app.core.lifespan import create_lifespan
 from app.chatbot.chat import set_knowledge_documents
 
 
-def create_http_app(cors_origins: list[str]) -> FastAPI:
-    limiter = Limiter(key_func=get_remote_address, default_limits=["25/minute"])
+def create_http_app(cors_origins: list[str], rate_limit: str) -> FastAPI:
+    limiter = Limiter(key_func=get_remote_address, default_limits=[rate_limit])
 
     app = FastAPI(lifespan=create_lifespan(set_knowledge_documents))
     app.state.limiter = limiter

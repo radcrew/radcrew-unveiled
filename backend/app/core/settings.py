@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     )
 
     PORT: int = Field(default=8787, ge=1)
+    # Per-client request budget for the API (slowapi limit string, e.g. "25/minute").
+    RATE_LIMIT: str = Field(default="25/minute")
     FRONTEND_ORIGIN: str = Field(default="https://radcrew.org")
     FRONTEND_ORIGINS: str | None = Field(
         default=None,
@@ -58,7 +60,11 @@ class Settings(BaseSettings):
     WEB_SEARCH_PROVIDER: str = Field(default="tavily")
     WEB_SEARCH_API_KEY: str | None = None
     WEB_SEARCH_MAX_RESULTS: int = Field(default=5, ge=1, le=20)
-    # Trigger deep search when the best KB similarity is below this.
+
+    # Retrieval similarity thresholds (best semantic score, 0.0–1.0).
+    # Below the fallback threshold, retrieval switches from semantic to lexical
+    # keyword matching; below the deep-search threshold, the web fallback runs.
+    RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD: float = Field(default=0.25, ge=0.0, le=1.0)
     DEEP_SEARCH_SIMILARITY_THRESHOLD: float = Field(default=0.30, ge=0.0, le=1.0)
 
     def cors_allow_origins(self) -> list[str]:

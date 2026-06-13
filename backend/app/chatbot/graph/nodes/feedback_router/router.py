@@ -11,7 +11,7 @@ from huggingface_hub.inference._generated.types.chat_completion import (
 from .message import RoutingReply
 from app.core.settings import get_settings
 from app.chatbot.graph.state import ChatState
-from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
+from app.chatbot.huggingface.common import DEFAULT_MAX_TOKENS, DETERMINISTIC_DECODING
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM_MARKER
 from app.schemas import ChatHistoryMessage
 from .message import build_feedback_routing_messages
@@ -103,10 +103,8 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
         )  # type: ignore[arg-type]
         resp = client.chat_completion(
             messages=routing_msgs,
-            max_tokens=512,
-            temperature=0,
-            top_p=1,
-            seed=DETERMINISTIC_GENERATION_SEED,
+            max_tokens=DEFAULT_MAX_TOKENS,
+            **DETERMINISTIC_DECODING,
             response_format=ChatCompletionInputResponseFormatJSONSchema(
                 type="json_schema",
                 json_schema=ChatCompletionInputJSONSchema(

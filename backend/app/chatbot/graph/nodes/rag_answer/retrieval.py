@@ -13,11 +13,9 @@ import re
 
 from app.chatbot.knowledge.embeddings import semantic_similarities
 from app.chatbot.knowledge.models import KnowledgeDocument
+from app.core.settings import get_settings
 
 logger = logging.getLogger(__name__)
-
-# Best semantic similarity among returned docs; below this → try the lexical fallback.
-RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.25
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
 
@@ -107,7 +105,8 @@ def retrieve_with_confidence(
     positive = [(i, s) for i, s in semantic_ranked if s > 0.0]
     best_similarity = positive[0][1] if positive else 0.0
 
-    if positive and best_similarity >= RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD:
+    fallback_threshold = get_settings().RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD
+    if positive and best_similarity >= fallback_threshold:
         return [documents[i] for i, _ in positive[:limit]], best_similarity
 
     # Semantic retrieval came up empty/weak — fall back to lexical keyword matching.

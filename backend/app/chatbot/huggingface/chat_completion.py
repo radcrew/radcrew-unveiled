@@ -6,7 +6,8 @@ from collections.abc import Iterator
 from typing import Any
 
 from app.chatbot.huggingface.common import (
-    DETERMINISTIC_GENERATION_SEED,
+    DEFAULT_MAX_TOKENS,
+    DETERMINISTIC_DECODING,
     build_inference_client,
     safe_get,
 )
@@ -31,11 +32,9 @@ def stream_chat_completion(
 
     stream = client.chat_completion(
         messages=messages,
-        max_tokens=512,
-        temperature=0,
-        top_p=1,
-        seed=DETERMINISTIC_GENERATION_SEED,
+        max_tokens=DEFAULT_MAX_TOKENS,
         stream=True,
+        **DETERMINISTIC_DECODING,
     )
 
     for chunk in stream:

@@ -22,7 +22,7 @@ from huggingface_hub.inference._generated.types.chat_completion import (
 from pydantic import BaseModel, Field
 
 from app.core.settings import Settings
-from app.chatbot.huggingface.common import DETERMINISTIC_GENERATION_SEED
+from app.chatbot.huggingface.common import DETERMINISTIC_DECODING
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +83,8 @@ def classify_confirmation_via_llm(message: str, settings: Settings) -> ConfirmDe
         )  # type: ignore[arg-type]
         resp = client.chat_completion(
             messages=_messages(message),
-            max_tokens=64,
-            temperature=0,
-            top_p=1,
-            seed=DETERMINISTIC_GENERATION_SEED,
+            max_tokens=64,  # tiny: the classifier only emits a one-word JSON label
+            **DETERMINISTIC_DECODING,
             response_format=ChatCompletionInputResponseFormatJSONSchema(
                 type="json_schema",
                 json_schema=ChatCompletionInputJSONSchema(
