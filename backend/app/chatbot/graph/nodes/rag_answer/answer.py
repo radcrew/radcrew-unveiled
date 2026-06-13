@@ -6,6 +6,7 @@ from app.chatbot.deepsearch import deep_search_documents, is_deep_search_availab
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.graph.state import ChatState
 from app.chatbot.graph.nodes.feedback_router.pregate import looks_like_question
+from app.chatbot.guardrails import apply_output_rail_stream
 from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.chatbot.huggingface import generate_answer
 from app.core.settings import get_settings
@@ -88,8 +89,11 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     return {
         "output_stream": timed_stream(
             stream_answer_with_cache(
-                sanitize_answer_stream(
-                    generate_answer(prompt.system, prompt.user, list(prompt.history))
+                apply_output_rail_stream(
+                    sanitize_answer_stream(
+                        generate_answer(prompt.system, prompt.user, list(prompt.history))
+                    ),
+                    context_chunks,
                 ),
                 cache_key,
             ),
