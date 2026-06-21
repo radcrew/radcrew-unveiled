@@ -1,0 +1,51 @@
+# RadCrew
+
+> RadCrew is a lean software development agency of three senior engineers building
+> full-stack web products, Web3 systems on EVM and Solana, and AI features from
+> prototype to production. Contact: code@radcrew.org
+
+RadCrew ("RadCrew Unveiled") is a small, senior development agency. The crew is
+three engineers: a lead who owns architecture and delivery, a Web3/AI specialist
+focused on smart contracts and chains, and a full-stack/AI engineer who ties
+interfaces, backends, and models together. They partner with teams who want
+velocity without sacrificing quality. The website (https://radcrew.org) is a
+single-page site with a built-in FAQ chatbot.
+
+## What we do
+
+- **Full-stack product engineering**: Web apps, APIs, dashboards, and
+  integrations—from greenfield MVPs to hardening production systems. TypeScript-first,
+  cloud-ready, built for maintainability.
+- **Web3 on EVM & Solana**: Smart contracts, wallets, indexing, and protocol UX.
+  Shipping on Ethereum and L2s, plus Solana when a product needs speed,
+  composability, or cross-chain clarity.
+- **AI in the real product**: LLM features, agents, RAG, and evaluation—not demos.
+  Connecting models to your data, auth, and stack so AI ships with the rest of the
+  product.
+
+## How we work
+
+A four-phase rhythm from first call to production and beyond:
+
+1. **Discover** — align on outcomes, constraints, and risk; propose a thin slice to
+   validate architecture and UX early.
+2. **Build** — short cycles with visible progress: trunk-based flow, reviews, and
+   demos.
+3. **Ship** — hardening, observability, and handoff-ready docs; care about launch
+   day and the week after.
+4. **Partner** — stay for a phase-two roadmap or transition cleanly; knowledge
+   lives in the repo and runbooks.
+
+## Representative work
+
+Examples of the kinds of problems RadCrew takes from idea to production (illustrative
+of capability areas, not an exhaustive client list): multi-chain DeFi analytics,
+enterprise RAG assistants, Solana trading experiences, NFT creator tooling,
+cross-chain bridge/relayer ops dashboards, AI support copilots, realtime
+collaboration SaaS, mobile Web3 wallets, ML pipeline observability, DAO governance
+portals, and B2B API platforms.
+
+## Contact
+
+- Email: code@radcrew.org (typical response within one to two business days)
+- Website: https://radcrew.org
