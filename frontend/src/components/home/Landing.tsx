@@ -8,7 +8,6 @@ import { Process } from "./sections/Process";
 import { Portfolio } from "./sections/Portfolio";
 import { TechStack } from "./sections/TechStack";
 import { Testimonial } from "./sections/Testimonial";
-import { Team } from "./sections/Team";
 import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
@@ -36,7 +35,6 @@ const Landing = () => {
       <Portfolio />
       <TechStack />
       <Testimonial />
-      <Team />
       <Faq />
       <ContactSection />
       <Footer />
