@@ -1,6 +1,7 @@
 {
   "name": "radcrew-unveiled",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "workspaces": ["frontend"],
   "scripts": {
