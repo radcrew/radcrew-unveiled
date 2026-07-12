@@ -64,3 +64,10 @@ See [frontend/README.md](frontend/README.md#lint).
 - **API (Uvicorn):** [backend/README.md](backend/README.md#production)
 
 `yarn build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
+
+## Community
+
+- **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Code of Conduct:** [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Security policy:** [SECURITY.md](SECURITY.md)
+- **License:** [MIT](LICENSE)
