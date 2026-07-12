@@ -42,14 +42,6 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
           >
             Process
           </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("team")}
-            className="transition-colors hover:text-primary"
-            data-testid="nav-team"
-          >
-            Team
-          </button>
           <Button
             type="button"
             onClick={() => onNavigate("contact")}

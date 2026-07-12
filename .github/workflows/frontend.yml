@@ -1,7 +1,7 @@
 # Frontend CI/CD (Vite) — deploys from repo root (see /vercel.json).
 #
 # Vercel dashboard (frontend project): set Root Directory to "." (repository root),
-# not "frontend", so install can run `npm ci` against package-lock.json.
+# not "frontend", so install can run `pnpm install` against pnpm-lock.yaml.
 #
 # Required GitHub secrets (Vercel → Project → Settings → General):
 #   VERCEL_TOKEN
@@ -16,14 +16,14 @@ on:
     paths:
       - "frontend/**"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "vercel.json"
       - ".github/workflows/frontend.yml"
   pull_request:
     paths:
       - "frontend/**"
       - "package.json"
-      - "package-lock.json"
+      - "pnpm-lock.yaml"
       - "vercel.json"
       - ".github/workflows/frontend.yml"
   workflow_dispatch:
@@ -44,36 +44,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: package-lock.json
+          node-version: "22"
+          cache: pnpm
 
       - name: Install dependencies
-        run: |
-          npm ci
-          # Lockfile may omit Linux native optional deps when generated on Windows (npm/cli#4828)
-          npm install --no-save \
-            @rollup/rollup-linux-x64-gnu@4.24.0 \
-            @swc/core-linux-x64-gnu@1.13.2
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Test
-        run: npm run test
+        run: pnpm run test
+        working-directory: frontend
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
         working-directory: frontend
 
       - name: E2E tests
-        run: npm run test:e2e
+        run: pnpm run test:e2e
         working-directory: frontend
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
+        working-directory: frontend
 
   deploy:
     needs: ci
