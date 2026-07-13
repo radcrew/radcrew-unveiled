@@ -2,6 +2,8 @@
 
 Monorepo: Vite React site (`frontend`) and FAQ chatbot API (`backend`, FastAPI + Uvicorn).
 
+For a system overview and cross-cutting docs, see **[docs/](docs/README.md)** (start with [docs/architecture.md](docs/architecture.md)).
+
 ## Prerequisites
 
 - **Node.js** — see [frontend/README.md](frontend/README.md)

@@ -1,0 +1,120 @@
+# RadCrew
+
+> RadCrew is a lean software development agency of three senior engineers building
+> full-stack web products, Web3 systems on EVM and Solana, and AI features from
+> prototype to production. Contact: code@radcrew.org
+
+This is the full-detail companion to /llms.txt — the same site, expanded with the
+complete copy from each section instead of summaries and links.
+
+## Overview
+
+RadCrew ("RadCrew Unveiled") is a small, senior development agency: "We build
+what's next." The crew is three senior engineers only — no juniors, no handoffs.
+The people you meet are the people who build. They partner with startups and
+scale-ups who want velocity without sacrificing quality, on projects ranging from
+3-month MVPs to multi-year embedded engagements. The website (https://radcrew.org)
+is a single-page site with a built-in FAQ chatbot.
+
+## Services and capabilities
+
+Core capabilities are organized into three areas:
+
+1. **Full-stack product engineering** — from scalable data pipelines to
+   bulletproof production systems. Platforms architected to scale elegantly from
+   day one: web apps, APIs, dashboards, and integrations. TypeScript-first,
+   cloud-ready, built for maintainability.
+2. **Web3 on EVM and Solana** — secure smart contract development, complex DeFi
+   mechanics, and full-stack dApp architecture, rigorously tested and flawlessly
+   executed. Smart contracts, protocol UX, wallets, and indexing, shipping on
+   Ethereum and L2s plus Solana when a product needs speed, composability, or
+   cross-chain clarity.
+3. **AI in the real product** — embedding intelligent capabilities into existing
+   stacks, from custom RAG pipelines to fine-tuned autonomous agents, plus
+   production AI features. Connecting models to your data, auth, and stack so AI
+   ships with the rest of the product, not as a demo bolted on the side.
+
+## How RadCrew works
+
+A four-phase rhythm from first call to production and beyond:
+
+1. **Discover** — map the architecture, define constraints, and build the
+   blueprint; align on outcomes and risk, and propose a thin slice to validate
+   architecture and UX early.
+2. **Build** — elite engineering velocity, transparent sprints, relentless
+   precision; short cycles with visible progress, trunk-based flow, reviews, and
+   demos.
+3. **Ship** — deploy to production, stabilize infrastructure, and hand off clean
+   docs; hardening, observability, and care about launch day and the week after.
+4. **Partner** — a long-term embedded relationship to scale the product forward;
+   stay for a phase-two roadmap or transition cleanly, with knowledge living in
+   the repo and runbooks.
+
+## Track record
+
+40+ projects shipped, 12+ happy clients, 5 years building, and a 99.9% uptime SLA.
+
+## Selected work
+
+- **Real Estate Consultant** — a client-facing discovery and advisory experience
+  with property search, market context, and guided consultation flows in a
+  polished, trustworthy UI. Stack: React, Next.js, product UI.
+- **CryptoPets** — a collectible pet experience on-chain with minting, trading,
+  and profile flows, built with a bright, approachable UI for mainstream Web3
+  onboarding. Stack: React, Web3, NFTs.
+
+Representative problem areas (illustrative of capability, not an exhaustive client
+list): multi-chain DeFi analytics, enterprise RAG assistants, Solana trading
+experiences, NFT creator tooling, cross-chain bridge/relayer ops dashboards, AI
+support copilots, realtime collaboration SaaS, mobile Web3 wallets, ML pipeline
+observability, DAO governance portals, and B2B API platforms.
+
+## Technology
+
+React, Next.js, TypeScript, Node.js, NestJS, Django, Flask, Python, Rust,
+Solidity, EVM/Ethereum, Solana, WalletConnect, MongoDB, PostgreSQL, Redis,
+GraphQL, Sequelize, TanStack Query, Socket.IO, LangChain, OpenAI, Docker,
+Kubernetes, Vercel, GitHub, GitHub Actions, Flutter, Android, iOS/Apple, Jest,
+Cypress.
+
+## Client testimonial
+
+"An incredible partner that transformed our technical architecture from the
+ground up." — Jordan Lee, CTO, Series B Fintech.
+
+## FAQ
+
+**What size projects do you take on?**
+RadCrew partners with startups and scale-ups on projects from 3-month MVPs to
+multi-year embedded engagements — quality over quantity.
+
+**Do you work on fixed-price or time-and-materials contracts?**
+Both; they recommend the right model based on the project's scope and certainty.
+
+**How quickly can you start?**
+Typically within 2 weeks of signing — capacity is kept deliberately limited to
+ensure exceptional execution.
+
+**Do you offer post-launch support?**
+Yes — the Partner phase is an ongoing embedded relationship, not just a
+maintenance contract; they stay and scale with you.
+
+**What makes RadCrew different?**
+Senior talent only, no handoffs to juniors — the people you meet are the people
+who build, with meticulous execution.
+
+## Contact
+
+- Email: code@radcrew.org (typical response within one to two business days)
+- Website: https://radcrew.org
+- Start a project via the site inquiry form (asks for a project type) or by
+  emailing directly; RadCrew follows up to schedule a discovery call.
+
+## Official links
+
+- Website: https://radcrew.org
+- Email: code@radcrew.org
+- GitHub: https://github.com/radcrew
+
+These are the only official channels. RadCrew does not maintain other social
+media accounts (no Twitter/X, LinkedIn, Discord, or Instagram).
