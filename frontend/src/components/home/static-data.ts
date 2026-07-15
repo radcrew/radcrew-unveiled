@@ -5,6 +5,8 @@ import reImg4 from "@/assets/portfolio/real-estate-consultant/img4.png";
 import reImg5 from "@/assets/portfolio/real-estate-consultant/img5.png";
 import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/img1.png";
 import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/img2.png";
+import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/img3.png";
+import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/img4.png";
 import ceoImg from "@/assets/team/ceo.png";
 import jesusImg from "@/assets/team/jesus-monroig.png";
 import designImg from "@/assets/team/design.png";
@@ -29,7 +31,7 @@ export const featuredProjects: FeaturedProject[] = [
     title: "CryptoPets",
     description:
       "Collectible pet experience on-chain: minting, trading, and profile flows with a bright, approachable UI built for mainstream Web3 onboarding.",
-    images: [cryptoPetsImg1, cryptoPetsImg2],
+    images: [cryptoPetsImg1, cryptoPetsImg2, cryptoPetsImg3, cryptoPetsImg4],
     tags: ["React", "Web3", "NFTs"],
   },
 ];
