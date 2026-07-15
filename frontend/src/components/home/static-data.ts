@@ -25,14 +25,14 @@ export const featuredProjects: FeaturedProject[] = [
     description:
       "Client-facing discovery and advisory experience: property search, market context, and guided consultation flows with a polished, trustworthy UI.",
     images: [reImg1, reImg2, reImg3, reImg4, reImg5],
-    tags: ["React", "Next.js", "Product UI"],
+    tags: ["React", "Next.js", "Product UI", "LLM", "Fastapi", "PostgreSQL", "Prisma", "MicroService", "Github-Actions"],
   },
   {
     title: "CryptoPets",
     description:
       "Collectible pet experience on-chain: minting, trading, and profile flows with a bright, approachable UI built for mainstream Web3 onboarding.",
     images: [cryptoPetsImg1, cryptoPetsImg2, cryptoPetsImg3, cryptoPetsImg4],
-    tags: ["React", "Web3", "NFTs"],
+    tags: ["React", "Web3", "NFTs", "GraphQL", "Helius", "Agentic-AI", "grpc", "React-Native", "SubGraph", "Ethereum", "Solana", "HuggingFace", "Zod", "GoLang", "Redis", "PostgreSQL"],
   },
 ];
 

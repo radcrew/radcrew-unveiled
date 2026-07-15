@@ -1,4 +1,6 @@
+import { motion } from "framer-motion";
 import { AnimatedCounter } from "../AnimatedCounter";
+import { fadeIn, staggerContainer } from "../motion";
 
 const statLabelClassName = "mt-4 text-sm font-light uppercase tracking-widest text-muted-foreground";
 
@@ -6,26 +8,32 @@ export const Stats = () => {
   return (
     <section className="border-t border-border bg-background px-6 py-24 lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <div className="grid grid-cols-2 gap-12 text-center md:grid-cols-4 md:text-left">
-          <div>
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-2 gap-12 text-center md:grid-cols-4 md:text-left"
+        >
+          <motion.div variants={fadeIn}>
             <AnimatedCounter end={40} suffix="+" />
             <div className={statLabelClassName}>Projects Shipped</div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={fadeIn}>
             <AnimatedCounter end={12} suffix="+" />
             <div className={statLabelClassName}>Happy Clients</div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={fadeIn}>
             <AnimatedCounter end={5} suffix="" />
             <div className={statLabelClassName}>Years Building</div>
-          </div>
-          <div>
+          </motion.div>
+          <motion.div variants={fadeIn}>
             <div className="font-serif text-5xl text-foreground md:text-6xl">
               99.9<span className="ml-1 text-primary">%</span>
             </div>
             <div className={statLabelClassName}>Uptime SLA</div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );
