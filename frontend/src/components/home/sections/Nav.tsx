@@ -14,7 +14,11 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
-        <Link to="/" className="cursor-pointer text-xl font-light uppercase tracking-[0.25em]" data-testid="nav-logo">
+        <Link
+          to="/"
+          className="-ml-6 cursor-pointer text-xl font-light uppercase tracking-[0.25em] lg:-ml-12"
+          data-testid="nav-logo"
+        >
           radcrew
         </Link>
         <div className="hidden items-center gap-10 text-sm uppercase tracking-widest md:flex">
