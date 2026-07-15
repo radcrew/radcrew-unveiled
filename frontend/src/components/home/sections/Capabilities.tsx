@@ -38,22 +38,21 @@ export const Capabilities = () => {
           <h2 className="mb-20 border-b border-border pb-8 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
         </motion.div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          variants={staggerContainer}
+          viewport={{ once: true }}
+          className="grid gap-8 md:grid-cols-3"
+        >
           {capabilityCards.map((card) => (
-            <motion.div
-              key={card.index}
-              initial="hidden"
-              whileInView="visible"
-              variants={staggerContainer}
-              viewport={{ once: true }}
-              className={cardClassName}
-            >
+            <motion.div key={card.index} variants={fadeIn} className={cardClassName}>
               <div className="mb-8 font-serif text-3xl italic text-primary">{card.index}</div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
               <p className="font-light leading-relaxed text-muted-foreground">{card.description}</p>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { testimonial } from "../static-data";
+import { fadeIn } from "../motion";
 
 export const Testimonial = () => {
   return (
@@ -7,7 +8,7 @@ export const Testimonial = () => {
       <div className="mx-auto max-w-4xl text-center">
         <div className="mb-10 font-serif text-4xl italic text-primary">&quot;</div>
 
-        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 1 }}>
+        <motion.div initial="hidden" whileInView="visible" variants={fadeIn} viewport={{ once: true }}>
           <h3 className="mb-12 font-serif text-3xl leading-snug text-foreground md:text-5xl">{testimonial.quote}</h3>
           <div className="font-sans text-sm font-light uppercase tracking-widest">
             <span className="font-medium text-foreground">{testimonial.clientName}</span>
