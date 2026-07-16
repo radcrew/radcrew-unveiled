@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@components/ui/sheet";
+import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay-events";
 
 type NavProps = {
   isScrolled: boolean;
@@ -18,6 +19,13 @@ const navLinks = [
 export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigatingRef = useRef(false);
+
+  useCloseOnOtherOverlayOpen("nav", () => setMobileOpen(false));
+
+  const handleMobileOpenChange = (next: boolean) => {
+    setMobileOpen(next);
+    if (next) announceOverlayOpened("nav");
+  };
 
   const handleMobileNavigate = (id: string) => {
     navigatingRef.current = true;
@@ -75,7 +83,7 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
           </Button>
         </div>
 
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <Sheet open={mobileOpen} onOpenChange={handleMobileOpenChange}>
           <SheetTrigger asChild>
             <button
               type="button"
