@@ -16,6 +16,9 @@ const navLinks = [
   { id: "process", label: "Process" },
 ] as const;
 
+const focusRingClassName =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+
 export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigatingRef = useRef(false);
@@ -48,30 +51,17 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
           radcrew
         </Link>
         <div className="hidden items-center gap-10 text-sm uppercase tracking-widest md:flex">
-          <button
-            type="button"
-            onClick={() => onNavigate("services")}
-            className="transition-colors hover:text-primary"
-            data-testid="nav-services"
-          >
-            Services
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("portfolio")}
-            className="transition-colors hover:text-primary"
-            data-testid="nav-portfolio"
-          >
-            Work
-          </button>
-          <button
-            type="button"
-            onClick={() => onNavigate("process")}
-            className="transition-colors hover:text-primary"
-            data-testid="nav-process"
-          >
-            Process
-          </button>
+          {navLinks.map((link) => (
+            <button
+              key={link.id}
+              type="button"
+              onClick={() => onNavigate(link.id)}
+              className={`transition-colors hover:text-primary ${focusRingClassName}`}
+              data-testid={`nav-${link.id}`}
+            >
+              {link.label}
+            </button>
+          ))}
           <Button
             type="button"
             onClick={() => onNavigate("contact")}
@@ -87,7 +77,7 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
           <SheetTrigger asChild>
             <button
               type="button"
-              className="text-foreground md:hidden"
+              className={`text-foreground md:hidden ${focusRingClassName}`}
               aria-label="Open menu"
               data-testid="nav-mobile-trigger"
             >
@@ -114,7 +104,7 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
                   key={link.id}
                   type="button"
                   onClick={() => handleMobileNavigate(link.id)}
-                  className="text-left transition-colors hover:text-primary"
+                  className={`text-left transition-colors hover:text-primary ${focusRingClassName}`}
                   data-testid={`nav-mobile-${link.id}`}
                 >
                   {link.label}
