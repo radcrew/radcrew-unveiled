@@ -28,9 +28,7 @@ export const Stats = () => {
             <div className={statLabelClassName}>Years Building</div>
           </motion.div>
           <motion.div variants={fadeIn}>
-            <div className="font-serif text-5xl text-foreground md:text-6xl">
-              99.9<span className="ml-1 text-primary">%</span>
-            </div>
+            <AnimatedCounter end={99.9} suffix="%" decimals={1} />
             <div className={statLabelClassName}>Uptime SLA</div>
           </motion.div>
         </motion.div>
