@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@components
 import { Input } from "@components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
+import { scrollSectionIntoView } from "@/lib/scroll-to-section";
 
 const newsletterSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -16,8 +17,17 @@ const newsletterSchema = z.object({
 
 type NewsletterFormValues = z.infer<typeof newsletterSchema>;
 
-const socialLinkClassName =
+const footerLinks = [
+  { id: "services", label: "Services" },
+  { id: "portfolio", label: "Work" },
+  { id: "process", label: "Process" },
+  { id: "contact", label: "Contact" },
+] as const;
+
+const footerLinkClassName =
   "transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
+
+const socialLinkClassName = footerLinkClassName;
 
 export const Footer = () => {
   const { toast } = useToast();
@@ -63,12 +73,25 @@ export const Footer = () => {
   return (
     <footer id="footer" className="border-t-4 border-primary bg-foreground px-6 pb-12 pt-24 text-background lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-24 grid gap-16 md:grid-cols-2">
+        <div className="mb-24 grid gap-16 md:grid-cols-3">
           <div>
             <div className="mb-8 text-3xl font-light uppercase tracking-[0.25em]">radcrew</div>
             <p className="max-w-sm leading-relaxed font-light text-background/70">
               An elite engineering studio building the future of technology for those who demand excellence.
             </p>
+          </div>
+
+          <div>
+            <h4 className="mb-6 text-sm font-light uppercase tracking-widest opacity-70">Navigate</h4>
+            <ul className="space-y-3 font-light text-background/70">
+              {footerLinks.map((link) => (
+                <li key={link.id}>
+                  <button type="button" onClick={() => scrollSectionIntoView(link.id)} className={footerLinkClassName}>
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="w-full max-w-md md:justify-self-end">
