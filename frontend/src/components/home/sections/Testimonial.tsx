@@ -1,14 +1,26 @@
 import { motion } from "framer-motion";
 import { testimonial } from "../static-data";
-import { fadeIn } from "../motion";
 
 export const Testimonial = () => {
   return (
     <section className="relative overflow-hidden border-t border-border bg-muted px-6 py-32 lg:px-12">
       <div className="mx-auto max-w-4xl text-center">
-        <div className="mb-10 font-serif text-4xl italic text-primary">&quot;</div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 font-serif text-4xl italic text-primary"
+        >
+          &quot;
+        </motion.div>
 
-        <motion.div initial="hidden" whileInView="visible" variants={fadeIn} viewport={{ once: true }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+        >
           <h3 className="mb-12 font-serif text-3xl leading-snug text-foreground md:text-5xl">{testimonial.quote}</h3>
           <div className="font-sans text-sm font-light uppercase tracking-widest">
             <span className="font-medium text-foreground">{testimonial.clientName}</span>
