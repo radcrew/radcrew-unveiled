@@ -48,7 +48,9 @@ export const Capabilities = () => {
               viewport={{ once: true }}
               className={cardClassName}
             >
-              <div className="mb-8 font-serif text-3xl italic text-primary">{card.index}</div>
+              <div className="mb-8 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
+                {card.index}
+              </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
               <p className="font-light leading-relaxed text-muted-foreground">{card.description}</p>
             </motion.div>
