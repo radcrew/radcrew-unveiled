@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   Carousel,
   CarouselContent,
@@ -8,6 +8,16 @@ import {
 } from "@components/ui/carousel";
 import { featuredProjects } from "../static-data";
 import { fadeIn } from "../motion";
+
+const tagContainerVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.05 } },
+};
+
+const tagVariants: Variants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
 
 export const Portfolio = () => {
   return (
@@ -35,7 +45,13 @@ export const Portfolio = () => {
               className="group grid items-center gap-12 md:grid-cols-12"
             >
               <div className={`md:col-span-7 ${i % 2 !== 0 ? "md:order-last" : ""}`}>
-                <div className="relative aspect-[4/3] overflow-hidden border border-border bg-background shadow-sm md:aspect-[16/10]">
+                <motion.div
+                  initial={{ clipPath: "inset(0 100% 0 0)" }}
+                  whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                  className="relative aspect-[4/3] overflow-hidden border border-border bg-background shadow-sm md:aspect-[16/10]"
+                >
                   {project.images && project.images.length > 0 ? (
                     <Carousel opts={{ loop: true }} className="absolute inset-0 h-full min-h-0 w-full">
                       <CarouselContent className="-ml-0 h-full min-h-0">
@@ -69,19 +85,26 @@ export const Portfolio = () => {
                     />
                   ) : null}
                   <div className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply bg-primary/5 transition-colors duration-700 group-hover:bg-transparent" />
-                </div>
+                </motion.div>
               </div>
               <div className={`flex flex-col justify-center md:col-span-5 ${i % 2 !== 0 ? "md:pr-12" : "md:pl-12"}`}>
-                <div className="mb-8 flex flex-wrap gap-3">
+                <motion.div
+                  initial="hidden"
+                  whileInView="visible"
+                  variants={tagContainerVariants}
+                  viewport={{ once: true }}
+                  className="mb-8 flex flex-wrap gap-3"
+                >
                   {project.tags.map((tag) => (
-                    <span
+                    <motion.span
                       key={tag}
+                      variants={tagVariants}
                       className="border border-primary/30 px-4 py-2 text-xs font-light uppercase tracking-widest text-primary"
                     >
                       {tag}
-                    </span>
+                    </motion.span>
                   ))}
-                </div>
+                </motion.div>
                 <h3 className="mb-6 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
                 <p className="text-lg font-light leading-relaxed text-muted-foreground md:text-xl">{project.description}</p>
               </div>
