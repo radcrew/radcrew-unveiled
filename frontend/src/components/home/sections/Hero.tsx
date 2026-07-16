@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@components/ui/button";
 import HeroCanvas from "@components/HeroCanvas";
 import { fadeIn, staggerContainer } from "../motion";
@@ -52,6 +53,21 @@ export const Hero = ({ onNavigate }: HeroProps) => {
           </motion.div>
         </motion.div>
       </div>
+
+      <motion.button
+        type="button"
+        onClick={() => window.scrollBy({ top: window.innerHeight, behavior: "smooth" })}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1.2 }}
+        className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        aria-label="Scroll down"
+      >
+        <span className="text-xs font-light uppercase tracking-widest">Scroll</span>
+        <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
+          <ChevronDown className="h-5 w-5" />
+        </motion.span>
+      </motion.button>
     </section>
   );
 };

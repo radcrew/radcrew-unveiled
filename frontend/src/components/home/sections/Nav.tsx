@@ -7,6 +7,7 @@ import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay
 
 type NavProps = {
   isScrolled: boolean;
+  activeSection: string;
   onNavigate: (sectionId: string) => void;
 };
 
@@ -19,7 +20,7 @@ const navLinks = [
 const focusRingClassName =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
+export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigatingRef = useRef(false);
 
@@ -56,7 +57,9 @@ export const Nav = ({ isScrolled, onNavigate }: NavProps) => {
               key={link.id}
               type="button"
               onClick={() => onNavigate(link.id)}
-              className={`transition-colors hover:text-primary ${focusRingClassName}`}
+              className={`transition-colors hover:text-primary ${focusRingClassName} ${
+                activeSection === link.id ? "text-primary" : ""
+              }`}
               data-testid={`nav-${link.id}`}
             >
               {link.label}
