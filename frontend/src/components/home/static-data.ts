@@ -7,6 +7,9 @@ import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/img1.png";
 import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/img2.png";
 import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/img3.png";
 import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/img4.png";
+import forImg1 from "@/assets/portfolio/forgeng/img1.png";
+import forImg2 from "@/assets/portfolio/forgeng/img2.png";
+import forImg3 from "@/assets/portfolio/forgeng/img3.png";
 import ceoImg from "@/assets/team/ceo.png";
 import jesusImg from "@/assets/team/jesus-monroig.png";
 import designImg from "@/assets/team/design.png";
@@ -34,6 +37,13 @@ export const featuredProjects: FeaturedProject[] = [
     images: [cryptoPetsImg1, cryptoPetsImg2, cryptoPetsImg3, cryptoPetsImg4],
     tags: ["React", "Web3", "NFTs", "GraphQL", "Helius", "Agentic-AI", "grpc", "React-Native", "SubGraph", "Ethereum", "Solana", "HuggingFace", "Zod", "GoLang", "Redis", "PostgreSQL"],
   },
+  {
+    title: "Forgeng",
+    description:
+      "Internal platform for developer productivity: CI/CD orchestration, service templates, and observability tooling to accelerate delivery.",
+    images: [forImg1, forImg2, forImg3],
+    tags: ["TypeScript", "Node.js", "Kubernetes", "CI/CD", "Observability", "NestJS", "Passport", "PostgreSQL", "Shadcn-UI", "tailwindcss", "vitest", "NextJS", "Prisma"],
+  }
 ];
 
 export const teamMembers = [
