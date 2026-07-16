@@ -27,7 +27,7 @@ const cardClassName =
 
 export const Capabilities = () => {
   return (
-    <section id="services" className="relative bg-muted px-6 py-32 lg:px-12">
+    <section id="services" className="relative bg-muted px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"

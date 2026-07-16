@@ -3,7 +3,7 @@ import { testimonial } from "../static-data";
 
 export const Testimonial = () => {
   return (
-    <section className="relative overflow-hidden border-t border-border bg-muted px-6 py-32 lg:px-12">
+    <section className="relative overflow-hidden border-t border-border bg-muted px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-4xl text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}

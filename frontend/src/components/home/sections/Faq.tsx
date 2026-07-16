@@ -10,7 +10,7 @@ import { fadeIn, staggerContainer } from "../motion";
 
 export const Faq = () => {
   return (
-    <section className="border-t border-border bg-muted px-6 py-32 lg:px-12">
+    <section className="border-t border-border bg-muted px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-3xl">
         <motion.h2
           initial="hidden"
