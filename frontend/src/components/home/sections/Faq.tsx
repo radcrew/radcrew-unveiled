@@ -17,7 +17,7 @@ export const Faq = () => {
           whileInView="visible"
           variants={fadeIn}
           viewport={{ once: true }}
-          className="mb-16 text-center font-serif text-4xl text-foreground md:text-6xl"
+          className="mb-16 text-center font-serif text-5xl text-foreground md:text-7xl"
         >
           Common Questions
         </motion.h2>
