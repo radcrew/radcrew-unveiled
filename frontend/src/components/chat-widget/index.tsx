@@ -42,8 +42,21 @@ export const ChatWidget = () => {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
 
   useCloseOnOtherOverlayOpen("chat", () => setOpen(false));
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (panelRef.current?.contains(target) || launcherRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -131,6 +144,7 @@ export const ChatWidget = () => {
   return (
     <>
       <motion.button
+        ref={launcherRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
@@ -158,6 +172,7 @@ export const ChatWidget = () => {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={panelRef}
             id="radcrew-chat-panel"
             role="dialog"
             aria-label="RadCrew chat"
