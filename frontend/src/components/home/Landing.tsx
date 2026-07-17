@@ -51,7 +51,7 @@ const Landing = () => {
       <Nav isScrolled={isScrolled} activeSection={activeSection} onNavigate={scrollTo} />
       <Hero onNavigate={scrollTo} />
       <Stats />
-      <Capabilities />
+      <Capabilities onNavigate={scrollTo} />
       <Process />
       <Portfolio />
       <TechStack />
