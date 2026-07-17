@@ -77,9 +77,19 @@ export const faqs = [
   },
 ];
 
-export const testimonial = {
-  quote: "An incredible partner that transformed our technical architecture from the ground up.",
-  clientName: "Jordan Lee",
-  clientRole: "CTO",
-  clientCompany: "Series B Fintech",
+export type Testimonial = {
+  quote: string;
+  clientName: string;
+  clientRole: string;
+  clientCompany: string;
 };
+
+/** Add more entries here to enable the rotating carousel in Testimonial.tsx. */
+export const testimonials: Testimonial[] = [
+  {
+    quote: "An incredible partner that transformed our technical architecture from the ground up.",
+    clientName: "Jordan Lee",
+    clientRole: "CTO",
+    clientCompany: "Series B Fintech",
+  },
+];

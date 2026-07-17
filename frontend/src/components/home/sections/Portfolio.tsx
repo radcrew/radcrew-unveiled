@@ -95,7 +95,6 @@ export const Portfolio = () => {
           className="mb-24 flex flex-col items-baseline justify-between gap-8 border-b border-border pb-8 md:flex-row"
         >
           <h2 className="font-serif text-5xl text-foreground md:text-7xl">Selected Work</h2>
-          <div className="text-sm font-light uppercase tracking-widest text-muted-foreground">Crafted with intent.</div>
         </motion.div>
 
         <div className="space-y-32">
