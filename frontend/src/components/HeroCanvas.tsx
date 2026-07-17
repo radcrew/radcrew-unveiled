@@ -61,7 +61,9 @@ export default function HeroCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let animationId: number | null = null;
     let nodes: Node[] = [];
     let hexagons: Hexagon[] = [];
 
@@ -95,7 +97,7 @@ export default function HeroCanvas() {
       }));
     }
 
-    function draw() {
+    function drawFrame() {
       if (!canvas || !ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -159,23 +161,46 @@ export default function HeroCanvas() {
         ctx.fillStyle = `rgba(${GOLD}, ${alpha})`;
         ctx.fill();
       }
+    }
 
-      animationId = requestAnimationFrame(draw);
+    function tick() {
+      drawFrame();
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (animationId !== null || reducedMotion) return;
+      animationId = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      if (animationId === null) return;
+      cancelAnimationFrame(animationId);
+      animationId = null;
     }
 
     resize();
     init();
-    draw();
+    drawFrame();
+    start();
 
     const resizeObserver = new ResizeObserver(() => {
       resize();
       init();
+      drawFrame();
     });
     resizeObserver.observe(canvas);
 
+    const intersectionObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) start();
+      else stop();
+    });
+    intersectionObserver.observe(canvas);
+
     return () => {
-      cancelAnimationFrame(animationId);
+      stop();
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
     };
   }, []);
 
