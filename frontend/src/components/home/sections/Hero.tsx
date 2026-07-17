@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@components/ui/button";
 import HeroCanvas from "@components/HeroCanvas";
@@ -9,6 +10,13 @@ type HeroProps = {
 };
 
 export const Hero = ({ onNavigate }: HeroProps) => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    setIsScrolled(latest > 50);
+  });
+
   return (
     <section className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-6 pt-24">
       <div className="absolute inset-0 z-0">
@@ -20,7 +28,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         <motion.div initial="hidden" whileInView="visible" variants={staggerContainer} viewport={{ once: true }}>
           <motion.h1
             variants={fadeIn}
-            className="mb-8 font-serif text-6xl leading-[0.9] tracking-tight text-foreground md:text-8xl lg:text-[11rem]"
+            className="mb-8 font-serif text-[clamp(3.75rem,13vw+0.75rem,11rem)] leading-[0.9] tracking-tight text-foreground"
           >
             We build <br />
             <span className="font-medium italic text-primary">what&apos;s next.</span>
@@ -58,10 +66,12 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         type="button"
         onClick={() => window.scrollBy({ top: window.innerHeight, behavior: "smooth" })}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        animate={{ opacity: isScrolled ? 0 : 1 }}
+        transition={{ duration: isScrolled ? 0.3 : 0.8, delay: isScrolled ? 0 : 1.2 }}
+        className={`absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isScrolled ? "pointer-events-none" : ""}`}
         aria-label="Scroll down"
+        aria-hidden={isScrolled}
+        tabIndex={isScrolled ? -1 : 0}
       >
         <span className="text-xs font-light uppercase tracking-widest">Scroll</span>
         <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
