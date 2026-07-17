@@ -28,7 +28,25 @@ export const Process = () => {
           </h2>
         </motion.div>
 
-        <div className="grid gap-12 border-l border-primary/20 pl-8 md:grid-cols-4 md:border-l-0 md:border-t md:border-primary/20 md:pl-0 md:pt-12">
+        <div className="relative grid gap-12 pl-8 md:grid-cols-4 md:pl-0 md:pt-12">
+          <div className="absolute inset-y-0 left-0 w-px bg-primary/20 md:hidden" />
+          <motion.div
+            initial={{ scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-y-0 left-0 w-px origin-top bg-primary md:hidden"
+          />
+
+          <div className="absolute inset-x-0 top-0 hidden h-px bg-primary/20 md:block" />
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-x-0 top-0 hidden h-px origin-left bg-primary md:block"
+          />
+
           {phases.map((phase, i) => (
             <motion.div
               key={phase.num}
