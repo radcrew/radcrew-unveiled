@@ -63,6 +63,8 @@ export const Portfolio = () => {
                             <img
                               src={src}
                               alt={`${project.title} — screen ${idx + 1}`}
+                              loading="lazy"
+                              decoding="async"
                               className="absolute inset-0 h-full w-full object-fill opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
                             />
                           </CarouselItem>
@@ -81,6 +83,8 @@ export const Portfolio = () => {
                     <img
                       src={project.image}
                       alt={project.title}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
                     />
                   ) : null}
