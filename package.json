@@ -3,6 +3,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
+  "packageManager": "pnpm@11.5.0",
   "workspaces": ["frontend"],
   "scripts": {
     "dev": "concurrently -n frontend,api -c cyan,magenta \"npm run dev -w frontend\" \"npm run dev:backend\"",

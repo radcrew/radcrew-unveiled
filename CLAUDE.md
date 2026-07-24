@@ -170,7 +170,11 @@ Both deploy on `pull_request` (preview) and on push to `main` (production, via `
 
 > Root `vercel.json` drives the frontend deploy and `MUST` stay on pnpm: `"installCommand": "pnpm install --frozen-lockfile"`, `"buildCommand": "pnpm --filter frontend build"`, output `frontend/dist`. It previously declared `npm ci`, which cannot work here because the repo has no `package-lock.json`, and it failed every deploy with `Command "npm ci" exited with 1`. Do not "fix" a future install failure by committing a fourth lockfile.
 >
-> The root `package.json` has no `packageManager` field, so Vercel picks a pnpm major from `pnpm-lock.yaml`'s `lockfileVersion: '9.0'`. The stale `yarn.lock` is still tracked and is the remaining ambiguity in package-manager detection. Removing it, or pinning `packageManager`, would settle this permanently, but pinning also means dropping `version: 11` from `pnpm/action-setup` in both workflows, since v4 errors when a version is specified in both places.
+> **The pnpm version is pinned in exactly one place:** `"packageManager": "pnpm@11.5.0"` in the root `package.json`. Vercel and `pnpm/action-setup` both read it. `MUST NOT` also pass `version:` to `pnpm/action-setup` in `frontend.yml`, because v4 fails with "Multiple versions of pnpm specified" when it is set in both places.
+>
+> This pin exists because Vercel's default pnpm was too old for `pnpm-lock.yaml`'s `lockfileVersion: '9.0'`. It logged `WARN Ignoring not compatible lockfile`, then `ERROR Headless installation requires a pnpm-lock.yaml file`, because `--frozen-lockfile` had nothing left to read. If that pair of messages returns, the pin is wrong or missing, not the lockfile. Keep the pinned major in step with whatever wrote the lockfile.
+>
+> The stale `yarn.lock` is still tracked and is the last remaining ambiguity in package-manager detection. Nothing reads it.
 
 Path filters mean neither workflow runs for a root-only change. An absent check is not a passing check.
 
