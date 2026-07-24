@@ -30,15 +30,15 @@ The import above pulls in the cross-tool non-negotiables and command baseline fr
 
 ## Commands
 
-Package manager is **pnpm** for Node. Backend is a separate Python venv, not managed by pnpm. CI uses pnpm 11 with Node 22, and Python 3.11.
+Package manager is **Yarn 1 classic**, pinned to `yarn@1.22.22` by the root `package.json` `packageManager` field. The backend is a separate Python venv, not managed by yarn. CI uses Node 22 and Python 3.11.
 
 ### Install / dev
 
 ```bash
-pnpm install                 # root, installs the frontend workspace
-pnpm dev                     # frontend + API concurrently
-pnpm dev:frontend            # Vite dev server, http://localhost:8080
-pnpm dev:backend             # Uvicorn reload on backend, http://localhost:8787
+yarn install                 # root, installs the frontend workspace
+yarn dev                     # frontend + API concurrently
+yarn dev:frontend            # Vite dev server, http://localhost:8080
+yarn dev:backend             # Uvicorn reload on backend, http://localhost:8787
 ```
 
 ```bash
@@ -48,18 +48,20 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-> Root scripts delegate through `npm run <script> -w frontend`, so a root `pnpm test` shells out to **npm** and reads the npm `workspaces` field, while CI runs Vitest directly from `frontend/`. Both work, but they are different code paths, and root-level failures may print `npm error` noise that has nothing to do with your change. Prefer `pnpm --filter frontend <script>` to bypass the wrapper entirely.
+> Every root script delegates through `yarn workspace frontend <script>`, and CI runs the root scripts rather than reaching into `frontend/`. One command shape everywhere, no `npm run -w` wrapper, no `working-directory` juggling in the workflow.
 
 ### Lint / test / build
 
 | Side | lint | test | build | single test |
 |---|---|---|---|---|
-| `frontend` | `pnpm lint` (root ESLint over `frontend/src`) | `pnpm --filter frontend test` (Vitest) | `pnpm --filter frontend build` (`vite build`) | `pnpm --filter frontend exec vitest run <path>` or `-t "<name>"` |
-| `frontend` E2E | n/a | `pnpm --filter frontend test:e2e` (Playwright, chromium) | n/a | `pnpm --filter frontend exec playwright test <path>` |
+| `frontend` | `yarn lint` (root ESLint over `frontend/src`) | `yarn test` (Vitest) | `yarn build` (`vite build`) | `yarn workspace frontend test <path>` or `-t "<name>"` |
+| `frontend` E2E | n/a | `yarn test:e2e` (Playwright, chromium) | n/a | `yarn workspace frontend test:e2e <path>` |
 | `backend` | *(none)* | `cd backend && python -m pytest` | `python -m compileall -q app` (syntax check only) | `python -m pytest app/tests/test_retrieval.py -k "name"` |
 | `training` | *(none)* | *(no suite)* | n/a | n/a |
 
-Current baseline: frontend 13 Vitest tests, 2 Playwright tests, backend 183 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `pnpm lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+Current baseline: frontend 13 Vitest tests, 2 Playwright tests, backend 183 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+
+Do not run a hoisted binary straight from the root (`yarn vitest run <path>`). It resolves, because Yarn 1 hoists everything into the root `node_modules/.bin`, but it runs with the root as CWD and never loads `frontend/vitest.config.ts`, so there is no jsdom environment and no setup file. Pure-function tests still pass, which is what makes it dangerous. Always go through `yarn workspace frontend ...`.
 
 Backend `pytest.ini` sets `testpaths = app/tests` and `asyncio_mode = auto`, so `python -m pytest` from `backend/` needs no arguments.
 
@@ -141,7 +143,7 @@ All calls share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`)
 
 These are wrong in the repo's own documentation. Trust the source, not the prose.
 
-**Package manager.** Root `README.md` says `yarn install` and `yarn dev`. `frontend/README.md` and `backend/README.md` say `npm install` and `npm run dev`. Root `package.json` declares npm-style `workspaces`. CI uses pnpm against `pnpm-lock.yaml`. `yarn.lock` is tracked but stale. Use pnpm.
+**Package manager.** The repo is Yarn 1 only, and the root `README.md` is correct about that. `frontend/README.md` and `backend/README.md` still say `npm install` and `npm run dev` throughout; those commands would generate a `package-lock.json` that nothing reads. Substitute `yarn` wherever they say `npm run`.
 
 **Backend env defaults** in `backend/README.md` have drifted from `app/core/settings.py`:
 
@@ -168,13 +170,9 @@ Two Vercel projects, deployed by two workflows:
 
 Both deploy on `pull_request` (preview) and on push to `main` (production, via `--prod`). Runtime env vars are set in the Vercel project settings, not in CI; the workflows only carry `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and the project ids.
 
-> Root `vercel.json` drives the frontend deploy and `MUST` stay on pnpm: `"installCommand": "pnpm install --frozen-lockfile"`, `"buildCommand": "pnpm --filter frontend build"`, output `frontend/dist`. It previously declared `npm ci`, which cannot work here because the repo has no `package-lock.json`, and it failed every deploy with `Command "npm ci" exited with 1`. Do not "fix" a future install failure by committing a fourth lockfile.
+> Root `vercel.json` drives the frontend deploy: `"installCommand": "yarn install --frozen-lockfile"`, `"buildCommand": "yarn workspace frontend build"`, output `frontend/dist`. `frontend/vercel.json` mirrors it for the case where the project root is set to `frontend/`, but the root config is the one in use.
 >
-> **The pnpm version is pinned in exactly one place:** `"packageManager": "pnpm@11.5.0"` in the root `package.json`. Vercel and `pnpm/action-setup` both read it. `MUST NOT` also pass `version:` to `pnpm/action-setup` in `frontend.yml`, because v4 fails with "Multiple versions of pnpm specified" when it is set in both places.
->
-> This pin exists because Vercel's default pnpm was too old for `pnpm-lock.yaml`'s `lockfileVersion: '9.0'`. It logged `WARN Ignoring not compatible lockfile`, then `ERROR Headless installation requires a pnpm-lock.yaml file`, because `--frozen-lockfile` had nothing left to read. If that pair of messages returns, the pin is wrong or missing, not the lockfile. Keep the pinned major in step with whatever wrote the lockfile.
->
-> The stale `yarn.lock` is still tracked and is the last remaining ambiguity in package-manager detection. Nothing reads it.
+> Two deploy failures came out of this file and are worth not repeating. It first declared `npm ci`, which cannot work because the repo has no `package-lock.json` (`Command "npm ci" exited with 1`). It then declared `pnpm install --frozen-lockfile` while Vercel's pnpm was older than the lockfile format, giving `WARN Ignoring not compatible lockfile` followed by `ERROR Headless installation requires a pnpm-lock.yaml file`. The lesson in both cases: the install command, the lockfile, and the `packageManager` pin have to name the same tool, and the fix is never to commit a second lockfile.
 
 Path filters mean neither workflow runs for a root-only change. An absent check is not a passing check.
 

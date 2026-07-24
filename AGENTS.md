@@ -12,8 +12,8 @@ Normative language: `MUST`/`MUST NOT` are mandatory. `SHOULD`/`SHOULD NOT` are e
 
 ## Non-Negotiables
 
-- `MUST` use **pnpm** for the Node side. Three competing declarations exist at root (`pnpm-lock.yaml`, `yarn.lock`, and an npm-style `workspaces` field in `package.json`), and only `pnpm-lock.yaml` is honored: CI and the Vercel frontend deploy both run `pnpm install --frozen-lockfile`. `MUST NOT` run `npm install` or `yarn install` at the root; they resolve against the wrong lockfile and produce a `node_modules` layout CI never sees.
-- `MUST` keep the pnpm version pinned in exactly one place, `"packageManager"` in the root `package.json`. Vercel and `pnpm/action-setup` both read it, and `MUST NOT` also receive a `version:` input in `frontend.yml`, which makes action-setup v4 fail outright. A pin older than the lockfile's `lockfileVersion` makes Vercel skip the lockfile and fail the deploy; see CLAUDE.md's Deployment section.
+- `MUST` use **Yarn 1 classic** for the Node side, pinned by `"packageManager": "yarn@1.22.22"` in the root `package.json`. `yarn.lock` is the only lockfile; CI and the Vercel frontend deploy both run `yarn install --frozen-lockfile`. `MUST NOT` run `npm install` or `pnpm install` at the root, and `MUST NOT` commit a `package-lock.json` or `pnpm-lock.yaml`. pnpm was removed deliberately: the only JavaScript package here is `frontend/`, since the backend is Python, so a workspace-oriented package manager bought nothing.
+- `MUST` declare peer dependencies explicitly. Yarn 1 does not auto-install peers the way the previous pnpm setup did (`autoInstallPeers`), so a package that is only ever reached as someone else's peer will be missing at runtime. `@testing-library/dom` is in `frontend` devDependencies for exactly this reason; do not remove it because "nothing imports it directly".
 - `MUST` treat `backend/app/core/settings.py` as the source of truth for backend configuration. The environment table in `backend/README.md` has drifted on at least three defaults (see CLAUDE.md's Stale docs section) and `MUST NOT` be cited to justify a value.
 - `MUST NOT` weaken the chatbot's grounding contract when editing prompts, retrieval, or the graph: answers stay grounded in conversation history plus retrieved context only, insufficient context points the user at `code@radcrew.org`, replies carry no URLs, and bullets use `-` rather than `*`. These are enforced by `backend/app/tests/` and by the prompt text in `graph/nodes/rag_answer/prompt.py`.
 - `MUST` keep the SSE wire contract in sync across all three sides when changing it. `backend/app/api/chat.py` emits `{"type":"chunk","content":...}` events followed by a final `{"type":"done"}`, consumed by `frontend/src/lib/chatbot-api.ts` and `frontend/src/components/chat-widget/`. Changing one side alone breaks chat silently, with no error surfaced anywhere.
@@ -27,17 +27,17 @@ Normative language: `MUST`/`MUST NOT` are mandatory. `SHOULD`/`SHOULD NOT` are e
 
 Node, from repo root:
 
-- Install: `pnpm install`
-- Dev: `pnpm dev` (frontend and API together), or `pnpm dev:frontend` / `pnpm dev:backend`
-- Lint: `pnpm lint` (ESLint over `frontend/src` only; there is no backend linter)
-- Test: `pnpm test` (frontend Vitest)
-- Build: `pnpm build` (frontend Vite build)
+- Install: `yarn install`
+- Dev: `yarn dev` (frontend and API together), or `yarn dev:frontend` / `yarn dev:backend`
+- Lint: `yarn lint` (ESLint over `frontend/src` only; there is no backend linter)
+- Test: `yarn test` (frontend Vitest), `yarn test:e2e` (Playwright)
+- Build: `yarn build` (frontend Vite build)
 
 Python, from `backend/` with the venv active:
 
 - Install: `python -m venv .venv`, activate, then `pip install -r requirements.txt`
 - Test: `python -m pytest` (183 tests; `pytest.ini` pins `testpaths = app/tests`)
-- Syntax check: `python -m compileall -q app`, which is all `pnpm build:backend` does
+- Syntax check: `python -m compileall -q app`, which is all `yarn build:backend` does
 
 Full per-package matrix, E2E, and single-test syntax: see [CLAUDE.md](./CLAUDE.md#commands).
 
@@ -57,7 +57,7 @@ Full per-package matrix, E2E, and single-test syntax: see [CLAUDE.md](./CLAUDE.m
 
 Mechanical checks over prose, where they exist:
 
-- ESLint at root over `frontend/src` (`pnpm lint`). There is no backend linter, no formatter config, and no pre-commit hooks in this repo, so Python style is convention-only.
+- ESLint at root over `frontend/src` (`yarn lint`). There is no backend linter, no formatter config, and no pre-commit hooks in this repo, so Python style is convention-only.
 - Frontend Vitest (`frontend/src/**/*.test.ts[x]`), Playwright E2E (`frontend/e2e/`), and backend pytest (`backend/app/tests/`). CI runs all three.
-- **CI path filters mean a change can be green without being tested.** `frontend.yml` triggers only on `frontend/**`, `package.json`, `pnpm-lock.yaml`, `vercel.json`, and its own file; `backend.yml` only on `backend/**` and its own file. A root-only change (this file, `README.md`, `docs/`) runs neither workflow. Do not read an absent check as a passing one.
+- **CI path filters mean a change can be green without being tested.** `frontend.yml` triggers only on `frontend/**`, `package.json`, `yarn.lock`, `vercel.json`, and its own file; `backend.yml` only on `backend/**` and its own file. A root-only change (this file, `README.md`, `docs/`) runs neither workflow. Do not read an absent check as a passing one.
 - There is no repo-wide `agents:check` or module-boundary lint. Rely on the per-package commands above.
