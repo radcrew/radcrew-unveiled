@@ -68,10 +68,18 @@ class Settings(BaseSettings):
     DEEP_SEARCH_SIMILARITY_THRESHOLD: float = Field(default=0.30, ge=0.0, le=1.0)
 
     def cors_allow_origins(self) -> list[str]:
-        """Origins allowed by CORSMiddleware (exact match, include scheme)."""
+        """Origins allowed by CORSMiddleware (exact match, include scheme).
+
+        Never returns an empty list. A FRONTEND_ORIGINS holding only separators
+        or blanks (for example ``","``) would otherwise reject every origin,
+        including the configured one, and CORSMiddleware answers that with a
+        bare 400 that reads like a malformed request rather than a config error.
+        """
         raw = self.FRONTEND_ORIGINS
         if raw and raw.strip():
-            return [part.strip() for part in raw.split(",") if part.strip()]
+            origins = [part.strip() for part in raw.split(",") if part.strip()]
+            if origins:
+                return origins
         return [self.FRONTEND_ORIGIN]
 
 
