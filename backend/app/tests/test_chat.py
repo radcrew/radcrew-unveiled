@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.chatbot.knowledge.models import KnowledgeDocument
+from app.chatbot.messages import MSG_AI_UNAVAILABLE
 
 
 def _stream_content(response_text: str) -> str:
@@ -58,3 +59,23 @@ def test_chat_stream_failure_returns_streamed_fallback(_mock_stream: object, cli
     assert "The AI service is temporarily unavailable" in r.text
     assert '"type": "done"' in r.text
 
+
+
+def test_chat_stream_failure_yields_fallback_and_done(client: TestClient) -> None:
+    """A raise mid-stream must not surface as an empty 200 body.
+
+    The generators are lazy, so the failure happens after the response headers
+    are already sent. Without a guard around the iteration it escapes into the
+    ASGI server and the client just sees nothing.
+    """
+
+    def exploding_stream():
+        raise RuntimeError("no inference provider could stream")
+        yield  # pragma: no cover - generator marker
+
+    with patch("app.api.chat.chatbot.generate_chat_stream", return_value=exploding_stream()):
+        r = client.post("/chat", json={"message": "what does radcrew do?"})
+
+    assert r.status_code == 200
+    assert _stream_content(r.text) == MSG_AI_UNAVAILABLE
+    assert '"type": "done"' in r.text or '"type":"done"' in r.text
