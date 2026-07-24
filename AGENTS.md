@@ -1,0 +1,62 @@
+# AGENTS.md
+
+Root coordination contract for AI and human contributors in this repo. Detailed architecture and working guidelines live in [CLAUDE.md](./CLAUDE.md); this file states the non-negotiables and where to look.
+
+## Scope
+
+- Applies to the whole monorepo: `frontend/`, `backend/`, `training/`, `docs/`.
+- No nested `AGENTS.md` files exist yet. If one is added under a package, it may tighten rules for that subtree but must not relax the rules here.
+- `.cursor/skills/radcrew-chatbot/SKILL.md` is a Cursor-specific companion covering the chatbot subsystem. Its path map and behavioral rules are current and worth reading before touching `backend/app/chatbot/`, but it is not loaded at runtime and is not authoritative over this file.
+
+Normative language: `MUST`/`MUST NOT` are mandatory. `SHOULD`/`SHOULD NOT` are expected by default; deviations should be explained in the PR. `MAY` is optional.
+
+## Non-Negotiables
+
+- `MUST` use **pnpm** for the Node side. Three competing declarations exist at root (`pnpm-lock.yaml`, `yarn.lock`, and an npm-style `workspaces` field in `package.json`), and only `pnpm-lock.yaml` is honored: both CI workflows run `pnpm install --frozen-lockfile`. `MUST NOT` run `npm install` or `yarn install` at the root; they resolve against the wrong lockfile and produce a `node_modules` layout CI never sees.
+- `MUST` treat `backend/app/core/settings.py` as the source of truth for backend configuration. The environment table in `backend/README.md` has drifted on at least three defaults (see CLAUDE.md's Stale docs section) and `MUST NOT` be cited to justify a value.
+- `MUST NOT` weaken the chatbot's grounding contract when editing prompts, retrieval, or the graph: answers stay grounded in conversation history plus retrieved context only, insufficient context points the user at `code@radcrew.org`, replies carry no URLs, and bullets use `-` rather than `*`. These are enforced by `backend/app/tests/` and by the prompt text in `graph/nodes/rag_answer/prompt.py`.
+- `MUST` keep the SSE wire contract in sync across all three sides when changing it. `backend/app/api/chat.py` emits `{"type":"chunk","content":...}` events followed by a final `{"type":"done"}`, consumed by `frontend/src/lib/chatbot-api.ts` and `frontend/src/components/chat-widget/`. Changing one side alone breaks chat silently, with no error surfaced anywhere.
+- `MUST NOT` commit secrets. `.env` is gitignored. `HF_TOKEN`, `GITHUB_TOKEN`, `WEB_SEARCH_API_KEY`, and `WEB3FORMS_ACCESS_KEY` are real credentials belonging in `backend/.env` locally and in Vercel project settings for deploys, never in CI config or source.
+- `MUST NOT` treat `training/` as runtime code. It is an offline QLoRA pipeline producing an adapter; nothing under `backend/app/` imports it.
+- `MUST` remember that **opening a pull request deploys**. Both `.github/workflows/frontend.yml` and `backend.yml` run their Vercel deploy job on `pull_request`, so opening a PR is an outward-facing action, not just a CI run.
+- `MUST` run the smallest scoped lint/test command for the side you touched (see Command Baseline), not both suites, unless the change spans them.
+- `SHOULD NOT` trust the root `README.md`, `frontend/README.md`, `backend/README.md`, or `docs/architecture.md` at face value on commands, environment defaults, or module layout. Several have drifted; CLAUDE.md's Stale docs section lists what is actually current.
+
+## Command Baseline
+
+Node, from repo root:
+
+- Install: `pnpm install`
+- Dev: `pnpm dev` (frontend and API together), or `pnpm dev:frontend` / `pnpm dev:backend`
+- Lint: `pnpm lint` (ESLint over `frontend/src` only; there is no backend linter)
+- Test: `pnpm test` (frontend Vitest)
+- Build: `pnpm build` (frontend Vite build)
+
+Python, from `backend/` with the venv active:
+
+- Install: `python -m venv .venv`, activate, then `pip install -r requirements.txt`
+- Test: `python -m pytest` (183 tests; `pytest.ini` pins `testpaths = app/tests`)
+- Syntax check: `python -m compileall -q app`, which is all `pnpm build:backend` does
+
+Full per-package matrix, E2E, and single-test syntax: see [CLAUDE.md](./CLAUDE.md#commands).
+
+## Where To Look
+
+- Behavioral guidelines and full architecture: [CLAUDE.md](./CLAUDE.md)
+- Chatbot subsystem path map and behavioral rules: [.cursor/skills/radcrew-chatbot/SKILL.md](./.cursor/skills/radcrew-chatbot/SKILL.md)
+- Cross-cutting architecture: [docs/architecture.md](./docs/architecture.md), partially stale, see CLAUDE.md
+- Chatbot request walkthrough: [backend/docs/chatbot-flow.md](./backend/docs/chatbot-flow.md)
+- Tuning notes: [backend/docs/chatbot-improvements.md](./backend/docs/chatbot-improvements.md)
+- Training pipeline: [training/README.md](./training/README.md)
+- Contribution workflow: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- PR template: [.github/PULL_REQUEST_TEMPLATE.md](./.github/PULL_REQUEST_TEMPLATE.md)
+- Reporting vulnerabilities: [SECURITY.md](./SECURITY.md)
+
+## Enforcement
+
+Mechanical checks over prose, where they exist:
+
+- ESLint at root over `frontend/src` (`pnpm lint`). There is no backend linter, no formatter config, and no pre-commit hooks in this repo, so Python style is convention-only.
+- Frontend Vitest (`frontend/src/**/*.test.ts[x]`), Playwright E2E (`frontend/e2e/`), and backend pytest (`backend/app/tests/`). CI runs all three.
+- **CI path filters mean a change can be green without being tested.** `frontend.yml` triggers only on `frontend/**`, `package.json`, `pnpm-lock.yaml`, `vercel.json`, and its own file; `backend.yml` only on `backend/**` and its own file. A root-only change (this file, `README.md`, `docs/`) runs neither workflow. Do not read an absent check as a passing one.
+- There is no repo-wide `agents:check` or module-boundary lint. Rely on the per-package commands above.
