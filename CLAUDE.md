@@ -168,7 +168,9 @@ Two Vercel projects, deployed by two workflows:
 
 Both deploy on `pull_request` (preview) and on push to `main` (production, via `--prod`). Runtime env vars are set in the Vercel project settings, not in CI; the workflows only carry `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and the project ids.
 
-> Root `vercel.json` declares `"installCommand": "npm ci"` and `"buildCommand": "npm run build -w frontend"`, which contradicts the pnpm lockfile the rest of the repo standardizes on. `npm ci` requires a `package-lock.json`, and this repo does not have one. If a frontend deploy fails at the install step, look here first rather than assuming a dependency problem, and change it to a pnpm install rather than committing a fourth lockfile.
+> Root `vercel.json` drives the frontend deploy and `MUST` stay on pnpm: `"installCommand": "pnpm install --frozen-lockfile"`, `"buildCommand": "pnpm --filter frontend build"`, output `frontend/dist`. It previously declared `npm ci`, which cannot work here because the repo has no `package-lock.json`, and it failed every deploy with `Command "npm ci" exited with 1`. Do not "fix" a future install failure by committing a fourth lockfile.
+>
+> The root `package.json` has no `packageManager` field, so Vercel picks a pnpm major from `pnpm-lock.yaml`'s `lockfileVersion: '9.0'`. The stale `yarn.lock` is still tracked and is the remaining ambiguity in package-manager detection. Removing it, or pinning `packageManager`, would settle this permanently, but pinning also means dropping `version: 11` from `pnpm/action-setup` in both workflows, since v4 errors when a version is specified in both places.
 
 Path filters mean neither workflow runs for a root-only change. An absent check is not a passing check.
 
