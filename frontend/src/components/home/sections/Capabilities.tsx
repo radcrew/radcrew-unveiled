@@ -1,5 +1,10 @@
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import { fadeIn, staggerContainer } from "../motion";
+
+type CapabilitiesProps = {
+  onNavigate: (sectionId: string) => void;
+};
 
 const capabilityCards = [
   {
@@ -7,27 +12,30 @@ const capabilityCards = [
     title: "Full Stack Product Engineering",
     description:
       "From scalable data pipelines to bulletproof production systems. We build platforms that are architected to scale elegantly from day one.",
+    relatedProject: "Forgeng",
   },
   {
     index: "02",
     title: "Web3 on EVM & Solana",
     description:
       "Secure smart contract development, complex DeFi mechanics, and full-stack dApp architecture. Rigorously tested, flawlessly executed.",
+    relatedProject: "CryptoPets",
   },
   {
     index: "03",
     title: "AI in the Real Product",
     description:
       "Embedding intelligent capabilities into existing stacks. From custom RAG pipelines to fine-tuned autonomous agents.",
+    relatedProject: "Real Estate Consultant",
   },
 ] as const;
 
 const cardClassName =
   "group border border-primary/20 bg-background p-10 transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5";
 
-export const Capabilities = () => {
+export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (
-    <section id="services" className="relative bg-muted px-6 py-32 lg:px-12">
+    <section id="services" className="relative bg-muted px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -48,9 +56,19 @@ export const Capabilities = () => {
               viewport={{ once: true }}
               className={cardClassName}
             >
-              <div className="mb-8 font-serif text-3xl italic text-primary">{card.index}</div>
+              <div className="mb-8 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
+                {card.index}
+              </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
-              <p className="font-light leading-relaxed text-muted-foreground">{card.description}</p>
+              <p className="mb-6 font-light leading-relaxed text-muted-foreground">{card.description}</p>
+              <button
+                type="button"
+                onClick={() => onNavigate("portfolio")}
+                className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
+              >
+                See it in {card.relatedProject}
+                <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
+              </button>
             </motion.div>
           ))}
         </div>

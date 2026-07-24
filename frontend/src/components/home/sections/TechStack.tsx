@@ -1,3 +1,4 @@
+import { motion, type Variants } from "framer-motion";
 import {
   SiAndroid,
   SiApple,
@@ -36,6 +37,51 @@ import {
 /** Shared sizing / hover for Simple Icons in the “Technologies We Master” row */
 const TECH_ICON_CLASS = "h-9 w-9 transition-colors duration-300 hover:text-primary md:h-10 md:w-10";
 
+const techIcons = [
+  { Icon: SiReact, title: "React" },
+  { Icon: SiNextdotjs, title: "Next.js" },
+  { Icon: SiTypescript, title: "TypeScript" },
+  { Icon: SiNodedotjs, title: "Node.js" },
+  { Icon: SiDjango, title: "Django" },
+  { Icon: SiFlask, title: "Flask" },
+  { Icon: SiPython, title: "Python" },
+  { Icon: SiRust, title: "Rust" },
+  { Icon: SiSolidity, title: "Solidity" },
+  { Icon: SiEthereum, title: "EVM / Ethereum" },
+  { Icon: SiSolana, title: "Solana" },
+  { Icon: SiMongodb, title: "MongoDB" },
+  { Icon: SiPostgresql, title: "PostgreSQL" },
+  { Icon: SiRedis, title: "Redis" },
+  { Icon: SiGraphql, title: "GraphQL" },
+  { Icon: SiLangchain, title: "LangChain" },
+  { Icon: SiOpenai, title: "OpenAI" },
+  { Icon: SiDocker, title: "Docker" },
+  { Icon: SiAndroid, title: "Android" },
+  { Icon: SiApple, title: "iOS / Apple" },
+  { Icon: SiGithub, title: "GitHub" },
+  { Icon: SiGithubactions, title: "GitHub Actions" },
+  { Icon: SiVercel, title: "Vercel" },
+  { Icon: SiKubernetes, title: "Kubernetes" },
+  { Icon: SiFlutter, title: "Flutter" },
+  { Icon: SiWalletconnect, title: "WalletConnect" },
+  { Icon: SiCypress, title: "Cypress" },
+  { Icon: SiJest, title: "Jest" },
+  { Icon: SiNestjs, title: "NestJS" },
+  { Icon: SiSequelize, title: "Sequelize" },
+  { Icon: SiSocketdotio, title: "Socket.IO" },
+  { Icon: SiReactquery, title: "TanStack Query" },
+] as const;
+
+const iconRowVariants: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.015 } },
+};
+
+const iconVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
 export const TechStack = () => {
   return (
     <section className="bg-background px-6 py-24 lg:px-12">
@@ -44,40 +90,19 @@ export const TechStack = () => {
           Technologies We Master
         </div>
 
-        <div className="mx-auto flex max-w-7xl flex-wrap justify-center gap-x-10 gap-y-8 text-muted-foreground/60">
-          <SiReact className={TECH_ICON_CLASS} title="React" />
-          <SiNextdotjs className={TECH_ICON_CLASS} title="Next.js" />
-          <SiTypescript className={TECH_ICON_CLASS} title="TypeScript" />
-          <SiNodedotjs className={TECH_ICON_CLASS} title="Node.js" />
-          <SiDjango className={TECH_ICON_CLASS} title="Django" />
-          <SiFlask className={TECH_ICON_CLASS} title="Flask" />
-          <SiPython className={TECH_ICON_CLASS} title="Python" />
-          <SiRust className={TECH_ICON_CLASS} title="Rust" />
-          <SiSolidity className={TECH_ICON_CLASS} title="Solidity" />
-          <SiEthereum className={TECH_ICON_CLASS} title="EVM / Ethereum" />
-          <SiSolana className={TECH_ICON_CLASS} title="Solana" />
-          <SiMongodb className={TECH_ICON_CLASS} title="MongoDB" />
-          <SiPostgresql className={TECH_ICON_CLASS} title="PostgreSQL" />
-          <SiRedis className={TECH_ICON_CLASS} title="Redis" />
-          <SiGraphql className={TECH_ICON_CLASS} title="GraphQL" />
-          <SiLangchain className={TECH_ICON_CLASS} title="LangChain" />
-          <SiOpenai className={TECH_ICON_CLASS} title="OpenAI" />
-          <SiDocker className={TECH_ICON_CLASS} title="Docker" />
-          <SiAndroid className={TECH_ICON_CLASS} title="Android" />
-          <SiApple className={TECH_ICON_CLASS} title="iOS / Apple" />
-          <SiGithub className={TECH_ICON_CLASS} title="GitHub" />
-          <SiGithubactions className={TECH_ICON_CLASS} title="GitHub Actions" />
-          <SiVercel className={TECH_ICON_CLASS} title="Vercel" />
-          <SiKubernetes className={TECH_ICON_CLASS} title="Kubernetes" />
-          <SiFlutter className={TECH_ICON_CLASS} title="Flutter" />
-          <SiWalletconnect className={TECH_ICON_CLASS} title="WalletConnect" />
-          <SiCypress className={TECH_ICON_CLASS} title="Cypress" />
-          <SiJest className={TECH_ICON_CLASS} title="Jest" />
-          <SiNestjs className={TECH_ICON_CLASS} title="NestJS" />
-          <SiSequelize className={TECH_ICON_CLASS} title="Sequelize" />
-          <SiSocketdotio className={TECH_ICON_CLASS} title="Socket.IO" />
-          <SiReactquery className={TECH_ICON_CLASS} title="TanStack Query" />
-        </div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          variants={iconRowVariants}
+          viewport={{ once: true }}
+          className="mx-auto flex max-w-7xl flex-wrap justify-center gap-x-10 gap-y-8 text-muted-foreground/60"
+        >
+          {techIcons.map(({ Icon, title }) => (
+            <motion.span key={title} variants={iconVariants}>
+              <Icon className={TECH_ICON_CLASS} title={title} />
+            </motion.span>
+          ))}
+        </motion.div>
       </div>
     </section>
   );

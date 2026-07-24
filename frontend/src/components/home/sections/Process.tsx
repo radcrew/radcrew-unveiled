@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { fadeIn } from "../motion";
 
 const phases = [
@@ -8,9 +8,19 @@ const phases = [
   { num: "IV.", title: "Partner", desc: "Long-term embedded relationship to scale the product forward." },
 ] as const;
 
+const phaseItemVariants: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+const phaseContainerVariants = (delay: number): Variants => ({
+  hidden: {},
+  visible: { transition: { delayChildren: delay, staggerChildren: 0.12 } },
+});
+
 export const Process = () => {
   return (
-    <section id="process" className="border-t border-border bg-background px-6 py-32 lg:px-12">
+    <section id="process" className="border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div initial="hidden" whileInView="visible" variants={fadeIn} viewport={{ once: true }} className="mb-24">
           <h2 className="max-w-4xl font-serif text-5xl leading-tight text-foreground md:text-7xl">
@@ -18,19 +28,43 @@ export const Process = () => {
           </h2>
         </motion.div>
 
-        <div className="grid gap-12 border-l border-primary/20 pl-8 md:grid-cols-4 md:border-l-0 md:border-t md:border-primary/20 md:pl-0 md:pt-12">
+        <div className="relative grid gap-12 pl-8 md:grid-cols-4 md:pl-0 md:pt-12">
+          <div className="absolute inset-y-0 left-0 w-px bg-primary/20 md:hidden" />
+          <motion.div
+            initial={{ scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-y-0 left-0 w-px origin-top bg-primary md:hidden"
+          />
+
+          <div className="absolute inset-x-0 top-0 hidden h-px bg-primary/20 md:block" />
+          <motion.div
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-x-0 top-0 hidden h-px origin-left bg-primary md:block"
+          />
+
           {phases.map((phase, i) => (
             <motion.div
               key={phase.num}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial="hidden"
+              whileInView="visible"
               viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: i * 0.15 }}
+              variants={phaseContainerVariants(i * 0.15)}
               className="relative"
             >
-              <div className="mb-6 font-serif text-4xl italic text-primary">{phase.num}</div>
-              <h4 className="mb-4 font-serif text-2xl text-foreground">{phase.title}</h4>
-              <p className="font-light leading-relaxed text-muted-foreground">{phase.desc}</p>
+              <motion.div variants={phaseItemVariants} className="mb-6 font-serif text-4xl italic text-primary">
+                {phase.num}
+              </motion.div>
+              <motion.h4 variants={phaseItemVariants} className="mb-4 font-serif text-2xl text-foreground">
+                {phase.title}
+              </motion.h4>
+              <motion.p variants={phaseItemVariants} className="font-light leading-relaxed text-muted-foreground">
+                {phase.desc}
+              </motion.p>
             </motion.div>
           ))}
         </div>

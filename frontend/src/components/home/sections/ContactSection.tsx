@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -36,6 +37,11 @@ const contactSchema = z.object({
 
 type ContactFormValues = z.infer<typeof contactSchema>;
 
+const shakeVariants: Variants = {
+  idle: { x: 0 },
+  shake: { x: [0, -8, 8, -6, 6, -3, 3, 0], transition: { duration: 0.4 } },
+};
+
 export const ContactSection = () => {
   const { toast } = useToast();
   const [contactPending, setContactPending] = useState(false);
@@ -50,6 +56,7 @@ export const ContactSection = () => {
       message: "",
     },
   });
+  const submitCount = form.formState.submitCount;
 
   async function onSubmit(data: ContactFormValues) {
     if (!getWeb3FormsAccessKey()) {
@@ -93,7 +100,7 @@ export const ContactSection = () => {
   }
 
   return (
-    <section id="contact" className="relative border-t border-border bg-background px-6 py-32 lg:px-12">
+    <section id="contact" className="relative border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -110,26 +117,39 @@ export const ContactSection = () => {
           </p>
         </motion.div>
 
-        <div className="border border-border bg-muted p-8 shadow-sm md:p-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="border border-border bg-muted p-8 shadow-sm md:p-12"
+        >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="grid gap-8 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="name"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-light uppercase tracking-widest text-muted-foreground">
                         Full Name
                       </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Jane Doe"
-                          {...field}
-                          className="h-14 rounded-none border-border bg-background font-light focus-visible:ring-primary"
-                          data-testid="contact-name"
-                        />
-                      </FormControl>
+                      <motion.div
+                        key={submitCount}
+                        initial="idle"
+                        animate={fieldState.error ? "shake" : "idle"}
+                        variants={shakeVariants}
+                      >
+                        <FormControl>
+                          <Input
+                            placeholder="Jane Doe"
+                            {...field}
+                            className="h-14 rounded-none border-border bg-background font-light focus-visible:ring-primary"
+                            data-testid="contact-name"
+                          />
+                        </FormControl>
+                      </motion.div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -137,19 +157,26 @@ export const ContactSection = () => {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-light uppercase tracking-widest text-muted-foreground">
                         Email Address
                       </FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="jane@company.com"
-                          {...field}
-                          className="h-14 rounded-none border-border bg-background font-light focus-visible:ring-primary"
-                          data-testid="contact-email"
-                        />
-                      </FormControl>
+                      <motion.div
+                        key={submitCount}
+                        initial="idle"
+                        animate={fieldState.error ? "shake" : "idle"}
+                        variants={shakeVariants}
+                      >
+                        <FormControl>
+                          <Input
+                            placeholder="jane@company.com"
+                            {...field}
+                            className="h-14 rounded-none border-border bg-background font-light focus-visible:ring-primary"
+                            data-testid="contact-email"
+                          />
+                        </FormControl>
+                      </motion.div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -180,20 +207,27 @@ export const ContactSection = () => {
                 <FormField
                   control={form.control}
                   name="projectType"
-                  render={({ field }) => (
+                  render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-light uppercase tracking-widest text-muted-foreground">
                         Project Type
                       </FormLabel>
                       <Select onValueChange={field.onChange} value={field.value ?? ""}>
-                        <FormControl>
-                          <SelectTrigger
-                            className="h-14 rounded-none border-border bg-background font-light data-[state=open]:text-foreground focus:ring-primary text-muted-foreground"
-                            data-testid="contact-project-type"
-                          >
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                        </FormControl>
+                        <motion.div
+                          key={submitCount}
+                          initial="idle"
+                          animate={fieldState.error ? "shake" : "idle"}
+                          variants={shakeVariants}
+                        >
+                          <FormControl>
+                            <SelectTrigger
+                              className="h-14 rounded-none border-border bg-background font-light data-[state=open]:text-foreground focus:ring-primary text-muted-foreground"
+                              data-testid="contact-project-type"
+                            >
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                          </FormControl>
+                        </motion.div>
                         <SelectContent className="rounded-none border-border">
                           <SelectItem value="fullstack" className="cursor-pointer font-light">
                             Full Stack Engineering
@@ -218,19 +252,26 @@ export const ContactSection = () => {
               <FormField
                 control={form.control}
                 name="message"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-light uppercase tracking-widest text-muted-foreground">
                       Project Details
                     </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Tell us about the vision, timeline, and budget..."
-                        className="min-h-[150px] resize-y rounded-none border-border bg-background font-light focus-visible:ring-primary"
-                        {...field}
-                        data-testid="contact-message"
-                      />
-                    </FormControl>
+                    <motion.div
+                      key={submitCount}
+                      initial="idle"
+                      animate={fieldState.error ? "shake" : "idle"}
+                      variants={shakeVariants}
+                    >
+                      <FormControl>
+                        <Textarea
+                          placeholder="Tell us about the vision, timeline, and budget..."
+                          className="min-h-[150px] resize-y rounded-none border-border bg-background font-light focus-visible:ring-primary"
+                          {...field}
+                          data-testid="contact-message"
+                        />
+                      </FormControl>
+                    </motion.div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -242,11 +283,18 @@ export const ContactSection = () => {
                 disabled={contactPending}
                 data-testid="contact-submit"
               >
-                {contactPending ? "Submitting..." : "Submit Inquiry"}
+                {contactPending ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Submitting...
+                  </span>
+                ) : (
+                  "Submit Inquiry"
+                )}
               </Button>
             </form>
           </Form>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

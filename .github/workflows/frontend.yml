@@ -1,7 +1,8 @@
 # Frontend CI/CD (Vite) — deploys from repo root (see /vercel.json).
 #
 # Vercel dashboard (frontend project): set Root Directory to "." (repository root),
-# not "frontend", so install can run `pnpm install` against pnpm-lock.yaml.
+# not "frontend", so install can run `yarn install` against the root yarn.lock
+# and resolve the frontend workspace.
 #
 # Required GitHub secrets (Vercel → Project → Settings → General):
 #   VERCEL_TOKEN
@@ -16,14 +17,14 @@ on:
     paths:
       - "frontend/**"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "yarn.lock"
       - "vercel.json"
       - ".github/workflows/frontend.yml"
   pull_request:
     paths:
       - "frontend/**"
       - "package.json"
-      - "pnpm-lock.yaml"
+      - "yarn.lock"
       - "vercel.json"
       - ".github/workflows/frontend.yml"
   workflow_dispatch:
@@ -44,37 +45,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
-          run_install: false
-
+      # Yarn 1 ships with the runner image; the version is pinned by the root
+      # package.json "packageManager" field, which Corepack honours.
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: pnpm
+          cache: yarn
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       - name: Lint
-        run: pnpm run lint
+        run: yarn lint
 
       - name: Test
-        run: pnpm run test
-        working-directory: frontend
+        run: yarn test
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-        working-directory: frontend
+        run: yarn playwright install --with-deps chromium
 
       - name: E2E tests
-        run: pnpm run test:e2e
-        working-directory: frontend
+        run: yarn test:e2e
 
       - name: Build
-        run: pnpm run build
-        working-directory: frontend
+        run: yarn build
 
   deploy:
     needs: ci

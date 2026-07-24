@@ -12,7 +12,11 @@ vi.mock("@/lib/chatbot-api", () => ({
 // motion-only props don't interfere with queries. The Proxy memoizes one
 // component per tag so React keeps a stable element type across re-renders
 // (otherwise the subtree, including the input, remounts on every render).
-vi.mock("framer-motion", () => {
+// Each stand-in must forwardRef: the widget measures the panel and launcher
+// through refs to decide whether a pointerdown landed outside, and a dropped
+// ref makes every click read as "outside" and close the panel.
+vi.mock("framer-motion", async () => {
+  const { forwardRef } = await import("react");
   const FRAMER_PROPS = [
     "initial",
     "animate",
@@ -22,7 +26,7 @@ vi.mock("framer-motion", () => {
     "whileTap",
     "layout",
   ];
-  const cache = new Map<string, React.FC<Record<string, unknown>>>();
+  const cache = new Map<string, React.ElementType>();
 
   return {
     AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
@@ -31,14 +35,20 @@ vi.mock("framer-motion", () => {
       {
         get: (_t, tag: string) => {
           if (!cache.has(tag)) {
-            const Component = ({ children, ...props }: Record<string, unknown>) => {
-              const rest: Record<string, unknown> = {};
-              for (const [k, v] of Object.entries(props)) {
-                if (!FRAMER_PROPS.includes(k)) rest[k] = v;
-              }
-              const Tag = tag as keyof JSX.IntrinsicElements;
-              return <Tag {...rest}>{children as React.ReactNode}</Tag>;
-            };
+            const Component = forwardRef<HTMLElement, Record<string, unknown>>(
+              ({ children, ...props }, ref) => {
+                const rest: Record<string, unknown> = {};
+                for (const [k, v] of Object.entries(props)) {
+                  if (!FRAMER_PROPS.includes(k)) rest[k] = v;
+                }
+                const Tag = tag as keyof JSX.IntrinsicElements;
+                return (
+                  <Tag ref={ref} {...rest}>
+                    {children as React.ReactNode}
+                  </Tag>
+                );
+              },
+            );
             Component.displayName = `motion.${tag}`;
             cache.set(tag, Component);
           }

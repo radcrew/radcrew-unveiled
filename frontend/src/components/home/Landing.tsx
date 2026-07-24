@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useScroll, useMotionValueEvent } from "framer-motion";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
@@ -12,13 +12,34 @@ import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
 
+const NAV_SECTION_IDS = ["services", "portfolio", "process"];
+
 const Landing = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("");
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 50);
   });
+
+  useEffect(() => {
+    const elements = NAV_SECTION_IDS.map((id) => document.getElementById(id)).filter(
+      (el): el is HTMLElement => el !== null,
+    );
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px", threshold: 0 },
+    );
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
@@ -27,10 +48,10 @@ const Landing = () => {
 
   return (
     <div className="min-h-[100dvh] bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary">
-      <Nav isScrolled={isScrolled} onNavigate={scrollTo} />
+      <Nav isScrolled={isScrolled} activeSection={activeSection} onNavigate={scrollTo} />
       <Hero onNavigate={scrollTo} />
       <Stats />
-      <Capabilities />
+      <Capabilities onNavigate={scrollTo} />
       <Process />
       <Portfolio />
       <TechStack />

@@ -4,6 +4,7 @@ import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { streamChatMessage } from "@/lib/chatbot-api";
+import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay-events";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
 
 const SUGGESTIONS = [
@@ -41,6 +42,21 @@ export const ChatWidget = () => {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+
+  useCloseOnOtherOverlayOpen("chat", () => setOpen(false));
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (panelRef.current?.contains(target) || launcherRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [open]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -128,14 +144,21 @@ export const ChatWidget = () => {
   return (
     <>
       <motion.button
+        ref={launcherRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() =>
+          setOpen((v) => {
+            const next = !v;
+            if (next) announceOverlayOpened("chat");
+            return next;
+          })
+        }
         aria-expanded={open}
         aria-controls="radcrew-chat-panel"
-        className="group fixed bottom-6 right-6 z-[60] flex items-center gap-2.5 rounded-full border-2 border-primary bg-foreground px-5 py-3.5 text-background shadow-2xl ring-1 ring-primary/30 transition-all duration-300 hover:bg-foreground/90 hover:ring-primary/50"
+        className="group pointer-events-auto fixed bottom-6 right-6 z-[60] flex items-center gap-2.5 rounded-full border-2 border-primary bg-foreground px-5 py-3.5 text-background shadow-2xl ring-1 ring-primary/30 transition-all duration-300 hover:bg-foreground/90 hover:ring-primary/50"
         style={{
           boxShadow: "0 8px 32px rgba(17,17,17,0.18), 0 0 0 1px rgba(201,169,110,0.35)",
         }}
@@ -149,6 +172,7 @@ export const ChatWidget = () => {
       <AnimatePresence>
         {open && (
           <motion.div
+            ref={panelRef}
             id="radcrew-chat-panel"
             role="dialog"
             aria-label="RadCrew chat"
@@ -156,7 +180,7 @@ export const ChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed right-6 z-[55] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl shadow-2xl"
+            className="pointer-events-auto fixed right-6 z-[55] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl shadow-2xl"
             style={{
               bottom: `${panelBottomPx}px`,
               height: "520px",
