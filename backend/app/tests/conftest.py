@@ -31,3 +31,49 @@ def offline_startup(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     monkeypatch.setattr("app.core.lifespan.get_resume_documents", lambda **kwargs: [])
     monkeypatch.setattr("app.core.lifespan.index_documents", lambda documents: None)
     yield
+
+
+class _OfflineInferenceClient:
+    """Stand-in whose every method refuses to reach the network."""
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        pass
+
+    def __getattr__(self, name: str):
+        def refuse(*args: object, **kwargs: object):
+            raise ConnectionError(f"network disabled in tests (InferenceClient.{name})")
+
+        return refuse
+
+
+@pytest.fixture(autouse=True)
+def no_live_inference(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
+    """Make an unmocked inference call fail instantly instead of going out.
+
+    Guardrails are fail-open by design: ``check_groundedness`` and
+    ``check_harmful_input`` swallow errors and return their safe default. That
+    is right in production and treacherous in tests, because a test that forgets
+    to mock the rails still passes, having quietly spent a real API call and
+    however long the provider took to answer. One such test was costing sixteen
+    seconds on its own.
+
+    Failing the transport keeps the fail-open paths behaving exactly as they do
+    in production while making the leak instant and free. Tests that patch these
+    seams themselves override this fixture, since their patches apply later.
+    """
+    for module in (
+        "app.chatbot.huggingface.common",
+        "app.chatbot.huggingface.structured",
+        "app.chatbot.knowledge.embeddings",
+    ):
+        monkeypatch.setattr(f"{module}.InferenceClient", _OfflineInferenceClient)
+
+    def refuse_urlopen(*args: object, **kwargs: object):
+        raise ConnectionError("network disabled in tests (urlopen)")
+
+    # Patched at the transport rather than at our own wrappers, so the wrappers'
+    # error handling stays under test and the block also covers the GitHub
+    # loader, web search, and form submit. A test that patches urlopen itself
+    # replaces this, because its patch is applied later and undone first.
+    monkeypatch.setattr("urllib.request.urlopen", refuse_urlopen)
+    yield
