@@ -4,14 +4,14 @@ Vite + React site. It consumes Contentful for content and talks to the FAQ chatb
 
 ## Prerequisites
 
-- **Node.js** (LTS recommended; the repo uses npm workspaces — install dependencies from the repository root)
+- **Node.js** 22 (the repo uses Yarn 1 workspaces — install dependencies from the repository root)
 
 ## Install
 
 From the **repository root** (installs workspace dependencies, including this package):
 
 ```bash
-npm install
+yarn install
 ```
 
 ## Configuration
@@ -27,14 +27,14 @@ These are embedded in the browser bundle at build time. Do not put secrets you m
 - `VITE_CONTENTFUL_ENVIRONMENT`: environment name (optional; default in the SDK is often `master`)
 - `VITE_CHATBOT_API_BASE_URL`: base URL for the chat API (default `http://localhost:8787`)
 
-For backend-side Contentful ingestion (RAG), mirror the same logical values in `backend/.env` as `CONTENTFUL_*` — see [backend/README.md](../backend/README.md).
+Contentful is used by the frontend only. The backend builds its knowledge base from static site copy and optional GitHub Markdown, and has no Contentful integration.
 
 ## Development
 
 From the **repository root**:
 
 ```bash
-npm run dev:frontend
+yarn dev:frontend
 ```
 
 This runs the Vite dev server (see root `package.json`). Default dev URL is **http://localhost:8080** (see [`vite.config.ts`](vite.config.ts)).
@@ -43,7 +43,7 @@ With dependencies installed, you can also run from this directory:
 
 ```bash
 cd frontend
-npm run dev
+yarn dev
 ```
 
 ## Build and preview
@@ -51,50 +51,50 @@ npm run dev
 From the repository root:
 
 ```bash
-npm run build
-npm run preview
+yarn build
+yarn preview
 ```
 
 Or from `frontend`:
 
 ```bash
 cd frontend
-npm run build
-npm run preview
+yarn build
+yarn preview
 ```
 
-`npm run build:dev` (root) runs a development-mode Vite build for the frontend workspace.
+`yarn build:dev` (root) runs a development-mode Vite build for the frontend workspace.
 
 ## Tests
 
 From the repository root:
 
 ```bash
-npm test
+yarn test
 ```
 
 Watch mode:
 
 ```bash
-npm run test:watch
+yarn test:watch
 ```
 
 Or from `frontend`:
 
 ```bash
 cd frontend
-npm run test
-npm run test:watch
+yarn test
+yarn test:watch
 ```
 
-The suite uses Vitest (`vitest run` / `vitest`).
+The suite uses Vitest (`vitest run` / `vitest`). End-to-end smoke tests use Playwright: `yarn test:e2e` from the root (run `yarn playwright install chromium` once first).
 
 ## Lint
 
 ESLint is configured at the monorepo root and targets `frontend/src`. From the repository root:
 
 ```bash
-npm run lint
+yarn lint
 ```
 
 ## Chatbot from the browser

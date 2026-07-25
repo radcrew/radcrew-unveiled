@@ -17,7 +17,7 @@ From the repository root:
 yarn install
 ```
 
-(If you use npm instead: `npm install`.)
+This repo is Yarn 1 only. Do not run `npm install` or `pnpm install`; `yarn.lock` is the only lockfile, and the Yarn version is pinned by the `packageManager` field in the root `package.json`.
 
 - **Frontend** (Vite, env vars, build, tests, lint): **[frontend/README.md](frontend/README.md)**
 - **Backend** (Python venv, `pip install`, API env): **[backend/README.md](backend/README.md)**
@@ -37,9 +37,10 @@ Environment files live in `frontend/.env` and `backend/.env` (copy from each pac
 
 ## Chatbot flow
 
-- Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`)
-- The API retrieves snippets from static site copy and optional GitHub Markdown
-- Hugging Face chat completion (with text-generation fallback) produces grounded answers
+- Browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL`, default `http://localhost:8787`) and reads a Server-Sent Events stream
+- Guardrails screen the message, then a router sends it to feedback submission or the RAG path
+- RAG retrieves snippets from static site copy and optional GitHub Markdown
+- The configured provider streams a grounded answer: **OpenRouter** when `OPENROUTER_API_KEY` is set, otherwise **Hugging Face** when `HF_TOKEN` is set (see [backend/README.md](backend/README.md#chat-provider))
 - Weak retrieval (with no prior conversation history) returns a safe fallback with contact guidance
 
 ## Tests

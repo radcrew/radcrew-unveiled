@@ -4,10 +4,20 @@ FastAPI service served with Uvicorn. It powers chat completion, retrieval (stati
 
 ## Layout
 
-- `app/main.py` — FastAPI app factory wiring (routers + middleware).
+- `app/main.py` — FastAPI app wiring (routers + middleware).
 - `app/api/` — HTTP routers (`health`, `chat`).
-- `app/chatbot/` — Assistant logic: `chat.py` (state + lifespan + stream entry), plus `knowledge/`, `rag/` (RAG package entry), `graph/`, `huggingface/`, `feedback/`, `cache/`.
-- `app/core/` — `settings.py` (`Settings`, `get_settings`), `http.py` (CORS + rate limit), `logger.py`.
+- `app/chatbot/` — Assistant logic:
+  - `chat.py` — knowledge state and the stream entry point
+  - `llm.py` — provider-neutral inference entry point (see [Chat provider](#chat-provider))
+  - `messages.py` — user-facing copy (fallbacks, confirmations)
+  - `graph/` — the LangGraph: guardrail → route → feedback | RAG
+  - `knowledge/` — static site copy, GitHub Markdown loader, cached embeddings
+  - `guardrails/` — NeMo input/output rails
+  - `huggingface/`, `openrouter/` — the two inference backends
+  - `deepsearch/` — web-search fallback
+  - `utils/` — stream helpers
+- `app/core/` — `settings.py` (`Settings`, `get_settings`), `http.py` (CORS + rate limit), `lifespan.py` (startup knowledge load), `logger.py`.
+- `app/schemas.py` — request/response models (`ChatRequest`, history capped at 12).
 - `app/tests/` — Pytest suite (`pytest.ini` uses `testpaths = app/tests`).
 
 ## Prerequisites
@@ -43,27 +53,90 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Copy [`.env.example`](.env.example) to `.env` and set values as needed (Hugging Face token, optional GitHub Markdown KB, etc.).
+Copy [`.env.example`](.env.example) to `.env` and set values as needed.
+
+`app/core/settings.py` is the source of truth for every value below. If this table
+and that file ever disagree, the file wins.
+
+### Chat provider
+
+Chat inference runs through `app/chatbot/llm.py`, which picks a backend from
+whichever credential is set. There is no provider switch to flip:
+
+| Credential set | Provider used |
+| --- | --- |
+| `OPENROUTER_API_KEY` | OpenRouter (wins even if `HF_TOKEN` is also set) |
+| `HF_TOKEN` only | Hugging Face Inference |
+| neither | none; `/chat` replies that the assistant is unavailable |
+
+OpenRouter wins the tie because it is the explicit opt-in, while `HF_TOKEN` may be
+present purely to keep embeddings working.
+
+**Embeddings are Hugging Face only.** OpenRouter has no embeddings endpoint, so
+running OpenRouter-only is supported but leaves the corpus unembedded and drops
+retrieval to lexical keyword matching. For semantic retrieval, set `HF_TOKEN`
+alongside `OPENROUTER_API_KEY`.
+
+**Model ids are not interchangeable.** `HUGGINGFACE_MODEL` takes Hub ids
+(`Qwen/Qwen2.5-7B-Instruct`); `OPENROUTER_MODEL` takes OpenRouter slugs
+(`qwen/qwen-2.5-7b-instruct`).
 
 ### Environment variables
 
-- `HF_TOKEN`: Hugging Face access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens))
-- `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-1.5B-Instruct`)
-- `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `hf-inference`; try `auto` if you see HTTP 400 from the router)
-- `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for semantic retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
+**Server**
+
+- `PORT`: listen port (default `8787`)
+- `RATE_LIMIT`: per-client request budget, slowapi syntax (default `25/minute`)
+- `FRONTEND_ORIGIN`: single allowed browser origin for CORS (default `https://radcrew.org`)
+- `FRONTEND_ORIGINS`: optional comma-separated list (e.g. `https://radcrew.org,https://www.radcrew.org`). When set and non-empty, CORS uses this list instead of `FRONTEND_ORIGIN`. Set this on Vercel for production if the site and API are on different hosts. A rejected origin gets HTTP **400 "Disallowed CORS origin"**, which looks like a malformed request rather than a config error.
+
+**Hugging Face**
+
+- `HF_TOKEN`: access token ([hf.co/settings/tokens](https://huggingface.co/settings/tokens)). A depleted account returns HTTP 402 and the chat stream fails
+- `HUGGINGFACE_MODEL`: Hub model id for chat (default `Qwen/Qwen2.5-7B-Instruct`)
+- `HUGGINGFACE_PROVIDER`: which [Inference Provider](https://huggingface.co/docs/inference-providers) to use (default `auto`)
+- `HUGGINGFACE_EMBEDDING_MODEL`: Hub model id for retrieval embeddings (default `sentence-transformers/all-MiniLM-L6-v2`)
 - `HUGGINGFACE_EMBEDDING_PROVIDER`: provider for embedding inference (default `hf-inference`)
-- `FRONTEND_ORIGIN`: single allowed browser origin for CORS (default `http://localhost:8080`)
-- `FRONTEND_ORIGINS`: optional comma-separated list (e.g. `https://radcrew.org,https://www.radcrew.org`). When set and non-empty, CORS uses this list instead of only `FRONTEND_ORIGIN`. Set this on Vercel for production if the site and API are on different hosts.
-- `GITHUB_REPO_URL`: optional GitHub repo URL used for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
-- `GITHUB_TOKEN`: optional GitHub PAT used for GitHub API requests (required when `GITHUB_PRIVATE_REPO=true`)
+
+**OpenRouter**
+
+- `OPENROUTER_API_KEY`: API key ([openrouter.ai/keys](https://openrouter.ai/keys)). Setting this selects OpenRouter for chat
+- `OPENROUTER_MODEL`: OpenRouter model slug (default `qwen/qwen-2.5-7b-instruct`)
+- `OPENROUTER_BASE_URL`: API base (default `https://openrouter.ai/api/v1`)
+
+**Guardrails** (all default `true`)
+
+- `GUARDRAIL_INPUT_PATTERNS_ENABLED`: Colang jailbreak/off-topic patterns. Regex only, no inference cost
+- `GUARDRAIL_OUTPUT_PII_ENABLED`: redacts phone numbers from replies. Regex only, no inference cost
+- `GUARDRAIL_INPUT_HARMFUL_ENABLED`: harmful-content classifier. **Costs one extra inference call**
+- `GUARDRAIL_OUTPUT_GROUNDEDNESS_ENABLED`: checks the answer against retrieved context. **Costs one extra inference call**
+
+With both LLM-backed rails on, a single `/chat` makes up to **three** inference
+calls. That was cheap on a free tier; on a metered provider it is 3× per message,
+and it triples the time a serverless function must stay alive. Turning the two
+LLM-backed rails off leaves the regex rails working at no cost.
+
+**Knowledge base (optional GitHub Markdown)**
+
+- `GITHUB_REPO_URL`: repo URL for startup-time Markdown ingestion (example: `https://github.com/acme/private-knowledge`)
+- `GITHUB_TOKEN`: GitHub PAT (required when `GITHUB_PRIVATE_REPO=true`)
 - `GITHUB_BRANCH`: branch or ref for the Git tree API (required when `GITHUB_REPO_URL` is set; example: `main`)
 - `GITHUB_PATH`: optional repo subdirectory prefix to ingest (example: `docs/knowledge`)
 - `GITHUB_PRIVATE_REPO`: set to `true` to enforce token usage for private repository ingestion
+
+**Feedback forwarding**
+
+- `COMPANY_FEEDBACK_EMAIL`: where user feedback is sent (default `code@radcrew.org`)
+- `WEB3FORMS_ACCESS_KEY`: [Web3Forms](https://web3forms.com) key used to deliver it
+
+**Retrieval and deep search**
+
+- `RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD`: below this best-match score, retrieval switches from semantic to lexical keyword matching (default `0.25`)
+- `DEEP_SEARCH_SIMILARITY_THRESHOLD`: below this, the web fallback runs (default `0.30`)
 - `DEEP_SEARCH_ENABLED`: enable the web-search fallback (default `true`; only active when `WEB_SEARCH_API_KEY` is set)
-- `WEB_SEARCH_PROVIDER`: web-search provider for deep search (default `tavily`)
+- `WEB_SEARCH_PROVIDER`: web-search provider (default `tavily`)
 - `WEB_SEARCH_API_KEY`: API key for the search provider. Without it, deep search stays inert and the bot answers from the knowledge base only
 - `WEB_SEARCH_MAX_RESULTS`: max results pulled per deep search (default `5`)
-- `DEEP_SEARCH_SIMILARITY_THRESHOLD`: deep search runs only when the best knowledge-base similarity is below this (default `0.30`)
 
 ### Deep search (web-search fallback)
 
@@ -88,14 +161,14 @@ prefer adding them to the knowledge base.
    - `GITHUB_PRIVATE_REPO=true`
    - `GITHUB_TOKEN=<your_token>`
 3. Set `GITHUB_BRANCH` (e.g. `main`) and optionally `GITHUB_PATH` if Markdown lives under a subdirectory.
-4. Restart the backend (`npm run dev:backend` or `npm run dev` from the repo root) so startup ingestion reloads from GitHub.
+4. Restart the backend (`yarn dev:backend` or `yarn dev` from the repo root) so startup ingestion reloads from GitHub.
 
 ## Development
 
 From the **repository root** (uses the monorepo script):
 
 ```bash
-npm run dev:backend
+yarn dev:backend
 ```
 
 This runs Uvicorn with reload on `backend` (see root `package.json`).
@@ -111,7 +184,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8787 --reload --reload-dir 
 
 - The browser calls `POST /chat` on the backend URL (`VITE_CHATBOT_API_BASE_URL` in the frontend, default `http://localhost:8787`).
 - The API retrieves snippets from static site copy and optional GitHub Markdown.
-- Hugging Face chat completion (with text-generation fallback) produces grounded answers.
+- The configured provider (OpenRouter or Hugging Face) streams a grounded answer back over SSE.
 - Weak retrieval (with no prior conversation history) returns a safe fallback with contact guidance.
 
 ## Tests
@@ -119,7 +192,7 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8787 --reload --reload-dir 
 From the repository root:
 
 ```bash
-npm run test:backend
+yarn test:backend
 ```
 
 Or from `backend` with the venv active:
@@ -138,4 +211,4 @@ cd backend
 python -m uvicorn app.main:app --host 0.0.0.0 --port 8787
 ```
 
-From the repo root, `npm run build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
+From the repo root, `yarn build:backend` runs `compileall` on `backend/app` as a quick syntax check only.
