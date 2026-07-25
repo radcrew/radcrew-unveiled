@@ -84,6 +84,8 @@ Browser (chat-widget) -> POST /chat (SSE) -> chat.generate_chat_stream
   -> LangGraph: guardrail_input -> route -> feedback | rag -> END
 ```
 
+`GET /health` reports `{"ok", "chunks", "provider", "embeddings"}`. It is the fastest way to tell a deployed instance that cannot generate (`provider: "none"`) from one whose retrieval has quietly degraded (`embeddings: false`), both of which otherwise look identical from outside. It is public, so it must never gain a field carrying a credential, model id, or origin list.
+
 `app/api/chat.py` wraps the generator in a `StreamingResponse` and emits `data: {"type":"chunk","content":...}` per token, then `data: {"type":"done"}`. Any exception raised while building the stream is caught and replaced with `MSG_AI_UNAVAILABLE`, so the endpoint never 500s. Request shape is `app/schemas.py`: `message` is 2 to 1500 chars, `history` is capped at 12 messages.
 
 ### The graph
@@ -125,11 +127,29 @@ The two LLM-backed checks mean a single `/chat` request can make up to three inf
 
 PII scrubbing is line-buffered (`scrub_pii_stream`) so it works on a token stream without buffering the whole answer. Phone numbers never span newlines, which is what makes that safe.
 
-### Hugging Face inference
+### Inference: two interchangeable backends
 
-`chatbot/huggingface/` streams answers with two fallback layers: chat-completion across the configured providers first, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. `text_generation.py` exists only because some HF providers lack chat support, and it flattens roles into one prompt to compensate.
+`chatbot/llm.py` is the only entry point anything should call. It exposes `generate_answer` (streaming) and `complete_json` (schema-constrained), and picks a backend from `Settings.llm_provider()`:
 
-All calls share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`) so answers are reproducible.
+| Credential set | Provider |
+|---|---|
+| `OPENROUTER_API_KEY` | `openrouter` (wins if both are set) |
+| `HF_TOKEN` only | `huggingface` |
+| neither | `none`, and `/chat` answers `MSG_AI_UNAVAILABLE` without calling out |
+
+OpenRouter wins the tie because it is the explicit opt-in, while `HF_TOKEN` may be present purely to keep embeddings alive.
+
+`chatbot/huggingface/` streams with two fallback layers: chat-completion across the configured providers, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. Note the text-generation fallback is dead weight for chat-tuned models: `Qwen/Qwen2.5-7B-Instruct` only supports the `conversational` task, so that path always fails and only adds an error line to the log.
+
+`chatbot/openrouter/` talks to the OpenAI-compatible REST API over stdlib `urllib`, matching the GitHub loader and web search rather than adding an SDK. There is no provider ladder and no text-generation fallback, because OpenRouter is uniformly chat-completions and does its own upstream routing. Its stream is SSE: `data:` lines of JSON ending at `data: [DONE]`, interleaved with `: OPENROUTER PROCESSING` keepalive comments that must be skipped.
+
+Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so switching providers does not change answer style. OpenRouter forwards `seed` upstream but honouring it is model-dependent; `temperature=0` is what actually holds answers stable.
+
+**Model ids are not portable.** `HUGGINGFACE_MODEL` takes Hub ids (`Qwen/Qwen2.5-7B-Instruct`); `OPENROUTER_MODEL` takes OpenRouter slugs (`qwen/qwen-2.5-7b-instruct`). Copying one into the other fails at request time.
+
+**Embeddings never move.** OpenRouter has no embeddings endpoint, so `knowledge/embeddings.py` always uses Hugging Face. Running OpenRouter-only is supported, but with no `HF_TOKEN` the corpus goes unembedded and retrieval silently degrades to lexical keyword matching. For semantic retrieval, keep `HF_TOKEN` set alongside `OPENROUTER_API_KEY`.
+
+> A depleted HF account returns `402 Payment Required` ("You have depleted your monthly included credits"), which surfaces as `RuntimeError: No inference provider could stream model ...`. That is a billing state, not a code fault, and it is what switching to OpenRouter is for.
 
 ### Frontend chat widget
 
@@ -139,27 +159,13 @@ All calls share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`)
 
 `training/` trains a small `message` to `is_feedback` classifier via QLoRA. Dataset is `trainset.jsonl` (one JSON object per line: `message` string, `is_feedback` boolean), example at `trainset_example.jsonl`, output under `training/outputs/`. Needs an NVIDIA GPU; on Windows set `PYTHONUTF8=1` before starting Python or the TRL import fails, and prefer `training/run_train.ps1`. Nothing under `backend/app/` imports any of this.
 
-## Stale docs
+## Docs
 
-These are wrong in the repo's own documentation. Trust the source, not the prose.
+`README.md`, `frontend/README.md`, `backend/README.md`, and `docs/architecture.md` were realigned with the source and are current as of the OpenRouter work. `backend/README.md` now carries the full environment table, the provider-selection rules, and the guardrail cost note.
 
-**Package manager.** The repo is Yarn 1 only, and the root `README.md` is correct about that. `frontend/README.md` and `backend/README.md` still say `npm install` and `npm run dev` throughout; those commands would generate a `package-lock.json` that nothing reads. Substitute `yarn` wherever they say `npm run`.
+`app/core/settings.py` remains authoritative for configuration. When you change a setting's name, default, or meaning, update `backend/README.md` and `backend/.env.example` in the same commit, or this section becomes the next thing to distrust.
 
-**Backend env defaults** in `backend/README.md` have drifted from `app/core/settings.py`:
-
-| Variable | README says | `settings.py` actually |
-|---|---|---|
-| `HUGGINGFACE_MODEL` | `Qwen/Qwen2.5-1.5B-Instruct` | `Qwen/Qwen2.5-7B-Instruct` |
-| `HUGGINGFACE_PROVIDER` | `hf-inference` | `auto` |
-| `FRONTEND_ORIGIN` | `http://localhost:8080` | `https://radcrew.org` |
-
-The README also omits `PORT`, `RATE_LIMIT`, `COMPANY_FEEDBACK_EMAIL`, `WEB3FORMS_ACCESS_KEY`, all four `GUARDRAIL_*` toggles, and `RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD`. `backend/.env.example` is closer to reality than the README, but `settings.py` is authoritative.
-
-**Backend layout.** `backend/README.md` lists `rag/`, `feedback/`, and `cache/` packages under `app/chatbot/`. None exist. The real subpackages are `deepsearch/`, `graph/`, `guardrails/`, `huggingface/`, `knowledge/`, `utils/`, plus `chat.py` and `messages.py`. Response caching lives at `graph/nodes/rag_answer/cache.py`.
-
-**Architecture doc.** `docs/architecture.md` describes the chat flow as retrieval then a Hugging Face answer, with no mention of LangGraph, guardrails, feedback routing, or deep search, all of which are in the request path. It also lists a `data` directory under `frontend/src` that does not exist.
-
-**Contentful.** `frontend/README.md` says to mirror `CONTENTFUL_*` values into `backend/.env` for backend-side RAG ingestion. The backend has no Contentful code and no Contentful settings. Contentful is frontend-only.
+`.cursor/skills/radcrew-chatbot/SKILL.md` was updated alongside them and is current; it stays the fastest orientation for the chatbot subsystem. `backend/docs/chatbot-improvements.md` is a tuning log rather than a spec, so treat it as history.
 
 ## Deployment and CI
 

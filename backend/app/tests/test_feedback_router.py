@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.core.settings import Settings
 from app.schemas import ChatHistoryMessage, ChatRequest
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM
 from app.chatbot.graph.nodes.feedback_router import router
@@ -24,6 +25,20 @@ from app.chatbot.graph.nodes.feedback_router.pregate import (
     looks_like_question,
     should_skip_llm_route_to_rag,
 )
+
+
+@pytest.fixture(autouse=True)
+def configured_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Give the router a provider so the classifier path is actually reached.
+
+    ``feedback_router_node`` short-circuits to RAG when no chat backend is
+    configured, which is correct behaviour but makes every assertion about the
+    classifier vacuous. Left to the ambient environment these tests passed on a
+    machine with a populated .env and failed in CI, and the "skips the LLM"
+    cases passed for the wrong reason in both.
+    """
+    settings = Settings(_env_file=None, OPENROUTER_API_KEY="sk-or-test")
+    monkeypatch.setattr(router, "get_settings", lambda: settings)
 
 
 @pytest.mark.parametrize(
@@ -107,22 +122,20 @@ def _state(message: str) -> dict:
     return {"body": ChatRequest(message=message), "knowledge_documents": []}
 
 
-@patch.object(router, "InferenceClient")
-def test_plain_question_skips_llm_and_routes_to_rag(mock_client: MagicMock) -> None:
+@patch.object(router.llm, "complete_json")
+def test_plain_question_skips_llm_and_routes_to_rag(mock_complete: MagicMock) -> None:
     out = router.feedback_router_node(_state("Who is on the RadCrew team?"))
     assert out == {"route": "rag"}
-    mock_client.assert_not_called()  # the LLM was never consulted
+    mock_complete.assert_not_called()  # the LLM was never consulted
 
 
 @patch.object(router, "parse_routing_intent", return_value="question")
-@patch.object(router, "InferenceClient")
-def test_non_question_consults_llm(mock_client: MagicMock, _parse: MagicMock) -> None:
-    mock_client.return_value.chat_completion.return_value.choices = [
-        MagicMock(message=MagicMock(content="{}"))
-    ]
+@patch.object(router.llm, "complete_json")
+def test_non_question_consults_llm(mock_complete: MagicMock, _parse: MagicMock) -> None:
+    mock_complete.return_value = "{}"
     out = router.feedback_router_node(_state("The new homepage layout looks great."))
     assert out == {"route": "rag"}  # classifier said question → rag, but LLM ran
-    mock_client.assert_called_once()
+    mock_complete.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -203,11 +216,9 @@ def test_classify_confirmation(message: str, expected: str) -> None:
 
 
 @patch.object(router, "parse_routing_intent", return_value="feedback")
-@patch.object(router, "InferenceClient")
-def test_detected_feedback_asks_before_sending(mock_client: MagicMock, _parse: MagicMock) -> None:
-    mock_client.return_value.chat_completion.return_value.choices = [
-        MagicMock(message=MagicMock(content="{}"))
-    ]
+@patch.object(router.llm, "complete_json")
+def test_detected_feedback_asks_before_sending(mock_complete: MagicMock, _parse: MagicMock) -> None:
+    mock_complete.return_value = "{}"
     out = router.feedback_router_node(_state("Pass this note to the crew about the layout."))
     assert out["route"] == "feedback"
     assert out["feedback_phase"] == "ask"  # does NOT send on first contact
@@ -221,31 +232,31 @@ def _confirm_history(original: str):
     ]
 
 
-@patch.object(router, "InferenceClient")
-def test_confirmation_yes_sends_original(mock_client: MagicMock) -> None:
+@patch.object(router.llm, "complete_json")
+def test_confirmation_yes_sends_original(mock_complete: MagicMock) -> None:
     body = ChatRequest(message="yes please", history=_confirm_history("The contact form is broken."))
     out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out["route"] == "feedback"
     assert out["feedback_phase"] == "send"
     assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
-    mock_client.assert_not_called()  # no LLM re-classification on confirm
+    mock_complete.assert_not_called()  # no LLM re-classification on confirm
 
 
-@patch.object(router, "InferenceClient")
-def test_confirmation_no_cancels(mock_client: MagicMock) -> None:
+@patch.object(router.llm, "complete_json")
+def test_confirmation_no_cancels(mock_complete: MagicMock) -> None:
     body = ChatRequest(message="no thanks", history=_confirm_history("The contact form is broken."))
     out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out == {"route": "feedback", "feedback_phase": "cancel"}
-    mock_client.assert_not_called()
+    mock_complete.assert_not_called()
 
 
 # --- Option 3: LLM fallback for ambiguous confirmation replies ---
 
 
 @patch.object(router, "classify_confirmation_via_llm")
-@patch.object(router, "InferenceClient")
+@patch.object(router.llm, "complete_json")
 def test_clear_confirmation_skips_llm_fallback(
-    mock_client: MagicMock, mock_llm: MagicMock
+    mock_complete: MagicMock, mock_llm: MagicMock
 ) -> None:
     # A deterministic "yes" must not pay for the LLM round-trip.
     body = ChatRequest(message="yes please", history=_confirm_history("x"))
@@ -254,9 +265,9 @@ def test_clear_confirmation_skips_llm_fallback(
 
 
 @patch.object(router, "classify_confirmation_via_llm", return_value="yes")
-@patch.object(router, "InferenceClient")
+@patch.object(router.llm, "complete_json")
 def test_ambiguous_confirmation_uses_llm_and_sends(
-    mock_client: MagicMock, mock_llm: MagicMock
+    mock_complete: MagicMock, mock_llm: MagicMock
 ) -> None:
     # "yse" is unknown to the deterministic gate → LLM resolves it → send.
     body = ChatRequest(message="yse", history=_confirm_history("The contact form is broken."))
@@ -265,18 +276,16 @@ def test_ambiguous_confirmation_uses_llm_and_sends(
     assert out["feedback_phase"] == "send"
     assert json.loads(out["feedback_call"].arguments)["message"] == "The contact form is broken."
     mock_llm.assert_called_once()
-    mock_client.assert_not_called()  # main routing LLM never consulted
+    mock_complete.assert_not_called()  # main routing LLM never consulted
 
 
 @patch.object(router, "classify_confirmation_via_llm", return_value="unsure")
 @patch.object(router, "parse_routing_intent", return_value="question")
-@patch.object(router, "InferenceClient")
+@patch.object(router.llm, "complete_json")
 def test_ambiguous_confirmation_llm_unsure_routes_normally(
-    mock_client: MagicMock, _parse: MagicMock, _llm: MagicMock
+    mock_complete: MagicMock, _parse: MagicMock, _llm: MagicMock
 ) -> None:
-    mock_client.return_value.chat_completion.return_value.choices = [
-        MagicMock(message=MagicMock(content="{}"))
-    ]
+    mock_complete.return_value = "{}"
     body = ChatRequest(message="hmm what about it", history=_confirm_history("x"))
     out = router.feedback_router_node({"body": body, "knowledge_documents": []})
     assert out == {"route": "rag"}  # pending feedback dropped, re-classified

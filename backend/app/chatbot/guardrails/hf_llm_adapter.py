@@ -7,7 +7,7 @@ from collections.abc import Iterator
 from langchain_core.language_models.llms import BaseLLM
 from langchain_core.outputs import Generation, LLMResult
 
-from app.chatbot.huggingface import generate_answer
+from app.chatbot.llm import generate_answer
 
 # ---------------------------------------------------------------------------
 # PII patterns

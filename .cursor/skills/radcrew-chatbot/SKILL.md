@@ -1,8 +1,8 @@
 ---
 name: radcrew-chatbot
 description: >-
-  RadCrew Unveiled FAQ chatbot — FastAPI LangGraph (feedback vs RAG), Hugging Face
-  inference, knowledge ingestion, SSE /chat, frontend widget, and QLoRA feedback
+  RadCrew Unveiled FAQ chatbot — FastAPI LangGraph (feedback vs RAG), OpenRouter or
+  Hugging Face inference, knowledge ingestion, SSE /chat, frontend widget, and QLoRA feedback
   routing training. Use when changing backend/app/chatbot, POST /chat, RAG prompts,
   trainset.jsonl, training/train_qlora.py, chat-widget, or chatbot-related tests.
 ---
@@ -26,7 +26,9 @@ Browser (chat-widget) → POST /chat (SSE) → chat.generate_chat_stream
 | Feedback routing (HF JSON schema) | `backend/app/chatbot/graph/nodes/feedback_router/` |
 | Feedback submit | `backend/app/chatbot/graph/nodes/feedback_handler/` |
 | RAG answer + prompt + cache | `backend/app/chatbot/graph/nodes/rag_answer/` |
-| HF generate / embeddings | `backend/app/chatbot/huggingface/` |
+| Inference entry point (provider-neutral) | `backend/app/chatbot/llm.py` |
+| Providers | `backend/app/chatbot/huggingface/`, `backend/app/chatbot/openrouter/` |
+| Embeddings (Hugging Face only) | `backend/app/chatbot/knowledge/embeddings.py` |
 | Static KB | `backend/app/chatbot/knowledge/site_content.py` |
 | GitHub MD KB (startup) | `backend/app/chatbot/knowledge/github_loader/` |
 | Lifespan loads chunks | `backend/app/core/lifespan.py` |
@@ -45,7 +47,8 @@ Browser (chat-widget) → POST /chat (SSE) → chat.generate_chat_stream
 - Do not infer person names from source titles; names must appear in source body text.
 - Final answers: simple Markdown, `-` bullets (not `*`), no URLs/links in replies.
 - `POST /chat` contract: SSE events `{"type":"chunk","content":...}` then `{"type":"done"}`.
-- Without `HF_TOKEN`, stream returns `MSG_AI_UNAVAILABLE` only.
+- With neither `OPENROUTER_API_KEY` nor `HF_TOKEN`, the stream returns `MSG_AI_UNAVAILABLE` only.
+- Call inference through `app/chatbot/llm.py`, never by constructing a provider client inline; a direct client call ignores the configured provider.
 
 ## Dev commands
 
@@ -71,7 +74,7 @@ Full env and GitHub KB setup: `backend/README.md`. Monorepo overview: root `READ
 ## When changing behavior
 
 1. **Prompt / tone / formatting** → `graph/nodes/rag_answer/prompt.py` (and keep parity intent with any TS references noted in file headers).
-2. **Retrieval** → `rag_answer/retrieval.py`, embedding settings in `app/core/settings.py`.
+2. **Retrieval** → `rag_answer/retrieval.py`, embedding settings in `app/core/settings.py`. Embeddings are Hugging Face only; without `HF_TOKEN` retrieval degrades to lexical matching.
 3. **New user intent branch** → extend `graph/build.py` + new node; mirror feedback router pattern if structured routing is needed.
 4. **More site facts** → `knowledge/site_content.py` or GitHub Markdown under configured `GITHUB_*` env vars.
 5. **API shape** → `schemas.py`, `chat.py`, `frontend/src/lib/chatbot-api.ts`, widget types — keep in sync.

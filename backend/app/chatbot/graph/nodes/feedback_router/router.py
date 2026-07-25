@@ -2,16 +2,10 @@ import json
 import logging
 from typing import Literal
 
-from huggingface_hub import InferenceClient
-from huggingface_hub.inference._generated.types.chat_completion import (
-    ChatCompletionInputResponseFormatJSONSchema,
-    ChatCompletionInputJSONSchema
-)
-
 from .message import RoutingReply
 from app.core.settings import get_settings
+from app.chatbot import llm
 from app.chatbot.graph.state import ChatState
-from app.chatbot.huggingface.common import DEFAULT_MAX_TOKENS, DETERMINISTIC_DECODING
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM_MARKER
 from app.schemas import ChatHistoryMessage
 from .message import build_feedback_routing_messages
@@ -71,9 +65,9 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
         if decision == "unknown":
             # Deterministic gate is unsure (terse typo, bare token, free-form) —
             # let the LLM label it before we give up and re-route.
-            llm = classify_confirmation_via_llm(body.message, settings)
-            if llm != "unsure":
-                decision = llm
+            llm_decision = classify_confirmation_via_llm(body.message, settings)
+            if llm_decision != "unsure":
+                decision = llm_decision
         if decision == "yes":
             _log_decision("confirm_send", "feedback", body.message)
             original = _last_user_message(history)
@@ -95,28 +89,19 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
 
     routing_msgs = build_feedback_routing_messages(body.message)
 
+    if settings.llm_provider() == "none":
+        _log_decision("no_llm", "rag", body.message)
+        return {"route": "rag"}
+
     try:
-        client = InferenceClient(
-            model=settings.HUGGINGFACE_MODEL,
-            token=settings.HF_TOKEN,
-            provider=settings.HUGGINGFACE_PROVIDER
-        )  # type: ignore[arg-type]
-        resp = client.chat_completion(
-            messages=routing_msgs,
-            max_tokens=DEFAULT_MAX_TOKENS,
-            **DETERMINISTIC_DECODING,
-            response_format=ChatCompletionInputResponseFormatJSONSchema(
-                type="json_schema",
-                json_schema=ChatCompletionInputJSONSchema(
-                    name="routing_reply",
-                    description="Label the message intent: question (→ RAG) or feedback.",
-                    schema=RoutingReply.model_json_schema(),
-                    strict=True,
-                ),
-            )
+        content = llm.complete_json(
+            routing_msgs,
+            schema_name="routing_reply",
+            schema_description="Label the message intent: question (→ RAG) or feedback.",
+            schema=RoutingReply.model_json_schema(),
         )
 
-        intent = parse_routing_intent(resp.choices[0].message.content)
+        intent = parse_routing_intent(content)
 
         if intent == "feedback":
             # Solution D: don't send yet — ask the user to confirm first.
@@ -131,6 +116,6 @@ def feedback_router_node(state: ChatState) -> dict[str, object]:
         return {"route": "rag"}
 
     except Exception as err:
-        logger.error("[HF feedback routing] %s", err)
+        logger.error("[feedback routing provider=%s] %s", settings.llm_provider(), err)
         _log_decision("llm_error", "rag", body.message)
         return {"route": "rag"}
