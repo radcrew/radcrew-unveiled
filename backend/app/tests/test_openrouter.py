@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 from io import BytesIO
 from unittest.mock import patch
+
+import pytest
 
 from app.chatbot import llm
 from app.chatbot.openrouter import client as or_client
@@ -166,3 +169,38 @@ def test_stream_payload_requests_streaming_and_deterministic_decoding() -> None:
     payload = captured["payload"]
     assert payload["stream"] is True
     assert payload["temperature"] == 0
+
+
+# --------------------------------------------------------------------------
+# Failure surfacing
+# --------------------------------------------------------------------------
+
+
+def test_mid_stream_error_raises_instead_of_ending_silently() -> None:
+    """OpenRouter answers 200 before the upstream provider is proven healthy.
+
+    An error arriving as a stream payload must not close the stream cleanly and
+    hand the caller a blank answer.
+    """
+    payload = "data: " + json.dumps({"error": {"message": "Provider returned error"}})
+    response = _sse(payload, "data: [DONE]")
+
+    with patch.object(or_client, "_open", return_value=response):
+        with pytest.raises(RuntimeError, match="Provider returned error"):
+            "".join(or_client.stream_chat_completion([{"role": "user", "content": "hi"}]))
+
+
+def test_http_error_body_is_kept_in_the_message() -> None:
+    """urllib's own message omits the body, which is the part that says why."""
+    def raising_open(*_args, **_kwargs):
+        raise urllib.error.HTTPError(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            code=402,
+            msg="Payment Required",
+            hdrs=None,
+            fp=BytesIO(b'{"error":{"message":"Insufficient credits"}}'),
+        )
+
+    with patch.object(or_client.urllib.request, "urlopen", side_effect=raising_open):
+        with pytest.raises(RuntimeError, match="Insufficient credits"):
+            list(or_client.stream_chat_completion([{"role": "user", "content": "hi"}]))

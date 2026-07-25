@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import urllib.error
 import urllib.request
 from collections.abc import Iterator
 from typing import Any
@@ -24,6 +25,10 @@ from app.core.settings import get_settings
 logger = logging.getLogger(__name__)
 
 _REQUEST_TIMEOUT_SECONDS = 60
+
+# How much of an error body to keep when re-raising. Enough to identify the
+# cause without dumping a full provider payload into the logs.
+_ERROR_DETAIL_CHARS = 300
 
 # Optional attribution headers. OpenRouter uses them for its public rankings;
 # they do not affect routing or billing.
@@ -46,7 +51,16 @@ def _open(payload: dict[str, Any]):
         },
         method="POST",
     )
-    return urllib.request.urlopen(request, timeout=_REQUEST_TIMEOUT_SECONDS)
+    try:
+        return urllib.request.urlopen(request, timeout=_REQUEST_TIMEOUT_SECONDS)
+    except urllib.error.HTTPError as err:
+        # urllib's own message is just "HTTP Error 402: Payment Required". The
+        # body carries the reason (no credits, unknown model, rate limited), and
+        # losing it turns a one-line diagnosis into a debugging session.
+        detail = err.read().decode("utf-8", errors="replace").strip()
+        raise RuntimeError(
+            f"OpenRouter request failed: HTTP {err.code} {detail[:_ERROR_DETAIL_CHARS]}"
+        ) from err
 
 
 def _base_payload(messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any]:
@@ -56,6 +70,21 @@ def _base_payload(messages: list[dict[str, str]], max_tokens: int) -> dict[str, 
         "max_tokens": max_tokens,
         **DETERMINISTIC_DECODING,
     }
+
+
+def _raise_for_stream_error(chunk: dict[str, Any]) -> None:
+    """Fail loudly on an error reported inside an otherwise-200 stream.
+
+    OpenRouter answers 200 and opens the stream before the upstream provider is
+    necessarily healthy, so a provider outage or rate limit can arrive as an
+    error payload mid-stream. Ignoring it would end the stream cleanly and hand
+    the user a blank answer with nothing logged.
+    """
+    error = chunk.get("error")
+    if not error:
+        return
+    message = error.get("message") if isinstance(error, dict) else error
+    raise RuntimeError(f"OpenRouter stream error: {message}")
 
 
 def _delta_content(chunk: dict[str, Any]) -> str:
@@ -94,6 +123,8 @@ def stream_chat_completion(
             except json.JSONDecodeError:
                 logger.warning("[openrouter] skipping unparseable stream chunk")
                 continue
+
+            _raise_for_stream_error(chunk)
 
             content = _delta_content(chunk)
             if content:
