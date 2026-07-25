@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from app.core.settings import Settings
 from app.schemas import ChatHistoryMessage, ChatRequest
 from app.chatbot.messages import MSG_FEEDBACK_CONFIRM
 from app.chatbot.graph.nodes.feedback_router import router
@@ -24,6 +25,20 @@ from app.chatbot.graph.nodes.feedback_router.pregate import (
     looks_like_question,
     should_skip_llm_route_to_rag,
 )
+
+
+@pytest.fixture(autouse=True)
+def configured_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Give the router a provider so the classifier path is actually reached.
+
+    ``feedback_router_node`` short-circuits to RAG when no chat backend is
+    configured, which is correct behaviour but makes every assertion about the
+    classifier vacuous. Left to the ambient environment these tests passed on a
+    machine with a populated .env and failed in CI, and the "skips the LLM"
+    cases passed for the wrong reason in both.
+    """
+    settings = Settings(_env_file=None, OPENROUTER_API_KEY="sk-or-test")
+    monkeypatch.setattr(router, "get_settings", lambda: settings)
 
 
 @pytest.mark.parametrize(
