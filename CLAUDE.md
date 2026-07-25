@@ -84,6 +84,8 @@ Browser (chat-widget) -> POST /chat (SSE) -> chat.generate_chat_stream
   -> LangGraph: guardrail_input -> route -> feedback | rag -> END
 ```
 
+`GET /health` reports `{"ok", "chunks", "provider", "embeddings"}`. It is the fastest way to tell a deployed instance that cannot generate (`provider: "none"`) from one whose retrieval has quietly degraded (`embeddings: false`), both of which otherwise look identical from outside. It is public, so it must never gain a field carrying a credential, model id, or origin list.
+
 `app/api/chat.py` wraps the generator in a `StreamingResponse` and emits `data: {"type":"chunk","content":...}` per token, then `data: {"type":"done"}`. Any exception raised while building the stream is caught and replaced with `MSG_AI_UNAVAILABLE`, so the endpoint never 500s. Request shape is `app/schemas.py`: `message` is 2 to 1500 chars, `history` is capped at 12 messages.
 
 ### The graph

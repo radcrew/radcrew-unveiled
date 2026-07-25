@@ -20,6 +20,21 @@ FastAPI service served with Uvicorn. It powers chat completion, retrieval (stati
 - `app/schemas.py` — request/response models (`ChatRequest`, history capped at 12).
 - `app/tests/` — Pytest suite (`pytest.ini` uses `testpaths = app/tests`).
 
+## Endpoints
+
+- `POST /chat` — Server-Sent Events. Emits `{"type":"chunk","content":...}` per token, then `{"type":"done"}`. Request body is `ChatRequest` (`message` 2–1500 chars, `history` up to 12 turns).
+- `GET /health` — readiness plus the two config facts that explain most outages:
+
+  ```json
+  { "ok": true, "chunks": 10, "provider": "openrouter", "embeddings": true }
+  ```
+
+  `provider` is `openrouter`, `huggingface`, or `none` (no credential set, so
+  chat cannot answer). `embeddings` is false when `HF_TOKEN` is absent, meaning
+  retrieval has dropped to lexical matching. Check this first when a deployed
+  instance responds but chat does not work. The endpoint is public and reports
+  names and booleans only, never credentials or model ids.
+
 ## Prerequisites
 
 - **Python 3.11+**
