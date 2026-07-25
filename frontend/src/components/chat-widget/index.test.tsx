@@ -12,9 +12,9 @@ vi.mock("@/lib/chatbot-api", () => ({
 // motion-only props don't interfere with queries. The Proxy memoizes one
 // component per tag so React keeps a stable element type across re-renders
 // (otherwise the subtree, including the input, remounts on every render).
-// Each stand-in must forwardRef: the widget measures the panel and launcher
-// through refs to decide whether a pointerdown landed outside, and a dropped
-// ref makes every click read as "outside" and close the panel.
+// The stand-ins forward refs because the real motion components do; keeping the
+// mock faithful means a component that starts using a ref does not silently get
+// a dropped one here.
 vi.mock("framer-motion", async () => {
   const { forwardRef } = await import("react");
   const FRAMER_PROPS = [
@@ -151,6 +151,27 @@ describe("ChatWidget", () => {
 
     await waitFor(() =>
       expect(within(panel).getByText("service down")).toBeInTheDocument(),
+    );
+  });
+
+  it("stays open when clicking inside the panel, closes when clicking outside", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <div data-testid="outside">outside</div>
+        <ChatWidget />
+      </>,
+    );
+    const panel = await openPanel(user);
+
+    // Hit-testing uses a data attribute rather than a ref, because a ref on the
+    // AnimatePresence child makes framer-motion trip React 18's `ref` warning.
+    await user.click(within(panel).getByPlaceholderText(/ask anything about radcrew/i));
+    expect(screen.getByRole("dialog", { name: /radcrew chat/i })).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("outside"));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog", { name: /radcrew chat/i })).not.toBeInTheDocument(),
     );
   });
 });

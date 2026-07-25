@@ -13,6 +13,19 @@ const SUGGESTIONS = [
   "Do you build on Solana?",
 ];
 
+/**
+ * Marks the launcher and the panel as the widget's own surfaces, so a
+ * pointerdown can be tested with `closest()` instead of element refs.
+ *
+ * A ref would be the obvious choice, but the panel is a direct child of
+ * `AnimatePresence`, and framer-motion's `PopChild` reads `children.props.ref`
+ * to compose its own ref. On React 18 that property is React's warning getter,
+ * so passing a ref there logs "`ref` is not a prop" on every open. The ref
+ * still resolves (framer-motion falls back to `element.ref`), but the console
+ * noise is not worth it when hit-testing does not need a ref at all.
+ */
+const OWN_SURFACE_ATTR = "data-chat-surface";
+
 /** Renders the assistant's Markdown (summary + bullet lists) as real HTML. */
 const MARKDOWN_COMPONENTS: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
@@ -42,16 +55,15 @@ export const ChatWidget = () => {
   const [errorBanner, setErrorBanner] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const launcherRef = useRef<HTMLButtonElement>(null);
 
   useCloseOnOtherOverlayOpen("chat", () => setOpen(false));
 
   useEffect(() => {
     if (!open) return;
     const handlePointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (panelRef.current?.contains(target) || launcherRef.current?.contains(target)) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(`[${OWN_SURFACE_ATTR}]`)) return;
       setOpen(false);
     };
     document.addEventListener("pointerdown", handlePointerDown);
@@ -144,7 +156,7 @@ export const ChatWidget = () => {
   return (
     <>
       <motion.button
-        ref={launcherRef}
+        {...{ [OWN_SURFACE_ATTR]: "launcher" }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
@@ -172,7 +184,7 @@ export const ChatWidget = () => {
       <AnimatePresence>
         {open && (
           <motion.div
-            ref={panelRef}
+            {...{ [OWN_SURFACE_ATTR]: "panel" }}
             id="radcrew-chat-panel"
             role="dialog"
             aria-label="RadCrew chat"
