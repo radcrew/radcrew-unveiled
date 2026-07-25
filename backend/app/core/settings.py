@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,6 +37,13 @@ class Settings(BaseSettings):
     HUGGINGFACE_EMBEDDING_MODEL: str = Field(default="sentence-transformers/all-MiniLM-L6-v2")
     HUGGINGFACE_EMBEDDING_PROVIDER: str = Field(default="hf-inference")
 
+    # OpenRouter: an alternative chat backend, selected simply by setting a key.
+    # It has no embeddings endpoint, so retrieval still needs HF_TOKEN; without
+    # one, retrieval degrades to lexical matching (see knowledge/embeddings.py).
+    OPENROUTER_API_KEY: str | None = None
+    OPENROUTER_MODEL: str = Field(default="qwen/qwen-2.5-7b-instruct")
+    OPENROUTER_BASE_URL: str = Field(default="https://openrouter.ai/api/v1")
+
     GITHUB_REPO_URL: AnyHttpUrl | None = None
     GITHUB_TOKEN: str | None = None
     GITHUB_BRANCH: str | None = None
@@ -66,6 +74,20 @@ class Settings(BaseSettings):
     # keyword matching; below the deep-search threshold, the web fallback runs.
     RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD: float = Field(default=0.25, ge=0.0, le=1.0)
     DEEP_SEARCH_SIMILARITY_THRESHOLD: float = Field(default=0.30, ge=0.0, le=1.0)
+
+    def llm_provider(self) -> Literal["openrouter", "huggingface", "none"]:
+        """Which chat backend to use, chosen by whichever credential is present.
+
+        OpenRouter wins when both are set: it is the explicit opt-in, while
+        HF_TOKEN may still be present purely to keep embeddings working.
+        "none" means no chat backend is configured and the API should answer
+        with MSG_AI_UNAVAILABLE rather than attempting a call.
+        """
+        if self.OPENROUTER_API_KEY:
+            return "openrouter"
+        if self.HF_TOKEN:
+            return "huggingface"
+        return "none"
 
     def cors_allow_origins(self) -> list[str]:
         """Origins allowed by CORSMiddleware (exact match, include scheme).

@@ -14,15 +14,10 @@ import json
 import logging
 from typing import Any, Literal
 
-from huggingface_hub import InferenceClient
-from huggingface_hub.inference._generated.types.chat_completion import (
-    ChatCompletionInputResponseFormatJSONSchema,
-    ChatCompletionInputJSONSchema,
-)
 from pydantic import BaseModel, Field
 
 from app.core.settings import Settings
-from app.chatbot.huggingface.common import DETERMINISTIC_DECODING
+from app.chatbot import llm
 
 logger = logging.getLogger(__name__)
 
@@ -73,29 +68,16 @@ def _messages(message: str) -> list[dict[str, Any]]:
 
 def classify_confirmation_via_llm(message: str, settings: Settings) -> ConfirmDecision:
     """Best-effort yes/no/unsure for a confirmation reply; never raises."""
-    if not settings.HF_TOKEN:
+    if settings.llm_provider() == "none":
         return "unsure"
     try:
-        client = InferenceClient(
-            model=settings.HUGGINGFACE_MODEL,
-            token=settings.HF_TOKEN,
-            provider=settings.HUGGINGFACE_PROVIDER,
-        )  # type: ignore[arg-type]
-        resp = client.chat_completion(
-            messages=_messages(message),
+        content = llm.complete_json(
+            _messages(message),
+            schema_name="confirmation_reply",
+            schema_description="Confirm or decline sending the message to the team.",
+            schema=ConfirmationReply.model_json_schema(),
             max_tokens=64,  # tiny: the classifier only emits a one-word JSON label
-            **DETERMINISTIC_DECODING,
-            response_format=ChatCompletionInputResponseFormatJSONSchema(
-                type="json_schema",
-                json_schema=ChatCompletionInputJSONSchema(
-                    name="confirmation_reply",
-                    description="Confirm or decline sending the message to the team.",
-                    schema=ConfirmationReply.model_json_schema(),
-                    strict=True,
-                ),
-            ),
         )
-        content = resp.choices[0].message.content
         if not content:
             return "unsure"
         return ConfirmationReply.model_validate_json(content).decision

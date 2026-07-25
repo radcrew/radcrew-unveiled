@@ -125,11 +125,29 @@ The two LLM-backed checks mean a single `/chat` request can make up to three inf
 
 PII scrubbing is line-buffered (`scrub_pii_stream`) so it works on a token stream without buffering the whole answer. Phone numbers never span newlines, which is what makes that safe.
 
-### Hugging Face inference
+### Inference: two interchangeable backends
 
-`chatbot/huggingface/` streams answers with two fallback layers: chat-completion across the configured providers first, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. `text_generation.py` exists only because some HF providers lack chat support, and it flattens roles into one prompt to compensate.
+`chatbot/llm.py` is the only entry point anything should call. It exposes `generate_answer` (streaming) and `complete_json` (schema-constrained), and picks a backend from `Settings.llm_provider()`:
 
-All calls share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`) so answers are reproducible.
+| Credential set | Provider |
+|---|---|
+| `OPENROUTER_API_KEY` | `openrouter` (wins if both are set) |
+| `HF_TOKEN` only | `huggingface` |
+| neither | `none`, and `/chat` answers `MSG_AI_UNAVAILABLE` without calling out |
+
+OpenRouter wins the tie because it is the explicit opt-in, while `HF_TOKEN` may be present purely to keep embeddings alive.
+
+`chatbot/huggingface/` streams with two fallback layers: chat-completion across the configured providers, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. Note the text-generation fallback is dead weight for chat-tuned models: `Qwen/Qwen2.5-7B-Instruct` only supports the `conversational` task, so that path always fails and only adds an error line to the log.
+
+`chatbot/openrouter/` talks to the OpenAI-compatible REST API over stdlib `urllib`, matching the GitHub loader and web search rather than adding an SDK. There is no provider ladder and no text-generation fallback, because OpenRouter is uniformly chat-completions and does its own upstream routing. Its stream is SSE: `data:` lines of JSON ending at `data: [DONE]`, interleaved with `: OPENROUTER PROCESSING` keepalive comments that must be skipped.
+
+Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so switching providers does not change answer style. OpenRouter forwards `seed` upstream but honouring it is model-dependent; `temperature=0` is what actually holds answers stable.
+
+**Model ids are not portable.** `HUGGINGFACE_MODEL` takes Hub ids (`Qwen/Qwen2.5-7B-Instruct`); `OPENROUTER_MODEL` takes OpenRouter slugs (`qwen/qwen-2.5-7b-instruct`). Copying one into the other fails at request time.
+
+**Embeddings never move.** OpenRouter has no embeddings endpoint, so `knowledge/embeddings.py` always uses Hugging Face. Running OpenRouter-only is supported, but with no `HF_TOKEN` the corpus goes unembedded and retrieval silently degrades to lexical keyword matching. For semantic retrieval, keep `HF_TOKEN` set alongside `OPENROUTER_API_KEY`.
+
+> A depleted HF account returns `402 Payment Required` ("You have depleted your monthly included credits"), which surfaces as `RuntimeError: No inference provider could stream model ...`. That is a billing state, not a code fault, and it is what switching to OpenRouter is for.
 
 ### Frontend chat widget
 

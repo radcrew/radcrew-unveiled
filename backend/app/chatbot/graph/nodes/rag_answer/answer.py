@@ -13,7 +13,7 @@ from app.chatbot.graph.nodes.feedback_router.pregate import (
 )
 from app.chatbot.graph.state import ChatState
 from app.chatbot.guardrails import apply_output_rail_stream
-from app.chatbot.huggingface import generate_answer
+from app.chatbot.llm import generate_answer
 from app.chatbot.knowledge.models import KnowledgeDocument
 from app.chatbot.messages import MSG_FALLBACK_LOW_CONTEXT
 from app.chatbot.utils import get_text_chunk_stream, timed_stream
