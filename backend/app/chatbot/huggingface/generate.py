@@ -11,7 +11,7 @@ from collections.abc import Callable, Iterator
 from time import sleep
 
 from app.chatbot.huggingface.chat_completion import stream_chat_completion
-from app.chatbot.huggingface.common import logger, providers_to_try
+from app.chatbot.huggingface.common import is_retryable_error, logger, providers_to_try
 from app.chatbot.huggingface.text_generation import stream_text_generation
 from app.core.settings import get_settings
 
@@ -25,21 +25,6 @@ StreamFn = Callable[[list[dict[str, str]], str], Iterator[str]]
 # only ever run on the failure path, so a healthy request pays nothing.
 CHAT_COMPLETION_ATTEMPTS = 3
 RETRY_BACKOFF_SECONDS = 0.25
-
-
-def _is_retryable(err: Exception) -> bool:
-    """Whether another attempt could plausibly succeed.
-
-    A depleted account (402), a bad token (401/403), or an unknown model (404)
-    answers identically however many times we ask, so retrying only multiplies
-    the failed calls against an account that is already out of credit. Anything
-    without an HTTP status is a transport error or timeout, which is exactly the
-    case retrying exists for.
-    """
-    status = getattr(getattr(err, "response", None), "status_code", None)
-    if status is None:
-        return True
-    return status == 429 or status >= 500
 
 
 def generate_answer(
@@ -72,7 +57,7 @@ def generate_answer(
     # will serve this token, and a chat-tuned model answers that path with "not
     # supported for task text-generation", which then buries the real cause as the
     # last line in the log.
-    if chat_error is None or _is_retryable(chat_error):
+    if chat_error is None or is_retryable_error(chat_error):
         produced, _ = yield from _stream_first_responding(
             stream_text_generation, messages, providers, "textGenerationStream"
         )
@@ -123,7 +108,7 @@ def _stream_first_responding(
                 last_error = err
                 if produced:
                     return True, None
-                if not _is_retryable(err):
+                if not is_retryable_error(err):
                     break
                 if attempt < attempts:
                     sleep(RETRY_BACKOFF_SECONDS * attempt)

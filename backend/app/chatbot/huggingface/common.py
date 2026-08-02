@@ -26,6 +26,21 @@ DETERMINISTIC_DECODING = {
 }
 
 
+def is_retryable_error(err: Exception) -> bool:
+    """Whether another attempt could plausibly succeed.
+
+    A depleted account (402), a bad token (401/403), or an unknown model (404)
+    answers identically however many times we ask, so retrying only multiplies
+    the failed calls against an account that is already out of credit. Anything
+    without an HTTP status is a transport error or timeout, which is exactly the
+    case retrying exists for.
+    """
+    status = getattr(getattr(err, "response", None), "status_code", None)
+    if status is None:
+        return True
+    return status == 429 or status >= 500
+
+
 def safe_get(obj: Any, key: str) -> Any:
     """Read ``key`` from a dict or attribute-style object, returning None if absent."""
     if isinstance(obj, dict):
