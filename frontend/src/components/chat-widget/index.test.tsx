@@ -139,6 +139,54 @@ describe("ChatWidget", () => {
     );
   });
 
+  it("offers follow-up hints under the answer and sends the one clicked", async () => {
+    streamChatMessage.mockImplementation(async (_msg, handlers) => {
+      handlers.onChunk("We build software.");
+      handlers.onHints?.(["Do you work with Rust?", "How fast do you reply?"]);
+    });
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    const input = within(panel).getByPlaceholderText(/ask anything about radcrew/i);
+    await user.type(input, "what do you do?");
+    await user.click(submitButton(panel));
+
+    const hint = await within(panel).findByRole("button", { name: /do you work with rust/i });
+    await user.click(hint);
+
+    expect(streamChatMessage).toHaveBeenLastCalledWith(
+      "Do you work with Rust?",
+      expect.objectContaining({ onHints: expect.any(Function) }),
+      expect.any(Array),
+    );
+  });
+
+  it("keeps hints only under the newest answer", async () => {
+    streamChatMessage.mockImplementation(async (msg, handlers) => {
+      handlers.onChunk(`answer to ${msg}`);
+      if (msg === "first question") handlers.onHints?.(["Do you work with Rust?"]);
+    });
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    const input = within(panel).getByPlaceholderText(/ask anything about radcrew/i);
+    await user.type(input, "first question");
+    await user.click(submitButton(panel));
+    await within(panel).findByRole("button", { name: /do you work with rust/i });
+
+    await user.type(input, "second question");
+    await user.click(submitButton(panel));
+
+    await waitFor(() =>
+      expect(within(panel).getByText("answer to second question")).toBeInTheDocument(),
+    );
+    expect(
+      within(panel).queryByRole("button", { name: /do you work with rust/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows an error banner on failure", async () => {
     streamChatMessage.mockRejectedValue(new Error("service down"));
     const user = userEvent.setup();

@@ -22,7 +22,7 @@ FastAPI service served with Uvicorn. It powers chat completion, retrieval (stati
 
 ## Endpoints
 
-- `POST /chat` — Server-Sent Events. Emits `{"type":"chunk","content":...}` per token, then `{"type":"done"}`. Request body is `ChatRequest` (`message` 2–1500 chars, `history` up to 12 turns).
+- `POST /chat` — Server-Sent Events. Emits `{"type":"chunk","content":...}` per token, then `{"type":"hints","hints":[...]}` when the answer completed and has follow-up suggestions, then `{"type":"done"}`. Request body is `ChatRequest` (`message` 2–1500 chars, `history` up to 12 turns).
 - `GET /health` — readiness plus the two config facts that explain most outages:
 
   ```json

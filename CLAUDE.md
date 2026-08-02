@@ -59,7 +59,7 @@ pip install -r requirements.txt
 | `backend` | *(none)* | `cd backend && python -m pytest` | `python -m compileall -q app` (syntax check only) | `python -m pytest app/tests/test_retrieval.py -k "name"` |
 | `training` | *(none)* | *(no suite)* | n/a | n/a |
 
-Current baseline: frontend 13 Vitest tests, 2 Playwright tests, backend 183 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+Current baseline: frontend 20 Vitest tests, 4 Playwright tests, backend 221 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
 
 Do not run a hoisted binary straight from the root (`yarn vitest run <path>`). It resolves, because Yarn 1 hoists everything into the root `node_modules/.bin`, but it runs with the root as CWD and never loads `frontend/vitest.config.ts`, so there is no jsdom environment and no setup file. Pure-function tests still pass, which is what makes it dangerous. Always go through `yarn workspace frontend ...`.
 
@@ -86,7 +86,9 @@ Browser (chat-widget) -> POST /chat (SSE) -> chat.generate_chat_stream
 
 `GET /health` reports `{"ok", "chunks", "provider", "embeddings"}`. It is the fastest way to tell a deployed instance that cannot generate (`provider: "none"`) from one whose retrieval has quietly degraded (`embeddings: false`), both of which otherwise look identical from outside. It is public, so it must never gain a field carrying a credential, model id, or origin list.
 
-`app/api/chat.py` wraps the generator in a `StreamingResponse` and emits `data: {"type":"chunk","content":...}` per token, then `data: {"type":"done"}`. Any exception raised while building the stream is caught and replaced with `MSG_AI_UNAVAILABLE`, so the endpoint never 500s. Request shape is `app/schemas.py`: `message` is 2 to 1500 chars, `history` is capped at 12 messages.
+`app/api/chat.py` wraps the generator in a `StreamingResponse` and emits `data: {"type":"chunk","content":...}` per token, then an optional `data: {"type":"hints","hints":[...]}`, then `data: {"type":"done"}`. Any exception raised while building the stream is caught and replaced with `MSG_AI_UNAVAILABLE`, so the endpoint never 500s. Request shape is `app/schemas.py`: `message` is 2 to 1500 chars, `history` is capped at 12 messages.
+
+`chat.generate_chat_stream` returns a `ChatStream` (the chunk iterator plus the hints), not a bare iterator. The hints are the follow-up questions the widget renders as chips under the answer; `graph/nodes/rag_answer/hints.py` picks them from a curated catalog keyed by knowledge-document id, so they cost no inference call. Below `RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD` the matches came from lexical fallback and the node offers generic starters instead: answers tolerate weak retrieval because the prompt sees the whole corpus, but hints see only the retrieved list, so a contact question can otherwise surface portfolio chips. They are emitted only when the stream finished cleanly, and only the RAG node produces them: guardrail blocks and feedback replies leave `ChatState["hints"]` absent, so those turns carry no hints event. Unknown SSE event types are ignored by the client, which is what lets the two Vercel projects deploy independently.
 
 ### The graph
 
@@ -141,6 +143,10 @@ OpenRouter wins the tie because it is the explicit opt-in, while `HF_TOKEN` may 
 
 `chatbot/huggingface/` streams with two fallback layers: chat-completion across the configured providers, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. Note the text-generation fallback is dead weight for chat-tuned models: `Qwen/Qwen2.5-7B-Instruct` only supports the `conversational` task, so that path always fails and only adds an error line to the log.
 
+Chat-completion gets `CHAT_COMPLETION_ATTEMPTS` (3) tries per provider with a linear backoff, because that dead fallback means one transient router error would otherwise cost the whole answer. A failure *after* content has been yielded is never retried: those chunks are already on the wire to the browser, so another attempt would append a second answer to a partial one. The answer ends where it broke instead.
+
+Only 429, 5xx, and statusless transport errors are retried. A 402 (HF account out of included credits), 401/403, or 404 answers the same however often you ask, so those fail fast and also skip the text-generation fallback entirely; otherwise its "not supported for task text-generation" reply lands last in the log and buries the real cause. The raised `RuntimeError` carries the upstream message, so a depleted account reads as one.
+
 `chatbot/openrouter/` talks to the OpenAI-compatible REST API over stdlib `urllib`, matching the GitHub loader and web search rather than adding an SDK. There is no provider ladder and no text-generation fallback, because OpenRouter is uniformly chat-completions and does its own upstream routing. Its stream is SSE: `data:` lines of JSON ending at `data: [DONE]`, interleaved with `: OPENROUTER PROCESSING` keepalive comments that must be skipped.
 
 Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so switching providers does not change answer style. OpenRouter forwards `seed` upstream but honouring it is model-dependent; `temperature=0` is what actually holds answers stable.
@@ -154,6 +160,19 @@ Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so 
 ### Frontend chat widget
 
 `frontend/src/components/chat-widget/` owns the panel and the launcher. It coordinates with the mobile nav sheet through `src/lib/overlay-events.ts`, a window CustomEvent bus, because the two overlays live in separate React trees (`App.tsx` vs `home/Landing.tsx`) and cannot share props or context. The widget also holds refs to the panel and launcher to detect outside clicks; any test that mocks `framer-motion` must forward refs or every click reads as "outside" and closes the panel.
+
+### Frontend component files
+
+Pull a presentational piece out of a feature's `index.tsx` once it is self-contained: no props threaded from local state, no reads of the parent's closures. `chat-widget/TypingDots.tsx` is the shape to copy. `SuggestionChips` in `chat-widget/index.tsx` is the counter-example still inline, since both callers sit in that file.
+
+Naming follows what the file exports, not the folder:
+
+| Kind | Case | Examples |
+|---|---|---|
+| A React component | PascalCase, named after the component | `home/AnimatedCounter.tsx`, `home/Landing.tsx`, `chat-widget/TypingDots.tsx` |
+| Anything else (types, data, hooks, helpers) | lowercase kebab | `chat-widget/types.ts`, `home/static-data.ts`, `home/motion.ts`, `lib/overlay-events.ts` |
+
+`components/ui/` is vendored shadcn and stays kebab-case; do not rename it to match. A component file exports its component by name (`export const TypingDots`), not a default, so imports read the same everywhere and `react-refresh/only-export-components` stays quiet.
 
 ### Training
 

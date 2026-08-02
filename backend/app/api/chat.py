@@ -20,10 +20,10 @@ router = APIRouter(tags=["chat"])
 @router.post("/chat")
 def chat(body: ChatRequest) -> StreamingResponse:
     try:
-        answer_stream = chatbot.generate_chat_stream(body)
+        answer = chatbot.generate_chat_stream(body)
     except Exception:
         logger.exception("POST /chat failed")
-        answer_stream = iter([MSG_AI_UNAVAILABLE])
+        answer = chatbot.ChatStream(iter([MSG_AI_UNAVAILABLE]))
 
     def event_stream():
         # The answer is a chain of lazy generators (retrieval, guardrails, HF
@@ -32,12 +32,18 @@ def chat(body: ChatRequest) -> StreamingResponse:
         # which the client sees as an empty body and no error at all. Catch it,
         # log the real traceback, and close the stream with the fallback message.
         try:
-            for chunk in answer_stream:
+            for chunk in answer.chunks:
                 if chunk:
                     yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
         except Exception:
             logger.exception("POST /chat stream failed")
             yield f"data: {json.dumps({'type': 'chunk', 'content': MSG_AI_UNAVAILABLE})}\n\n"
+        else:
+            # Only after a complete answer. The failure branch above already said
+            # the answer is unavailable, and follow-up chips under an apology
+            # offer questions we just failed to answer.
+            if answer.hints:
+                yield f"data: {json.dumps({'type': 'hints', 'hints': list(answer.hints)})}\n\n"
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
     return StreamingResponse(
