@@ -59,11 +59,16 @@ pip install -r requirements.txt
 | `backend` | *(none)* | `cd backend && python -m pytest` | `python -m compileall -q app` (syntax check only) | `python -m pytest app/tests/test_retrieval.py -k "name"` |
 | `training` | *(none)* | *(no suite)* | n/a | n/a |
 
-Current baseline: frontend 20 Vitest tests, 4 Playwright tests, backend 221 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+Current baseline: frontend 20 Vitest tests, 4 Playwright tests, backend 281 pytest tests (plus 1 skipped without `DATABASE_URL` and 16 deselected `quality` cases), ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
 
 Do not run a hoisted binary straight from the root (`yarn vitest run <path>`). It resolves, because Yarn 1 hoists everything into the root `node_modules/.bin`, but it runs with the root as CWD and never loads `frontend/vitest.config.ts`, so there is no jsdom environment and no setup file. Pure-function tests still pass, which is what makes it dangerous. Always go through `yarn workspace frontend ...`.
 
 Backend `pytest.ini` sets `testpaths = app/tests` and `asyncio_mode = auto`, so `python -m pytest` from `backend/` needs no arguments.
+
+Two backend suites are excluded from that default run, both because they need something the runner does not have:
+
+- `python -m pytest -m quality` is the retrieval golden set (`test_retrieval_quality.py`). It makes real embedding calls, about seventeen per run, and skips when no provider is configured. It is deselected by `addopts = -m "not quality"` so an ordinary test run costs nothing. Run it after changing chunking, the embedding model, or retrieval ranking; it is the only check that says whether the right document comes back rather than whether the plumbing works.
+- The vector-store round trip in `test_vector_store.py` skips unless `DATABASE_URL` is set. CI runs it in its own step against a `pgvector/pgvector:pg16` service. Do not export `DATABASE_URL` for the whole suite: it flips every retrieval test onto the store path.
 
 ## Architecture
 
@@ -103,12 +108,24 @@ The router has several pre-LLM stages (`pregate.py`, `fuzzy.py`, `parse.py`, `co
 
 ### Knowledge and retrieval
 
-`app/core/lifespan.py` loads the corpus once at startup: static site copy (`knowledge/site_content.py`) plus optional GitHub Markdown (`knowledge/github_loader/`, gated on `GITHUB_*` env vars). It then calls `index_documents` to embed the whole corpus once.
+`app/core/lifespan.py` loads the corpus once at startup: static site copy (`knowledge/site_content.py`) plus optional GitHub Markdown (`knowledge/github_loader/`, gated on `GITHUB_*` env vars). It then indexes it, one of two ways depending on `DATABASE_URL`.
 
 `knowledge/embeddings.py` keeps L2-normalized vectors in memory keyed by document id, so a request only embeds the short query and similarity is a local dot product. Everything degrades to zeros (and therefore to lexical matching) when `HF_TOKEN` or the embedding model is unset, rather than failing. Two thresholds gate the fallbacks, both in `settings.py`:
 
 - Below `RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD` (0.25), retrieval switches from semantic to lexical keyword matching.
 - Below `DEEP_SEARCH_SIMILARITY_THRESHOLD` (0.30), the web-search fallback runs.
+
+### Vector store (optional)
+
+With `DATABASE_URL` set, embeddings live in Postgres (`knowledge/vector_store.py`) instead of process memory. The in-memory path re-embeds the whole corpus on every process start, which on Vercel is every cold start, spending embedding calls on unchanged content. It is not a latency win: a pgvector query adds a network round trip that an in-memory dot product over ten documents does not need.
+
+`knowledge/indexing.py` is the write path, at startup and via `python -m app.chatbot.knowledge.indexing [--force]`. A boot reads stored fingerprints and embeds only the chunks whose text *or embedding model* differs, so a normal boot writes nothing. The model belongs in that key because a content hash alone says "the text is unchanged", not "the vector is still valid": swap `HUGGINGFACE_EMBEDDING_MODEL` and every hash still matches while every vector is stale.
+
+Rows are chunks, not documents (`knowledge/chunking.py`), because `all-MiniLM-L6-v2` truncates past 256 word pieces without saying so, which made everything after roughly the first thousand characters of a GitHub Markdown file invisible. Every static site document is well inside that limit and stays a single chunk whose embedded text is byte-for-byte what the in-memory path produced, so their scores do not move. `search` returns document ids, collapsing to each document's best chunk, which is what keeps hints and the confidence gate document-shaped.
+
+Two safeguards exist because the store holds the only copy of the vectors: `delete_missing` refuses to run on an empty corpus (`document_id <> ALL('{}')` matches every row, and an empty corpus is a failed load far more often than an emptied knowledge base), and a failed embedding run keeps what is already stored rather than half-applying. Every store entry point fails open, so an unreachable database degrades to lexical matching exactly as a missing `HF_TOKEN` does.
+
+`vector({384})` is fixed at table creation, so `DATABASE_URL` and `HUGGINGFACE_EMBEDDING_MODEL` are one decision. `/health` reports `vector_store` from the last indexing outcome rather than probing the database, keeping that public endpoint query-free.
 
 ### Deep search
 

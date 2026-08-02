@@ -158,6 +158,13 @@ LLM-backed rails off leaves the regex rails working at no cost.
 - `DATABASE_URL`: Postgres with the `pgvector` extension, holding the corpus embeddings. Optional: without it the corpus is embedded into process memory at startup, so every cold start re-embeds it and spends embedding calls on unchanged content. On serverless use a pooled endpoint (Neon pooler, Supabase port 6543) and `?sslmode=require`
 - `EMBEDDING_BATCH_SIZE`: texts per embedding call while indexing (default `64`)
 
+Indexing runs at startup and embeds only what changed. To run it by hand, after editing site copy or changing the embedding model:
+
+```bash
+python -m app.chatbot.knowledge.indexing          # embed what changed
+python -m app.chatbot.knowledge.indexing --force  # re-embed everything
+```
+
 > The embedding dimension is fixed in the table when it is created, so `DATABASE_URL` and `HUGGINGFACE_EMBEDDING_MODEL` are a single decision. Changing the model means altering the column and re-embedding the whole corpus; the stored model id is part of the freshness check, so a changed model re-embeds rather than silently comparing vectors from two different models.
 
 ### Deep search (web-search fallback)
