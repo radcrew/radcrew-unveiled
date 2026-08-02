@@ -161,6 +161,19 @@ Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so 
 
 `frontend/src/components/chat-widget/` owns the panel and the launcher. It coordinates with the mobile nav sheet through `src/lib/overlay-events.ts`, a window CustomEvent bus, because the two overlays live in separate React trees (`App.tsx` vs `home/Landing.tsx`) and cannot share props or context. The widget also holds refs to the panel and launcher to detect outside clicks; any test that mocks `framer-motion` must forward refs or every click reads as "outside" and closes the panel.
 
+### Frontend component files
+
+Pull a presentational piece out of a feature's `index.tsx` once it is self-contained: no props threaded from local state, no reads of the parent's closures. `chat-widget/TypingDots.tsx` is the shape to copy. `SuggestionChips` in `chat-widget/index.tsx` is the counter-example still inline, since both callers sit in that file.
+
+Naming follows what the file exports, not the folder:
+
+| Kind | Case | Examples |
+|---|---|---|
+| A React component | PascalCase, named after the component | `home/AnimatedCounter.tsx`, `home/Landing.tsx`, `chat-widget/TypingDots.tsx` |
+| Anything else (types, data, hooks, helpers) | lowercase kebab | `chat-widget/types.ts`, `home/static-data.ts`, `home/motion.ts`, `lib/overlay-events.ts` |
+
+`components/ui/` is vendored shadcn and stays kebab-case; do not rename it to match. A component file exports its component by name (`export const TypingDots`), not a default, so imports read the same everywhere and `react-refresh/only-export-components` stays quiet.
+
 ### Training
 
 `training/` trains a small `message` to `is_feedback` classifier via QLoRA. Dataset is `trainset.jsonl` (one JSON object per line: `message` string, `is_feedback` boolean), example at `trainset_example.jsonl`, output under `training/outputs/`. Needs an NVIDIA GPU; on Windows set `PYTHONUTF8=1` before starting Python or the TRL import fails, and prefer `training/run_train.ps1`. Nothing under `backend/app/` imports any of this.

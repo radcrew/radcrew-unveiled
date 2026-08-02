@@ -5,6 +5,7 @@ import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { streamChatMessage } from "@/lib/chatbot-api";
 import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay-events";
+import { TypingDots } from "./TypingDots";
 import { WELCOME_MESSAGE, type ChatMessage } from "./types";
 
 const SUGGESTIONS = [
@@ -300,20 +301,7 @@ export const ChatWidget = () => {
                               </ReactMarkdown>
                             </div>
                           ) : pending && !streamStarted ? (
-                            <span className="flex items-center gap-1 py-0.5">
-                              <span
-                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                                style={{ animationDelay: "0ms" }}
-                              />
-                              <span
-                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                                style={{ animationDelay: "150ms" }}
-                              />
-                              <span
-                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                                style={{ animationDelay: "300ms" }}
-                              />
-                            </span>
+                            <TypingDots />
                           ) : null
                         ) : (
                           msg.content
