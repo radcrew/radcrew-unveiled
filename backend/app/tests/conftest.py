@@ -59,6 +59,9 @@ def offline_startup(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     """
     monkeypatch.setattr("app.core.lifespan.get_resume_documents", lambda **kwargs: [])
     monkeypatch.setattr("app.core.lifespan.index_documents", lambda documents: None)
+    # Same reasoning for the pgvector path: with DATABASE_URL exported, every
+    # TestClient(app) would otherwise open a connection and index the corpus.
+    monkeypatch.setattr("app.core.lifespan.index_corpus", lambda documents: None)
     yield
 
 
