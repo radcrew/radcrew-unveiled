@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from dataclasses import dataclass
 
 from app.core.settings import get_settings
 from app.chatbot.knowledge.models import KnowledgeDocument
@@ -18,12 +19,22 @@ def set_knowledge_documents(documents: list[KnowledgeDocument]) -> None:
     knowledge_documents = documents
 
 
-def generate_chat_stream(
-    body: ChatRequest,
-) -> Iterator[str]:
+@dataclass(frozen=True)
+class ChatStream:
+    """An answer stream plus the follow-up hints to offer under it.
+
+    Hints are plain data, known before the first token because the graph runs
+    its nodes eagerly, so the endpoint can hold them while the stream drains.
+    """
+
+    chunks: Iterator[str]
+    hints: tuple[str, ...] = ()
+
+
+def generate_chat_stream(body: ChatRequest) -> ChatStream:
     settings = get_settings()
     if settings.llm_provider() == "none":
-        return iter([MSG_AI_UNAVAILABLE])
+        return ChatStream(iter([MSG_AI_UNAVAILABLE]))
 
     result = chat_graph.invoke(
         {
@@ -31,4 +42,4 @@ def generate_chat_stream(
             "knowledge_documents": knowledge_documents,
         }
     )
-    return result["output_stream"]
+    return ChatStream(result["output_stream"], tuple(result.get("hints", ())))

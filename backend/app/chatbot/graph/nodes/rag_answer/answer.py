@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator
 from time import perf_counter
 
 from app.chatbot.deepsearch import deep_search_documents, is_deep_search_available
@@ -20,6 +19,7 @@ from app.chatbot.utils import get_text_chunk_stream, timed_stream
 from app.core.settings import Settings, get_settings
 
 from .cache import get_cached_response, prompt_cache_key, stream_answer_with_cache
+from .hints import build_hints
 from .prompt import ChatPrompt, build_chat_prompt, build_smalltalk_prompt
 from .retrieval import query_matches_known_title, retrieve_with_confidence
 from .sanitize import sanitize_answer_stream
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 RETRIEVAL_DOCUMENT_LIMIT = 8
 
 
-def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
+def rag_answer_node(state: ChatState) -> dict[str, object]:
     settings = get_settings()
     body = state["body"]
     knowledge_documents = state["knowledge_documents"]
@@ -44,7 +44,12 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     # greeting as ungrounded).
     if is_smalltalk(message):
         prompt = build_smalltalk_prompt(message, history)
-        return _stream_prompt(prompt, context_documents=[], skip_groundedness=True)
+        return _stream_prompt(
+            prompt,
+            context_documents=[],
+            skip_groundedness=True,
+            hints=build_hints([], message, history),
+        )
 
     user_messages = [m.content for m in history if m.role == "user" and m.content]
     recent_context = "\n".join(user_messages[-2:])
@@ -68,10 +73,20 @@ def rag_answer_node(state: ChatState) -> dict[str, Iterator[str]]:
     context_documents += web_documents
 
     if not retrieved_documents and not web_documents and not history:
-        return {"output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT)}
+        return {
+            "output_stream": get_text_chunk_stream(MSG_FALLBACK_LOW_CONTEXT),
+            "hints": build_hints([], message, history),
+        }
 
     prompt = build_chat_prompt(message, context_documents, history)
-    return _stream_prompt(prompt, context_documents, skip_groundedness=False)
+    return _stream_prompt(
+        prompt,
+        context_documents,
+        skip_groundedness=False,
+        # Hints read the retrieved documents, not `context_documents`: the prompt
+        # gets the whole corpus, so only the retrieved list reflects the question.
+        hints=build_hints(retrieved_documents, message, history),
+    )
 
 
 def _maybe_deep_search(
@@ -114,15 +129,21 @@ def _stream_prompt(
     prompt: ChatPrompt,
     context_documents: list[KnowledgeDocument],
     skip_groundedness: bool,
-) -> dict[str, Iterator[str]]:
-    """Serve a built prompt: cache hit → replay, else stream through the rails."""
+    hints: tuple[str, ...],
+) -> dict[str, object]:
+    """Serve a built prompt: cache hit → replay, else stream through the rails.
+
+    Hints ride along unchanged either way. They are recomputed per request and
+    never cached, so a cache hit still offers follow-ups.
+    """
     cache_key = prompt_cache_key(prompt.cache_text())
     cached = get_cached_response(cache_key)
     if cached is not None:
         logger.info("[timing] cache=hit chars=%d", len(cached))
-        return {"output_stream": get_text_chunk_stream(cached)}
+        return {"output_stream": get_text_chunk_stream(cached), "hints": hints}
 
     return {
+        "hints": hints,
         "output_stream": timed_stream(
             stream_answer_with_cache(
                 apply_output_rail_stream(

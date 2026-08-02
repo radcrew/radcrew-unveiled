@@ -19,3 +19,7 @@ class ChatState(TypedDict, total=False):
     feedback_call: ParsedToolCall
     feedback_phase: Literal["ask", "send", "cancel"]
     output_stream: Iterator[str]
+    # Follow-up questions to offer under the answer. Only the RAG node sets it;
+    # guardrail blocks and feedback replies leave it absent, which is what keeps
+    # those turns hint-free without any extra branching downstream.
+    hints: tuple[str, ...]

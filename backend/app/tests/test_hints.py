@@ -1,7 +1,10 @@
-"""Follow-up hints: catalog selection, top-up, and already-asked suppression."""
+"""Follow-up hints: catalog selection, top-up, already-asked suppression, node wiring."""
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock, patch
+
+from app.chatbot.graph.nodes.rag_answer import answer as answer_mod
 from app.chatbot.graph.nodes.rag_answer.hints import (
     DEFAULT_HINTS,
     HINT_CATALOG,
@@ -9,7 +12,7 @@ from app.chatbot.graph.nodes.rag_answer.hints import (
     build_hints,
 )
 from app.chatbot.knowledge.models import KnowledgeDocument
-from app.schemas import ChatHistoryMessage
+from app.schemas import ChatHistoryMessage, ChatRequest
 
 
 def _document(doc_id: str) -> KnowledgeDocument:
@@ -70,6 +73,41 @@ def test_hint_already_asked_earlier_in_the_conversation_is_suppressed() -> None:
 def test_never_returns_more_than_the_cap() -> None:
     documents = [_document(doc_id) for doc_id in HINT_CATALOG]
     assert len(build_hints(documents, "tell me everything")) == MAX_HINTS
+
+
+_MODULE = "app.chatbot.graph.nodes.rag_answer.answer"
+
+
+def _run_node(message: str, retrieved: list[KnowledgeDocument]) -> tuple[str, ...]:
+    """Run rag_answer_node with retrieval stubbed, and return the hints it set."""
+    kb = [_document("hero"), _document("faq")]
+    state = {"body": ChatRequest(message=message), "knowledge_documents": kb}
+
+    settings = MagicMock()
+    settings.DEEP_SEARCH_SIMILARITY_THRESHOLD = 0.30
+
+    with patch(f"{_MODULE}.get_settings", return_value=settings), patch(
+        f"{_MODULE}.retrieve_with_confidence", return_value=(retrieved, 0.9)
+    ), patch(f"{_MODULE}.is_deep_search_available", return_value=False), patch(
+        f"{_MODULE}.get_cached_response", return_value=None
+    ), patch(f"{_MODULE}.generate_answer", return_value=iter(["ok"])):
+        result = answer_mod.rag_answer_node(state)
+        "".join(result["output_stream"])  # drain so caching side effects run
+    return result["hints"]
+
+
+def test_node_hints_follow_the_retrieved_documents() -> None:
+    assert _run_node("do you offer support?", [_document("faq")])[:2] == HINT_CATALOG["faq"]
+
+
+def test_node_falls_back_to_defaults_when_retrieval_is_empty() -> None:
+    # No retrieval and no history is the low-context path; it still offers hints
+    # so the user has somewhere to go besides the email address in the reply.
+    assert _run_node("qqq zzz wibble?", []) == DEFAULT_HINTS
+
+
+def test_node_hints_smalltalk_with_defaults() -> None:
+    assert _run_node("hey there", [_document("faq")]) == DEFAULT_HINTS
 
 
 def test_catalog_hints_stay_inside_the_reply_contract() -> None:
