@@ -68,7 +68,7 @@ Backend `pytest.ini` sets `testpaths = app/tests` and `asyncio_mode = auto`, so 
 Two backend suites are excluded from that default run, both because they need something the runner does not have:
 
 - `python -m pytest -m quality` is the retrieval golden set (`test_retrieval_quality.py`). It makes real embedding calls, about seventeen per run, and skips when no provider is configured. It is deselected by `addopts = -m "not quality"` so an ordinary test run costs nothing. Run it after changing chunking, the embedding model, or retrieval ranking; it is the only check that says whether the right document comes back rather than whether the plumbing works.
-- The vector-store round trip in `test_vector_store.py` skips unless `DATABASE_URL` is set. CI runs it in its own step against a `pgvector/pgvector:pg16` service. Do not export `DATABASE_URL` for the whole suite: it flips every retrieval test onto the store path.
+- The vector-store round trip in `test_vector_store.py` skips unless `DATABASE_URL` is set, and CI does not set it, so the SQL is only ever exercised by a local run against a real database. Run it after touching `vector_store.py`: the other tests there use a fake connection, which accepts a syntax error without complaint. Do not export `DATABASE_URL` for the whole suite: it flips every retrieval test onto the store path.
 
 ## Architecture
 
