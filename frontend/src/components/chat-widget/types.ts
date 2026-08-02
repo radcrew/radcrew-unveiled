@@ -4,6 +4,8 @@ export interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
+  /** Follow-up questions offered under an assistant answer. */
+  hints?: string[];
 }
 
 export const WELCOME_MESSAGE: ChatMessage = {

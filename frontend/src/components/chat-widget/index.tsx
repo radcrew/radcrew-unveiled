@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -39,6 +39,35 @@ const MARKDOWN_COMPONENTS: Components = {
   h2: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
   h3: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
 };
+
+/** Tappable questions: the openers before the first message, and the follow-up hints after an answer. */
+const SuggestionChips = ({
+  items,
+  label,
+  onPick,
+}: {
+  items: string[];
+  label: string;
+  onPick: (item: string) => void;
+}) => (
+  <div role="group" aria-label={label} className="flex flex-col gap-2 pt-1">
+    {items.map((item) => (
+      <button
+        key={item}
+        type="button"
+        onClick={() => onPick(item)}
+        className="rounded-xl px-3 py-2 text-left text-xs transition-all duration-200 hover:scale-[1.02]"
+        style={{
+          background: "transparent",
+          border: "1px solid rgba(201,169,110,0.3)",
+          color: "#111111",
+        }}
+      >
+        {item}
+      </button>
+    ))}
+  </div>
+);
 
 /** Matches floating control height for panel stacking above the launcher. */
 const CHAT_FLOAT_BUTTON_PX = 56;
@@ -127,6 +156,11 @@ export const ChatWidget = () => {
               existing.map((msg) =>
                 msg.id === assistantId ? { ...msg, content: `${msg.content}${chunk}` } : msg,
               ),
+            );
+          },
+          onHints: (hints) => {
+            setMessages((existing) =>
+              existing.map((msg) => (msg.id === assistantId ? { ...msg, hints } : msg)),
             );
           },
         },
@@ -233,70 +267,77 @@ export const ChatWidget = () => {
             ) : null}
 
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: "thin" }}>
-              {messages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                      msg.role === "user" ? "rounded-br-sm text-background" : "rounded-bl-sm"
-                    }`}
-                    style={
-                      msg.role === "user"
-                        ? { background: "#111111", color: "#FAFAF7" }
-                        : {
-                            background: "rgba(201,169,110,0.08)",
-                            color: "#111111",
-                            border: "1px solid rgba(201,169,110,0.15)",
-                          }
-                    }
-                  >
-                    {msg.role === "assistant" ? (
-                      msg.content ? (
-                        <div className="break-words">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
-                            {msg.content}
-                          </ReactMarkdown>
-                        </div>
-                      ) : pending && !streamStarted ? (
-                        <span className="flex items-center gap-1 py-0.5">
-                          <span
-                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                            style={{ animationDelay: "0ms" }}
-                          />
-                          <span
-                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                            style={{ animationDelay: "150ms" }}
-                          />
-                          <span
-                            className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
-                            style={{ animationDelay: "300ms" }}
-                          />
-                        </span>
-                      ) : null
-                    ) : (
-                      msg.content
-                    )}
-                  </div>
-                </div>
-              ))}
+              {messages.map((msg, index) => {
+                // Only the newest answer offers follow-ups, so the transcript
+                // doesn't accumulate rows of stale chips.
+                const hints =
+                  index === messages.length - 1 && msg.role === "assistant" && !pending
+                    ? msg.hints ?? []
+                    : [];
+
+                return (
+                  <Fragment key={msg.id}>
+                    <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                          msg.role === "user" ? "rounded-br-sm text-background" : "rounded-bl-sm"
+                        }`}
+                        style={
+                          msg.role === "user"
+                            ? { background: "#111111", color: "#FAFAF7" }
+                            : {
+                                background: "rgba(201,169,110,0.08)",
+                                color: "#111111",
+                                border: "1px solid rgba(201,169,110,0.15)",
+                              }
+                        }
+                      >
+                        {msg.role === "assistant" ? (
+                          msg.content ? (
+                            <div className="break-words">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+                                {msg.content}
+                              </ReactMarkdown>
+                            </div>
+                          ) : pending && !streamStarted ? (
+                            <span className="flex items-center gap-1 py-0.5">
+                              <span
+                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                                style={{ animationDelay: "0ms" }}
+                              />
+                              <span
+                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                                style={{ animationDelay: "150ms" }}
+                              />
+                              <span
+                                className="h-1.5 w-1.5 animate-bounce rounded-full bg-current"
+                                style={{ animationDelay: "300ms" }}
+                              />
+                            </span>
+                          ) : null
+                        ) : (
+                          msg.content
+                        )}
+                      </div>
+                    </div>
+
+                    {hints.length > 0 ? (
+                      <SuggestionChips
+                        items={hints}
+                        label="Suggested follow-up questions"
+                        onPick={(hint) => void sendMessage(hint)}
+                      />
+                    ) : null}
+                  </Fragment>
+                );
+              })}
 
               {showSuggestions ? (
-                <div className="flex flex-col gap-2 pt-1">
-                  {SUGGESTIONS.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => void sendMessage(s)}
-                      className="rounded-xl px-3 py-2 text-left text-xs transition-all duration-200 hover:scale-[1.02]"
-                      style={{
-                        background: "transparent",
-                        border: "1px solid rgba(201,169,110,0.3)",
-                        color: "#111111",
-                      }}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+                <SuggestionChips
+                  items={SUGGESTIONS}
+                  label="Suggested questions"
+                  onPick={(suggestion) => void sendMessage(suggestion)}
+                />
               ) : null}
 
               <div ref={bottomRef} />
