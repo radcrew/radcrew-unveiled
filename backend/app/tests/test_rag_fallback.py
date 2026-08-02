@@ -17,6 +17,8 @@ def _run(confidence: float, available: bool, threshold: float = 0.30, message: s
 
     settings = MagicMock()
     settings.DEEP_SEARCH_SIMILARITY_THRESHOLD = threshold
+    # Read by the hint gate; a MagicMock would break the float comparison.
+    settings.RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.25
 
     web_doc = KnowledgeDocument(id="web-0", title="GitHub", text="github.com/radcrew")
     deep_search = MagicMock(return_value=[web_doc])

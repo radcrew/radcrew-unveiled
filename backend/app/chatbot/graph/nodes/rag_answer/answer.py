@@ -79,13 +79,19 @@ def rag_answer_node(state: ChatState) -> dict[str, object]:
         }
 
     prompt = build_chat_prompt(message, context_documents, history)
+    # Hints read the retrieved documents, not `context_documents`: the prompt gets
+    # the whole corpus, so only the retrieved list reflects the question. Below the
+    # threshold those matches came from the lexical fallback, which is too noisy to
+    # suggest from (a contact question can surface a portfolio document), so drop
+    # back to the generic starters. Answers survive weak retrieval because they see
+    # the whole corpus; hints have only this list, so they need the guard.
+    confident = confidence >= settings.RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD
+
     return _stream_prompt(
         prompt,
         context_documents,
         skip_groundedness=False,
-        # Hints read the retrieved documents, not `context_documents`: the prompt
-        # gets the whole corpus, so only the retrieved list reflects the question.
-        hints=build_hints(retrieved_documents, message, history),
+        hints=build_hints(retrieved_documents if confident else [], message, history),
     )
 
 

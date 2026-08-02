@@ -59,7 +59,7 @@ pip install -r requirements.txt
 | `backend` | *(none)* | `cd backend && python -m pytest` | `python -m compileall -q app` (syntax check only) | `python -m pytest app/tests/test_retrieval.py -k "name"` |
 | `training` | *(none)* | *(no suite)* | n/a | n/a |
 
-Current baseline: frontend 20 Vitest tests, 2 Playwright tests, backend 220 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+Current baseline: frontend 20 Vitest tests, 4 Playwright tests, backend 221 pytest tests, ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
 
 Do not run a hoisted binary straight from the root (`yarn vitest run <path>`). It resolves, because Yarn 1 hoists everything into the root `node_modules/.bin`, but it runs with the root as CWD and never loads `frontend/vitest.config.ts`, so there is no jsdom environment and no setup file. Pure-function tests still pass, which is what makes it dangerous. Always go through `yarn workspace frontend ...`.
 
@@ -88,7 +88,7 @@ Browser (chat-widget) -> POST /chat (SSE) -> chat.generate_chat_stream
 
 `app/api/chat.py` wraps the generator in a `StreamingResponse` and emits `data: {"type":"chunk","content":...}` per token, then an optional `data: {"type":"hints","hints":[...]}`, then `data: {"type":"done"}`. Any exception raised while building the stream is caught and replaced with `MSG_AI_UNAVAILABLE`, so the endpoint never 500s. Request shape is `app/schemas.py`: `message` is 2 to 1500 chars, `history` is capped at 12 messages.
 
-`chat.generate_chat_stream` returns a `ChatStream` (the chunk iterator plus the hints), not a bare iterator. The hints are the follow-up questions the widget renders as chips under the answer; `graph/nodes/rag_answer/hints.py` picks them from a curated catalog keyed by knowledge-document id, so they cost no inference call. They are emitted only when the stream finished cleanly, and only the RAG node produces them: guardrail blocks and feedback replies leave `ChatState["hints"]` absent, so those turns carry no hints event. Unknown SSE event types are ignored by the client, which is what lets the two Vercel projects deploy independently.
+`chat.generate_chat_stream` returns a `ChatStream` (the chunk iterator plus the hints), not a bare iterator. The hints are the follow-up questions the widget renders as chips under the answer; `graph/nodes/rag_answer/hints.py` picks them from a curated catalog keyed by knowledge-document id, so they cost no inference call. Below `RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD` the matches came from lexical fallback and the node offers generic starters instead: answers tolerate weak retrieval because the prompt sees the whole corpus, but hints see only the retrieved list, so a contact question can otherwise surface portfolio chips. They are emitted only when the stream finished cleanly, and only the RAG node produces them: guardrail blocks and feedback replies leave `ChatState["hints"]` absent, so those turns carry no hints event. Unknown SSE event types are ignored by the client, which is what lets the two Vercel projects deploy independently.
 
 ### The graph
 

@@ -78,16 +78,21 @@ def test_never_returns_more_than_the_cap() -> None:
 _MODULE = "app.chatbot.graph.nodes.rag_answer.answer"
 
 
-def _run_node(message: str, retrieved: list[KnowledgeDocument]) -> tuple[str, ...]:
+def _run_node(
+    message: str,
+    retrieved: list[KnowledgeDocument],
+    confidence: float = 0.9,
+) -> tuple[str, ...]:
     """Run rag_answer_node with retrieval stubbed, and return the hints it set."""
     kb = [_document("hero"), _document("faq")]
     state = {"body": ChatRequest(message=message), "knowledge_documents": kb}
 
     settings = MagicMock()
     settings.DEEP_SEARCH_SIMILARITY_THRESHOLD = 0.30
+    settings.RETRIEVAL_FALLBACK_SIMILARITY_THRESHOLD = 0.25
 
     with patch(f"{_MODULE}.get_settings", return_value=settings), patch(
-        f"{_MODULE}.retrieve_with_confidence", return_value=(retrieved, 0.9)
+        f"{_MODULE}.retrieve_with_confidence", return_value=(retrieved, confidence)
     ), patch(f"{_MODULE}.is_deep_search_available", return_value=False), patch(
         f"{_MODULE}.get_cached_response", return_value=None
     ), patch(f"{_MODULE}.generate_answer", return_value=iter(["ok"])):
@@ -104,6 +109,15 @@ def test_node_falls_back_to_defaults_when_retrieval_is_empty() -> None:
     # No retrieval and no history is the low-context path; it still offers hints
     # so the user has somewhere to go besides the email address in the reply.
     assert _run_node("qqq zzz wibble?", []) == DEFAULT_HINTS
+
+
+def test_node_ignores_low_confidence_matches() -> None:
+    # Below the retrieval threshold the documents came from the lexical fallback,
+    # which is noisy enough to answer a contact question with portfolio hints.
+    # Generic starters beat confidently wrong suggestions.
+    assert _run_node("how do i get in touch?", [_document("portfolio")], confidence=0.1) == (
+        DEFAULT_HINTS
+    )
 
 
 def test_node_hints_smalltalk_with_defaults() -> None:
