@@ -35,14 +35,20 @@ jobs:
       run:
         working-directory: backend
     services:
-      # pgvector's own image, so CREATE EXTENSION vector works out of the box.
-      # Only the vector-store integration test uses it; the main suite runs with
-      # no DATABASE_URL and must stay that way.
+      # pgvector's own image: the runner ships PostgreSQL, but without the vector
+      # extension, so CREATE EXTENSION vector would fail on it. Only the
+      # vector-store integration test uses this; the main suite runs with no
+      # DATABASE_URL and must stay that way.
+      #
+      # No credentials, here or in repository settings. The container is created
+      # for this job, listens only on the runner's loopback, and is destroyed
+      # with the job, so trust auth leaves nothing to store or leak. What remains
+      # below is a hostname and a database name, neither of which is a secret.
       postgres:
         image: pgvector/pgvector:pg16
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: radcrew_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: radcrew_unveiled
         ports:
           - 5432:5432
         options: >-
@@ -70,7 +76,7 @@ jobs:
       # the store path. This is the only place the SQL meets a real server.
       - name: Vector store integration
         env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/radcrew_test
+          DATABASE_URL: postgresql://postgres@localhost:5432/radcrew_unveiled
         run: python -m pytest app/tests/test_vector_store.py
 
       - name: Syntax check
