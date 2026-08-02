@@ -96,6 +96,14 @@ def _get_pool() -> Any:
         kwargs={
             "application_name": "radcrew-chat",
             "options": f"-c statement_timeout={STATEMENT_TIMEOUT_MS}",
+            # Pooled endpoints (Supabase port 6543, Neon's pooler) run PgBouncer
+            # in transaction mode, where a connection is handed to another client
+            # between statements. psycopg starts using server-side prepared
+            # statements after a few repeats of the same query, and those do not
+            # survive that handover: it fails later, under load, as "prepared
+            # statement _pg3_0 already exists". Off by default costs one parse
+            # per query and works on both pooled and direct connections.
+            "prepare_threshold": None,
         },
     )
     return _pool
