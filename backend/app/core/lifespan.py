@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from app.chatbot.knowledge import get_static_site_documents
 from app.chatbot.knowledge.embeddings import index_documents
 from app.chatbot.knowledge.github_loader import get_resume_documents
+from app.chatbot.knowledge.indexing import index_corpus
 from app.chatbot.knowledge.models import KnowledgeDocument
 from app.core.settings import get_settings
 
@@ -35,9 +36,14 @@ def create_lifespan(
             ),
         ]
         on_documents_loaded(documents)
-        # Embed the corpus once so per-request retrieval only embeds the query.
-        # Safe no-op when embeddings are unconfigured (falls back to lexical).
-        index_documents(documents)
+        if settings.vector_store_enabled():
+            # Vectors live in Postgres, so a boot embeds only what changed and
+            # normally writes nothing. This is the cost the store exists to cut.
+            index_corpus(documents)
+        else:
+            # Embed the corpus once so per-request retrieval only embeds the query.
+            # Safe no-op when embeddings are unconfigured (falls back to lexical).
+            index_documents(documents)
         yield
 
     return lifespan

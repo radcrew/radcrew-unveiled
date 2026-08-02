@@ -21,6 +21,13 @@ def test_health_reports_provider_and_embedding_availability() -> None:
 
     assert data.get("provider") in {"openrouter", "huggingface", "none"}
     assert isinstance(data.get("embeddings"), bool)
+    assert isinstance(data.get("vector_store"), bool)
+
+
+def test_health_reports_no_vector_store_without_a_database() -> None:
+    """Configured-but-not-indexed reads the same as absent: retrieval is degraded."""
+    with TestClient(app) as client:
+        assert client.get("/health").json().get("vector_store") is False
 
 
 def test_health_never_leaks_credentials() -> None:
