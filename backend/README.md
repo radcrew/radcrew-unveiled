@@ -153,6 +153,13 @@ LLM-backed rails off leaves the regex rails working at no cost.
 - `WEB_SEARCH_API_KEY`: API key for the search provider. Without it, deep search stays inert and the bot answers from the knowledge base only
 - `WEB_SEARCH_MAX_RESULTS`: max results pulled per deep search (default `5`)
 
+**Vector store**
+
+- `DATABASE_URL`: Postgres with the `pgvector` extension, holding the corpus embeddings. Optional: without it the corpus is embedded into process memory at startup, so every cold start re-embeds it and spends embedding calls on unchanged content. On serverless use a pooled endpoint (Neon pooler, Supabase port 6543) and `?sslmode=require`
+- `EMBEDDING_BATCH_SIZE`: texts per embedding call while indexing (default `64`)
+
+> The embedding dimension is fixed in the table when it is created, so `DATABASE_URL` and `HUGGINGFACE_EMBEDDING_MODEL` are a single decision. Changing the model means altering the column and re-embedding the whole corpus; the stored model id is part of the freshness check, so a changed model re-embeds rather than silently comparing vectors from two different models.
+
 ### Deep search (web-search fallback)
 
 When the static knowledge base can't confidently answer a question (best retrieval

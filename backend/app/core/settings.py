@@ -69,6 +69,16 @@ class Settings(BaseSettings):
     WEB_SEARCH_API_KEY: str | None = None
     WEB_SEARCH_MAX_RESULTS: int = Field(default=5, ge=1, le=20)
 
+    # Vector store: Postgres + pgvector, holding the corpus embeddings so they
+    # survive a restart. Inert until DATABASE_URL is set, and the in-process
+    # cache in knowledge/embeddings.py serves retrieval instead.
+    # The embedding dimension is baked into the table, so DATABASE_URL and
+    # HUGGINGFACE_EMBEDDING_MODEL are one decision, not two.
+    DATABASE_URL: str | None = None
+    # Texts per feature_extraction call when indexing. Large corpora fail as one
+    # unit otherwise, and a single rate limit costs the whole reindex.
+    EMBEDDING_BATCH_SIZE: int = Field(default=64, ge=1, le=512)
+
     # Retrieval similarity thresholds (best semantic score, 0.0–1.0).
     # Below the fallback threshold, retrieval switches from semantic to lexical
     # keyword matching; below the deep-search threshold, the web fallback runs.
@@ -88,6 +98,14 @@ class Settings(BaseSettings):
         if self.HF_TOKEN:
             return "huggingface"
         return "none"
+
+    def vector_store_enabled(self) -> bool:
+        """Whether corpus embeddings live in Postgres rather than in process memory.
+
+        Gated on the credential alone, like every other optional integration
+        here, so the default path needs no database and no extra setting.
+        """
+        return bool(self.DATABASE_URL)
 
     def cors_allow_origins(self) -> list[str]:
         """Origins allowed by CORSMiddleware (exact match, include scheme).
