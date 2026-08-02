@@ -143,6 +143,10 @@ OpenRouter wins the tie because it is the explicit opt-in, while `HF_TOKEN` may 
 
 `chatbot/huggingface/` streams with two fallback layers: chat-completion across the configured providers, then plain text-generation. `providers_to_try` tries the configured provider then `auto`. Note the text-generation fallback is dead weight for chat-tuned models: `Qwen/Qwen2.5-7B-Instruct` only supports the `conversational` task, so that path always fails and only adds an error line to the log.
 
+Chat-completion gets `CHAT_COMPLETION_ATTEMPTS` (3) tries per provider with a linear backoff, because that dead fallback means one transient router error would otherwise cost the whole answer. A failure *after* content has been yielded is never retried: those chunks are already on the wire to the browser, so another attempt would append a second answer to a partial one. The answer ends where it broke instead.
+
+Only 429, 5xx, and statusless transport errors are retried. A 402 (HF account out of included credits), 401/403, or 404 answers the same however often you ask, so those fail fast and also skip the text-generation fallback entirely; otherwise its "not supported for task text-generation" reply lands last in the log and buries the real cause. The raised `RuntimeError` carries the upstream message, so a depleted account reads as one.
+
 `chatbot/openrouter/` talks to the OpenAI-compatible REST API over stdlib `urllib`, matching the GitHub loader and web search rather than adding an SDK. There is no provider ladder and no text-generation fallback, because OpenRouter is uniformly chat-completions and does its own upstream routing. Its stream is SSE: `data:` lines of JSON ending at `data: [DONE]`, interleaved with `: OPENROUTER PROCESSING` keepalive comments that must be skipped.
 
 Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so switching providers does not change answer style. OpenRouter forwards `seed` upstream but honouring it is model-dependent; `temperature=0` is what actually holds answers stable.
