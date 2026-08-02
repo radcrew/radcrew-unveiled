@@ -2,11 +2,30 @@ const baseUrl = (import.meta.env.VITE_CHATBOT_API_BASE_URL ?? "http://localhost:
 
 type ChatStreamEvent =
   | { type: "chunk"; content: string }
+  | { type: "hints"; hints: string[] }
   | { type: "done" }
   | { type: "error"; error: string };
 
 interface StreamChatHandlers {
   onChunk: (chunk: string) => void;
+  onHints?: (hints: string[]) => void;
+}
+
+/** Follow-up questions the backend offers under the answer. */
+const MAX_HINTS = 3;
+
+/**
+ * Keep only usable hints. A malformed hints event is dropped rather than thrown:
+ * it arrives after the answer has already streamed intact, so failing here would
+ * turn a cosmetic problem into a lost reply.
+ */
+function cleanHints(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((hint): hint is string => typeof hint === "string")
+    .map((hint) => hint.trim())
+    .filter((hint) => hint.length > 0)
+    .slice(0, MAX_HINTS);
 }
 
 type ChatHistoryMessage = { role: "user" | "assistant"; content: string };
@@ -81,6 +100,9 @@ export async function streamChatMessage(
 
       if (event.type === "chunk" && event.content) {
         handlers.onChunk(event.content);
+      } else if (event.type === "hints") {
+        const hints = cleanHints(event.hints);
+        if (hints.length > 0) handlers.onHints?.(hints);
       } else if (event.type === "error") {
         throw new Error(event.error);
       }

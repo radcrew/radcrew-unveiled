@@ -90,6 +90,58 @@ describe("streamChatMessage", () => {
     ).rejects.toThrow("rate limited");
   });
 
+  it("passes hints to onHints after the answer", async () => {
+    const sse =
+      event({ type: "chunk", content: "We build software." }) +
+      event({ type: "hints", hints: ["How do I start a project?", "Do you work with Rust?"] }) +
+      event({ type: "done" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+
+    const onHints = vi.fn();
+    await streamChatMessage("hi", { onChunk: () => {}, onHints });
+
+    expect(onHints).toHaveBeenCalledWith(["How do I start a project?", "Do you work with Rust?"]);
+  });
+
+  it("drops malformed hints without failing the stream", async () => {
+    const sse =
+      event({ type: "chunk", content: "answer" }) +
+      event({ type: "hints", hints: "not an array" }) +
+      event({ type: "hints", hints: [42, "  ", null] }) +
+      event({ type: "done" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+
+    const chunks: string[] = [];
+    const onHints = vi.fn();
+    await streamChatMessage("hi", { onChunk: (c) => chunks.push(c), onHints });
+
+    expect(onHints).not.toHaveBeenCalled();
+    expect(chunks).toEqual(["answer"]);
+  });
+
+  it("ignores a hints event when no onHints handler is given", async () => {
+    const sse =
+      event({ type: "hints", hints: ["anything?"] }) + event({ type: "done" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+
+    await expect(streamChatMessage("hi", { onChunk: () => {} })).resolves.toBeUndefined();
+  });
+
+  it("ignores unknown event types", async () => {
+    // Guards the mixed-version case: a newer backend event must not break an
+    // older frontend, since the two Vercel projects deploy independently.
+    const sse =
+      event({ type: "chunk", content: "kept" }) +
+      event({ type: "something-new", payload: 1 }) +
+      event({ type: "done" });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(sseResponse(sse)));
+
+    const chunks: string[] = [];
+    await streamChatMessage("hi", { onChunk: (c) => chunks.push(c) });
+
+    expect(chunks).toEqual(["kept"]);
+  });
+
   it("throws on an in-stream error event", async () => {
     const sse =
       event({ type: "chunk", content: "partial" }) +
