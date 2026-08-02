@@ -60,7 +60,8 @@ See [`training/README.md`](../training/README.md).
 ## Request flow (chat)
 
 1. Browser sends `POST /chat` to the backend URL and reads a Server-Sent Events
-   stream: `{"type":"chunk","content":...}` events, then `{"type":"done"}`.
+   stream: `{"type":"chunk","content":...}` events, an optional
+   `{"type":"hints","hints":[...]}`, then `{"type":"done"}`.
 2. Input guardrails run; a block ends the turn immediately.
 3. The router classifies the message as feedback or a question. Feedback is
    confirmed and forwarded by email; questions continue to RAG.
@@ -70,6 +71,9 @@ See [`training/README.md`](../training/README.md).
    passes through the output rails before reaching the browser.
 6. Weak retrieval with no prior conversation history returns a safe fallback with
    contact guidance.
+7. The RAG node also picks up to three follow-up questions from a curated catalog
+   (`rag_answer/hints.py`), which the widget renders as chips under the newest
+   answer. No inference call, and none are sent if the stream failed.
 
 ## Deployment
 

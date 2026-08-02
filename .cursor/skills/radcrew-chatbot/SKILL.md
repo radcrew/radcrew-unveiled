@@ -38,7 +38,7 @@ Browser (chat-widget) → POST /chat (SSE) → chat.generate_chat_stream
 
 **Routing:** `feedback_router_node` tries structured feedback tool-call routing; on failure or no match → `rag_answer_node`.
 
-**RAG:** Retrieves top chunks via embeddings (`rag_answer/retrieval.py`), builds prompt (`rag_answer/prompt.py`), streams via `generate_answer` with optional response cache.
+**RAG:** Retrieves top chunks via embeddings (`rag_answer/retrieval.py`), builds prompt (`rag_answer/prompt.py`), streams via `generate_answer` with optional response cache, and attaches follow-up hints (`rag_answer/hints.py`) keyed by the ids of the **retrieved** documents, not the whole corpus the prompt receives.
 
 ## Do not break
 
@@ -46,7 +46,8 @@ Browser (chat-widget) → POST /chat (SSE) → chat.generate_chat_stream
 - Insufficient context → suggest **code@radcrew.org** (see `MSG_FALLBACK_LOW_CONTEXT` / prompt text).
 - Do not infer person names from source titles; names must appear in source body text.
 - Final answers: simple Markdown, `-` bullets (not `*`), no URLs/links in replies.
-- `POST /chat` contract: SSE events `{"type":"chunk","content":...}` then `{"type":"done"}`.
+- `POST /chat` contract: SSE events `{"type":"chunk","content":...}`, optional `{"type":"hints","hints":[...]}`, then `{"type":"done"}`.
+- Follow-up hints come from the curated `rag_answer/hints.py` catalog, never from the model, and never after a failed stream.
 - With neither `OPENROUTER_API_KEY` nor `HF_TOKEN`, the stream returns `MSG_AI_UNAVAILABLE` only.
 - Call inference through `app/chatbot/llm.py`, never by constructing a provider client inline; a direct client call ignores the configured provider.
 
