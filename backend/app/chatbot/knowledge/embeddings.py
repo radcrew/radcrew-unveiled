@@ -163,6 +163,12 @@ def index_documents(documents: list[KnowledgeDocument]) -> None:
     logger.info("[embeddings] indexed %d documents", len(_document_vectors))
 
 
+def embed_query(query: str) -> np.ndarray | None:
+    """One L2-normalized query vector, or None when embeddings are unavailable."""
+    vectors = _embed([query])
+    return None if vectors is None else vectors[0]
+
+
 def semantic_similarities(documents: list[KnowledgeDocument], query: str) -> list[float]:
     """Cosine similarity of ``query`` against each document, in input order.
 
@@ -173,10 +179,9 @@ def semantic_similarities(documents: list[KnowledgeDocument], query: str) -> lis
     if not documents:
         return []
 
-    query_vectors = _embed([query])
-    if query_vectors is None:
+    query_vector = embed_query(query)
+    if query_vector is None:
         return [0.0] * len(documents)
-    query_vector = query_vectors[0]
 
     with _lock:
         scores: list[float] = []
