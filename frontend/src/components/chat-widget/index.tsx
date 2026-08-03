@@ -41,6 +41,12 @@ const MARKDOWN_COMPONENTS: Components = {
   h3: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
 };
 
+/**
+ * Width cap shared by answer bubbles and the hint chips under them. Both are
+ * children of the same scroll container, so one value keeps their edges aligned.
+ */
+const BUBBLE_MAX_WIDTH = "max-w-[85%]";
+
 /** Tappable questions: the openers before the first message, and the follow-up hints after an answer. */
 const SuggestionChips = ({
   items,
@@ -51,7 +57,7 @@ const SuggestionChips = ({
   label: string;
   onPick: (item: string) => void;
 }) => (
-  <div role="group" aria-label={label} className="flex flex-col gap-2 pt-1">
+  <div role="group" aria-label={label} className={`flex ${BUBBLE_MAX_WIDTH} flex-col gap-2 pt-1`}>
     {items.map((item) => (
       <button
         key={item}
@@ -280,7 +286,7 @@ export const ChatWidget = () => {
                   <Fragment key={msg.id}>
                     <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                        className={`${BUBBLE_MAX_WIDTH} rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           msg.role === "user" ? "rounded-br-sm text-background" : "rounded-bl-sm"
                         }`}
                         style={
