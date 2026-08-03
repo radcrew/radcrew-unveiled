@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown, { type Components } from "react-markdown";
@@ -41,6 +41,12 @@ const MARKDOWN_COMPONENTS: Components = {
   h3: ({ children }) => <p className="mb-1 font-semibold">{children}</p>,
 };
 
+/**
+ * Width cap shared by answer bubbles and the hint chips under them. Both are
+ * children of the same scroll container, so one value keeps their edges aligned.
+ */
+const BUBBLE_MAX_WIDTH = "max-w-[85%]";
+
 /** Tappable questions: the openers before the first message, and the follow-up hints after an answer. */
 const SuggestionChips = ({
   items,
@@ -51,7 +57,7 @@ const SuggestionChips = ({
   label: string;
   onPick: (item: string) => void;
 }) => (
-  <div role="group" aria-label={label} className="flex flex-col gap-2 pt-1">
+  <div role="group" aria-label={label} className={`flex ${BUBBLE_MAX_WIDTH} flex-col gap-2 pt-1`}>
     {items.map((item) => (
       <button
         key={item}
@@ -183,6 +189,34 @@ export const ChatWidget = () => {
     void sendMessage(draft);
   };
 
+  // Only the newest answer offers follow-ups, so the transcript doesn't
+  // accumulate rows of stale chips. The armed hint reads from the same value,
+  // which is what keeps the placeholder and the first chip from disagreeing.
+  const lastMessage = messages[messages.length - 1];
+  const activeHints =
+    !pending && lastMessage?.role === "assistant" ? lastMessage.hints ?? [] : [];
+  const activeHint = activeHints[0] ?? null;
+
+  /**
+   * Tab asks the armed hint. It only claims the key when there is nothing else
+   * the press could mean: forward Tab, empty draft, hint available. Shift+Tab
+   * and any typed character both hand the key back, so focus is never trapped.
+   */
+  const onInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== "Tab" || e.shiftKey) return;
+    if (!activeHint || draft.trim().length > 0) return;
+    e.preventDefault();
+    void sendMessage(activeHint);
+  };
+
+  // The panel is 360px wide, so an over-long hint would be clipped mid-word by
+  // the input. Cut it deliberately; the full question is on the chip above.
+  const placeholder = activeHint
+    ? activeHint.length > 38
+      ? `${activeHint.slice(0, 37)}…`
+      : activeHint
+    : "Ask anything about radcrew…";
+
   const showSuggestions =
     messages.filter((m) => m.role === "user").length === 0 && !pending && !streamStarted;
 
@@ -269,18 +303,13 @@ export const ChatWidget = () => {
 
             <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: "thin" }}>
               {messages.map((msg, index) => {
-                // Only the newest answer offers follow-ups, so the transcript
-                // doesn't accumulate rows of stale chips.
-                const hints =
-                  index === messages.length - 1 && msg.role === "assistant" && !pending
-                    ? msg.hints ?? []
-                    : [];
+                const hints = index === messages.length - 1 ? activeHints : [];
 
                 return (
                   <Fragment key={msg.id}>
                     <div className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                        className={`${BUBBLE_MAX_WIDTH} rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           msg.role === "user" ? "rounded-br-sm text-background" : "rounded-bl-sm"
                         }`}
                         style={
@@ -333,20 +362,47 @@ export const ChatWidget = () => {
 
             <div className="border-t px-4 pb-4 pt-3" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
               <form onSubmit={onSubmit} className="flex items-center gap-2">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  placeholder="Ask anything about radcrew…"
-                  disabled={pending}
-                  className="flex-1 rounded-xl px-4 py-3 text-sm outline-none transition-all disabled:opacity-50"
-                  style={{
-                    background: "rgba(201,169,110,0.06)",
-                    border: "1px solid rgba(201,169,110,0.2)",
-                    color: "#111111",
-                  }}
-                />
+                <div className="relative flex-1">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    onKeyDown={onInputKeyDown}
+                    placeholder={placeholder}
+                    aria-label="Ask radcrew a question"
+                    aria-keyshortcuts={activeHint ? "Tab" : undefined}
+                    aria-describedby={activeHint ? "radcrew-chat-hint-shortcut" : undefined}
+                    disabled={pending}
+                    className={`w-full rounded-xl py-3 pl-4 text-sm outline-none transition-all disabled:opacity-50 ${
+                      activeHint ? "pr-14" : "pr-4"
+                    }`}
+                    style={{
+                      background: "rgba(201,169,110,0.06)",
+                      border: "1px solid rgba(201,169,110,0.2)",
+                      color: "#111111",
+                    }}
+                  />
+                  {activeHint ? (
+                    <>
+                      {/* A placeholder alone doesn't announce a key binding. */}
+                      <kbd
+                        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-md px-1.5 py-0.5 text-[10px] uppercase tracking-wide"
+                        style={{
+                          background: "rgba(201,169,110,0.1)",
+                          border: "1px solid rgba(201,169,110,0.35)",
+                          color: "rgba(17,17,17,0.55)",
+                        }}
+                      >
+                        Tab
+                      </kbd>
+                      {/* The badge and the truncated placeholder are both visual. */}
+                      <span id="radcrew-chat-hint-shortcut" className="sr-only">
+                        {`Press Tab to ask: ${activeHint}`}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
                 <button
                   type="submit"
                   disabled={!canSend}

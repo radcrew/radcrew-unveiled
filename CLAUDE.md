@@ -178,6 +178,10 @@ Both share `DETERMINISTIC_DECODING` (`temperature=0`, `top_p=1`, `seed=42`), so 
 
 `frontend/src/components/chat-widget/` owns the panel and the launcher. It coordinates with the mobile nav sheet through `src/lib/overlay-events.ts`, a window CustomEvent bus, because the two overlays live in separate React trees (`App.tsx` vs `home/Landing.tsx`) and cannot share props or context. The widget also holds refs to the panel and launcher to detect outside clicks; any test that mocks `framer-motion` must forward refs or every click reads as "outside" and closes the panel.
 
+The newest answer's first hint is *armed* on the input: it becomes the placeholder, and Tab sends it. `activeHints` is derived once from the last message and feeds both the chips and the armed hint, so the placeholder can never disagree with the first chip. Tab is the key that moves focus out of an input, so the handler claims it only when nothing else could be meant (forward Tab, empty draft, hint present) and hands it back on Shift+Tab or the first typed character. The `kbd` badge and the `sr-only` `aria-describedby` text exist because a placeholder alone announces no key binding, and the placeholder is truncated at 38 characters since the panel is 360px wide.
+
+Query the input by its `aria-label` ("Ask radcrew a question"), not by placeholder text, which is now variable. Only backend hints arm it; the three starter `SUGGESTIONS` deliberately do not, so a freshly opened panel keeps the default placeholder.
+
 ### Frontend component files
 
 Pull a presentational piece out of a feature's `index.tsx` once it is self-contained: no props threaded from local state, no reads of the parent's closures. `chat-widget/TypingDots.tsx` is the shape to copy. `SuggestionChips` in `chat-widget/index.tsx` is the counter-example still inline, since both callers sit in that file.

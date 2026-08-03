@@ -77,6 +77,26 @@ function submitButton(panel: HTMLElement): HTMLButtonElement {
   return panel.querySelector('button[type="submit"]') as HTMLButtonElement;
 }
 
+/**
+ * Queries by accessible name rather than placeholder text, because the
+ * placeholder becomes the armed hint once an answer carries one.
+ */
+function chatInput(panel: HTMLElement): HTMLInputElement {
+  return within(panel).getByRole("textbox", {
+    name: /ask radcrew a question/i,
+  }) as HTMLInputElement;
+}
+
+/** Answers `msg`, attaching hints only when `hints` is non-empty. */
+function answerWith(hints: string[]) {
+  streamChatMessage.mockImplementation(async (msg, handlers) => {
+    handlers.onChunk(`answer to ${msg}`);
+    if (hints.length > 0) handlers.onHints?.(hints);
+  });
+}
+
+const HINTS = ["Do you work with Rust?", "How fast do you reply?"];
+
 beforeEach(() => {
   streamChatMessage.mockReset();
   streamChatMessage.mockResolvedValue(undefined);
@@ -185,6 +205,135 @@ describe("ChatWidget", () => {
     expect(
       within(panel).queryByRole("button", { name: /do you work with rust/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("arms the top hint on the input after an answer that carried hints", async () => {
+    answerWith(HINTS);
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", HINTS[0]));
+    expect(within(panel).getByText("Tab")).toBeInTheDocument();
+  });
+
+  it("truncates an armed hint too long for the input", async () => {
+    const long = "What does a typical engagement timeline look like for you?";
+    answerWith([long]);
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+
+    await waitFor(() =>
+      expect(chatInput(panel)).toHaveAttribute("placeholder", `${long.slice(0, 37)}…`),
+    );
+  });
+
+  it("sends the armed hint when tab is pressed in the empty input", async () => {
+    const followUp = "What is your stack?";
+    streamChatMessage.mockImplementation(async (msg, handlers) => {
+      handlers.onChunk(`answer to ${msg}`);
+      handlers.onHints?.(msg === HINTS[0] ? [followUp] : HINTS);
+    });
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", HINTS[0]));
+
+    await user.click(chatInput(panel));
+    await user.tab();
+
+    expect(streamChatMessage).toHaveBeenLastCalledWith(
+      HINTS[0],
+      expect.objectContaining({ onHints: expect.any(Function) }),
+      expect.any(Array),
+    );
+    // The armed hint follows the newest answer rather than sticking.
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", followUp));
+  });
+
+  it("leaves tab alone once the draft has text", async () => {
+    answerWith(HINTS);
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", HINTS[0]));
+
+    await user.type(chatInput(panel), "my own question");
+    await user.tab();
+
+    expect(streamChatMessage).toHaveBeenCalledOnce();
+    expect(chatInput(panel)).not.toHaveFocus();
+  });
+
+  it("leaves shift+tab alone so focus can still move backwards", async () => {
+    answerWith(HINTS);
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", HINTS[0]));
+
+    await user.click(chatInput(panel));
+    await user.keyboard("{Shift>}{Tab}{/Shift}");
+
+    expect(streamChatMessage).toHaveBeenCalledOnce();
+  });
+
+  it("arms nothing when the answer carried no hints", async () => {
+    answerWith([]);
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+    await waitFor(() =>
+      expect(within(panel).getByText("answer to what do you do?")).toBeInTheDocument(),
+    );
+
+    expect(chatInput(panel)).toHaveAttribute("placeholder", "Ask anything about radcrew…");
+    expect(within(panel).queryByText("Tab")).not.toBeInTheDocument();
+  });
+
+  it("arms nothing while the answer is still streaming", async () => {
+    let release = () => {};
+    streamChatMessage.mockImplementation(async (_msg, handlers) => {
+      handlers.onChunk("partial answer");
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      handlers.onHints?.(HINTS);
+    });
+    const user = userEvent.setup();
+    render(<ChatWidget />);
+    const panel = await openPanel(user);
+
+    await user.type(chatInput(panel), "what do you do?");
+    await user.click(submitButton(panel));
+    await waitFor(() =>
+      expect(within(panel).getByText("partial answer")).toBeInTheDocument(),
+    );
+
+    expect(chatInput(panel)).toHaveAttribute("placeholder", "Ask anything about radcrew…");
+    expect(within(panel).queryByText("Tab")).not.toBeInTheDocument();
+
+    release();
+    await waitFor(() => expect(chatInput(panel)).toHaveAttribute("placeholder", HINTS[0]));
   });
 
   it("shows an error banner on failure", async () => {
