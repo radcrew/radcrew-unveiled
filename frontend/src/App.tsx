@@ -6,6 +6,7 @@ import { Toaster } from "@components/ui/toaster";
 import { TooltipProvider } from "@components/ui/tooltip";
 import { ChatWidget } from "@components/chat-widget";
 import { BackToTop } from "@components/BackToTop";
+import { ScrollProgress } from "@components/motion/ScrollProgress";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -17,6 +18,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollProgress />
         <Routes>
           <Route element={<PageTransitionLayout />}>
             <Route path="/" element={<Index />} />
