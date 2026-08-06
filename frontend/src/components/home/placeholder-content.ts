@@ -104,44 +104,6 @@ export const placeholderSpotlight = {
   ] satisfies SpotlightMetric[],
 };
 
-/**
- * Narrative sections for `/work/:slug`, keyed by the project slugs in
- * `static-data.ts`. The titles, tags and screenshots on those pages are real;
- * only this framing text is invented, so it is the part to rewrite first.
- */
-export type CaseStudyNarrative = {
-  challenge: string;
-  approach: string;
-  outcome: string;
-};
-
-export const placeholderCaseStudies: Record<string, CaseStudyNarrative> = {
-  "real-estate-consultant": {
-    challenge:
-      "Buyers were dropping out between search and enquiry. The listing data was there, but nothing in the interface explained why a given property was worth a conversation.",
-    approach:
-      "We put a retrieval layer over the listing and market data so the advisory copy on each property is generated from the same numbers the analysts use, then designed the consultation flow around what a broker actually asks on a first call.",
-    outcome:
-      "Enquiry rates rose and the advisory copy stopped needing manual review, because the model only ever sees data the team already trusts.",
-  },
-  cryptopets: {
-    challenge:
-      "The collection needed to onboard people who had never held a wallet, without hiding the fact that the assets are on-chain.",
-    approach:
-      "Custody and minting were pushed behind a flow that reads like any other sign-up, with the chain surfaced as detail rather than as a prerequisite. Indexing runs off a subgraph so profile and trade views stay responsive as the collection grows.",
-    outcome:
-      "First-time wallet holders completed minting at rates close to returning users, and the trading views held their latency through launch.",
-  },
-  forgeng: {
-    challenge:
-      "Every team was writing its own deployment pipeline, so a service took weeks to reach production and no two behaved the same way in an incident.",
-    approach:
-      "We built templates that generate a service with CI, observability and alerting already wired, then made the platform's own dashboards the default view rather than something each team assembled.",
-    outcome:
-      "New services reach production in days instead of weeks, and on-call engineers see the same shape of dashboard whichever service pages them.",
-  },
-};
-
 export type JournalPost = {
   slug: string;
   title: string;

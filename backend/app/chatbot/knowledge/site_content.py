@@ -111,7 +111,7 @@ def get_static_site_documents() -> list[KnowledgeDocument]:
             # the lexical fallback scored this document for unrelated questions.
             text=(
                 "What RadCrew has built before: the products they have already shipped for clients. "
-                "Featured projects, each with its own case study page. "
+                "Featured projects, each shown with screenshots in the Selected Work section. "
                 "Real Estate Consultant: a discovery and advisory experience with property "
                 "search, market context, and guided consultation flows in a polished, trustworthy UI. "
                 "CryptoPets: a collectible pet experience on-chain with minting, trading, and profile flows, "
