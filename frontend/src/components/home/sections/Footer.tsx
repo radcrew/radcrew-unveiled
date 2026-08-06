@@ -77,7 +77,7 @@ export const Footer = () => {
           <div>
             <div className="mb-8 text-3xl font-light uppercase tracking-[0.25em]">radcrew</div>
             <p className="max-w-sm leading-relaxed font-light text-background/70">
-              An elite engineering studio building the future of technology for those who demand excellence.
+              A guild of independent developers building the future of technology.
             </p>
           </div>
 

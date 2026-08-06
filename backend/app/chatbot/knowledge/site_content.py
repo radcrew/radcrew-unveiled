@@ -18,11 +18,12 @@ def get_static_site_documents() -> list[KnowledgeDocument]:
             title="RadCrew overview",
             url="/",
             text=(
-                "RadCrew is a lean, elite engineering studio for serious products — their tagline is "
-                "\"We build what's next.\" "
-                "They build AI/ML products and Web3 solutions on EVM and Solana, plus end-to-end web apps "
-                "and APIs, from prototypes to production, for discerning clients who demand precision. "
-                "The team is three senior engineers focused on velocity with quality."
+                "RadCrew is a guild: several independent senior developers under one name — their "
+                "tagline is \"We build what's next.\" "
+                "Each works on their own and is open to work individually, so hiring one is not hiring "
+                "the rest. The shared name covers the open source they write when they have free time. "
+                "Between them they build AI/ML products and Web3 solutions on EVM and Solana, plus "
+                "end-to-end web apps and APIs, from prototypes to production."
             ),
         ),
         KnowledgeDocument(

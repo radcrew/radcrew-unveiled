@@ -37,8 +37,8 @@ export const Hero = ({ onNavigate }: HeroProps) => {
             variants={fadeIn}
             className="mx-auto mb-12 max-w-2xl text-xl font-light leading-relaxed text-muted-foreground md:mx-0 md:text-2xl"
           >
-            An elite engineering studio building AI/ML products and Web3 solutions on EVM and Solana. For discerning
-            clients who demand precision.
+            A guild of independent developers building AI/ML products and Web3 solutions on EVM and Solana. Hire one of
+            us, not a company.
           </motion.p>
           <motion.div variants={fadeIn} className="flex flex-col justify-center gap-6 sm:flex-row md:justify-start">
             <Button

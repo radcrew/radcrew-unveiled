@@ -1,15 +1,15 @@
 # RadCrew
 
-> RadCrew is a lean software development agency of three senior engineers building
-> full-stack web products, Web3 systems on EVM and Solana, and AI features from
-> prototype to production. Contact: code@radcrew.org
+> RadCrew is a guild of independent senior developers building full-stack web
+> products, Web3 systems on EVM and Solana, and AI features from prototype to
+> production. Contact: code@radcrew.org
 
-RadCrew ("RadCrew Unveiled") is a small, senior development agency. The crew is
-three engineers: a lead who owns architecture and delivery, a Web3/AI specialist
+RadCrew ("RadCrew Unveiled") is a guild: several independent developers under one
+name. Among them, a lead who owns architecture and delivery, a Web3/AI specialist
 focused on smart contracts and chains, and a full-stack/AI engineer who ties
-interfaces, backends, and models together. They partner with teams who want
-velocity without sacrificing quality. The website (https://radcrew.org) is a
-single-page site with a built-in FAQ chatbot.
+interfaces, backends, and models together. Each works on their own and is open to
+work individually, so hiring one is not hiring the rest. The website
+(https://radcrew.org) is a single-page site with a built-in FAQ chatbot.
 
 ## What we do
 

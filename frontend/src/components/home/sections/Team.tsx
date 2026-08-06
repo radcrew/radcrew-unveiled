@@ -13,7 +13,7 @@ export const Team = () => {
           viewport={{ once: true }}
           className="mb-24 text-center"
         >
-          <h2 className="mb-6 font-serif text-5xl text-foreground md:text-7xl">Three minds, one mission.</h2>
+          <h2 className="mb-6 font-serif text-5xl text-foreground md:text-7xl">Independent minds, one name.</h2>
           <p className="text-xl font-light text-muted-foreground">Senior talent only. Precision at every level.</p>
         </motion.div>
 
