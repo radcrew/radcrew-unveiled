@@ -45,7 +45,10 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
     // which put it flush against the viewport edge below 1280px.
     <nav
       className={`fixed left-0 right-0 top-0 z-50 px-6 transition-all duration-500 lg:px-12 ${
-        isScrolled ? "border-b border-primary/20 bg-background/90 py-4 backdrop-blur-xl" : "bg-transparent py-6"
+        isScrolled
+          ? "border-b border-primary/20 bg-background/90 py-4 text-foreground backdrop-blur-xl"
+          : // Unscrolled, the bar sits over the dark hero, so it inverts.
+            "bg-transparent py-6 text-background"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -70,7 +73,11 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
             type="button"
             onClick={() => onNavigate("contact")}
             variant="outline"
-            className="h-auto rounded-none border-primary px-8 py-5 font-light uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
+            className={`h-auto rounded-none px-8 py-5 font-light uppercase tracking-widest transition-colors ${
+              isScrolled
+                ? "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                : "border-background/40 bg-transparent text-background hover:bg-background hover:!text-foreground"
+            }`}
             data-testid="nav-contact"
           >
             Get in Touch
@@ -81,7 +88,7 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
           <SheetTrigger asChild>
             <button
               type="button"
-              className={`text-foreground md:hidden ${focusRingClassName}`}
+              className={`md:hidden ${focusRingClassName}`}
               aria-label="Open menu"
               data-testid="nav-mobile-trigger"
             >

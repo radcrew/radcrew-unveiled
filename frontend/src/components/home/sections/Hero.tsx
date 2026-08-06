@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@components/ui/button";
-import HeroBackdrop from "@components/HeroBackdrop";
 import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
@@ -13,9 +10,9 @@ type HeroProps = {
 };
 
 /**
- * Track record, shown as the hero's right-hand rail. These numbers used to sit
- * in a standalone `Stats` section one screen further down; they carry more
- * weight next to the claim they support than they did on their own.
+ * Track record, shown as a band across the foot of the hero. These numbers used
+ * to sit in a standalone `Stats` section a screen further down; they carry more
+ * weight next to the claim they support.
  */
 const trackRecord = [
   { end: 40, suffix: "+", decimals: 0, label: "Projects shipped" },
@@ -24,60 +21,76 @@ const trackRecord = [
   { end: 99.9, suffix: "%", decimals: 1, label: "Uptime SLA" },
 ] as const;
 
+/**
+ * Film grain. A flat dark field reads as cheap; a little tooth makes it read as
+ * printed. Static SVG noise rather than a canvas, so it costs nothing per frame.
+ */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
 export const Hero = ({ onNavigate }: HeroProps) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsScrolled(latest > 50);
-  });
-
   return (
-    // Extra bottom padding on mobile keeps the last row of figures clear of the
-    // fixed chat launcher in the bottom-right corner.
-    <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 pb-28 pt-28 md:pb-28 md:pt-32 lg:px-12">
-      <div className="absolute inset-0 z-0">
-        <HeroBackdrop />
-        {/* Fading from the left gives the headline a clean field while keeping
-            the texture visible on the open right-hand side. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/90" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+    // Inverted to the dark ground the Spotlight and Footer already use. On cream,
+    // the gold accent measures 2.3:1 against the background and the filled CTA
+    // 2.4:1, both below AA. The same gold on this ground is 7.8:1 and the cream
+    // type is 18:1, so the section gets its contrast from the palette rather
+    // than from adding weight to the type.
+    // `antialiased` matters on the dark ground: subpixel rendering fringes the
+    // serif's thin strokes with colour against it.
+    <section className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-foreground px-6 text-background antialiased lg:px-12">
+      <div aria-hidden="true" className="absolute inset-0 z-0">
+        {/* Warm bloom behind the headline, so the type sits in light rather than
+            on a flat rectangle. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 90% at 12% 28%, hsl(38 60% 55% / 0.16) 0%, hsl(38 60% 55% / 0.05) 34%, transparent 68%)",
+          }}
+        />
+        <div className="absolute inset-0 opacity-[0.13] mix-blend-overlay" style={{ backgroundImage: GRAIN }} />
+        {/* Settles the foot of the section into the band and the page below it. */}
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-foreground to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-10 md:grid-cols-12 md:gap-12">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="md:col-span-7"
-        >
-          <motion.p variants={fadeIn} className="mb-8 flex items-center gap-4">
-            <span aria-hidden="true" className="h-px w-10 shrink-0 bg-primary" />
-            <span className="text-sm font-light uppercase tracking-widest text-primary">
-              Hire one of us, not a company
-            </span>
-          </motion.p>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pb-10 pt-24"
+      >
+        <motion.p variants={fadeIn} className="mb-10 flex items-center gap-4">
+          <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary" />
+          <span className="text-xs font-light uppercase tracking-[0.28em] text-primary sm:text-sm">
+            Hire one of us, not a company
+          </span>
+        </motion.p>
 
-          <h1 className="mb-8 font-serif text-[clamp(3.5rem,11vw+0.5rem,9rem)] leading-[0.88] tracking-tight text-foreground">
-            <SplitText text="We build" />
-            <br />
-            <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary" />
-          </h1>
+        {/* Full width rather than a column, so the display face can run to the
+            measure of the page. This is where the section spends its boldness. */}
+        <h1 className="mb-8 font-serif text-[clamp(3.25rem,16vw,13.5rem)] leading-[0.82] tracking-[-0.03em]">
+          <SplitText text="We build" />
+          <br />
+          <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary" />
+        </h1>
 
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <motion.p
             variants={fadeIn}
-            className="mb-10 max-w-xl text-lg font-light leading-relaxed text-muted-foreground md:mb-12 md:text-xl"
+            className="max-w-xl text-lg font-light leading-relaxed text-background/70 md:text-xl"
           >
             A guild of independent senior engineers building AI/ML products and Web3 solutions on EVM and Solana, from
             prototype to production.
           </motion.p>
 
-          <motion.div variants={fadeIn} className="flex flex-col gap-4 sm:flex-row">
+          <motion.div variants={fadeIn} className="flex shrink-0 flex-col gap-4 sm:flex-row">
             <Magnetic>
+              {/* Cream on dark is the highest-contrast pairing available here, and
+                  it reads as the primary action without relying on the gold. */}
               <Button
                 type="button"
                 onClick={() => onNavigate("portfolio")}
-                className="h-auto w-full rounded-none bg-primary px-10 py-6 text-sm font-light uppercase tracking-widest md:py-7 text-primary-foreground hover:bg-primary/90"
+                className="h-auto w-full rounded-none bg-background px-10 py-6 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90 md:py-7"
                 data-testid="hero-cta-work"
               >
                 View Selected Work
@@ -88,65 +101,46 @@ export const Hero = ({ onNavigate }: HeroProps) => {
                 type="button"
                 onClick={() => onNavigate("contact")}
                 variant="outline"
-                className="h-auto w-full rounded-none border-border px-10 py-6 text-sm font-light uppercase tracking-widest md:py-7 hover:bg-muted hover:!text-primary"
+                className="h-auto w-full rounded-none border-background/30 bg-transparent px-10 py-6 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground md:py-7"
                 data-testid="hero-cta-contact"
               >
                 Start a Project
               </Button>
             </Magnetic>
           </motion.div>
-        </motion.div>
+        </div>
+      </motion.div>
 
-        {/* One list, two layouts. On mobile the four figures sit inline as a
-            compact wrapped row; a stacked rail there costs ~170px and pushes the
-            last row under the fixed chat launcher. From `md` it becomes the
-            vertical rail that fills the space beside the headline.
-            The `*-reverse` classes show each figure ahead of its label while the
-            DOM keeps the label first, so each pair still reads as "label: value". */}
-        <motion.dl
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="flex flex-wrap gap-x-6 gap-y-3 md:col-span-4 md:col-start-9 md:grid md:grid-cols-1 md:gap-0 md:border-l md:border-primary/20 md:pl-10"
-        >
-          {trackRecord.map(({ end, suffix, decimals, label }) => (
-            <motion.div
-              key={label}
-              variants={fadeIn}
-              className="flex flex-row-reverse items-baseline gap-2 md:flex-col-reverse md:items-start md:gap-0 md:py-4 md:first:pt-0 md:last:pb-0"
-            >
-              <dt className="text-[0.625rem] font-light uppercase tracking-widest text-muted-foreground md:mt-2 md:text-xs">
-                {label}
-              </dt>
-              <dd>
-                <AnimatedCounter
-                  end={end}
-                  suffix={suffix}
-                  decimals={decimals}
-                  className="font-serif text-2xl text-foreground md:text-5xl"
-                />
-              </dd>
-            </motion.div>
-          ))}
-        </motion.dl>
-      </div>
-
-      <motion.button
-        type="button"
-        onClick={() => window.scrollBy({ top: window.innerHeight, behavior: "smooth" })}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isScrolled ? 0 : 1 }}
-        transition={{ duration: isScrolled ? 0.3 : 0.8, delay: isScrolled ? 0 : 1.2 }}
-        className={`absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 text-muted-foreground md:flex transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isScrolled ? "pointer-events-none" : ""}`}
-        aria-label="Scroll down"
-        aria-hidden={isScrolled}
-        tabIndex={isScrolled ? -1 : 0}
+      {/* The band anchors the section: a rule the full width of the page, with the
+          proof sitting on it. `flex-col-reverse` shows each figure above its label
+          while the DOM keeps the label first, so each pair reads as "label: value". */}
+      <motion.dl
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-wrap gap-x-7 gap-y-3 border-t border-background/15 pb-10 pt-6 md:grid md:grid-cols-4 md:gap-8"
       >
-        <span className="text-xs font-light uppercase tracking-widest">Scroll</span>
-        <motion.span animate={{ y: [0, 6, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
-          <ChevronDown className="h-5 w-5" />
-        </motion.span>
-      </motion.button>
+        {trackRecord.map(({ end, suffix, decimals, label }) => (
+          <motion.div
+            key={label}
+            variants={fadeIn}
+            className="flex flex-row-reverse items-baseline gap-2 md:flex-col-reverse md:items-start md:gap-0"
+          >
+            <dt className="text-[0.625rem] font-light uppercase tracking-[0.2em] text-background/55 md:mt-2 md:text-[0.6875rem]">
+              {label}
+            </dt>
+            <dd>
+              <AnimatedCounter
+                end={end}
+                suffix={suffix}
+                decimals={decimals}
+                className="font-serif text-2xl text-background md:text-5xl"
+              />
+            </dd>
+          </motion.div>
+        ))}
+      </motion.dl>
+
     </section>
   );
 };
