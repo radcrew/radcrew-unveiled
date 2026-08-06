@@ -17,7 +17,7 @@ import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
 
-const NAV_SECTION_IDS = ["services", "portfolio", "process"];
+const NAV_SECTION_IDS = ["services", "portfolio", "process", "team", "journal"];
 
 const Landing = () => {
   const [isScrolled, setIsScrolled] = useState(false);
