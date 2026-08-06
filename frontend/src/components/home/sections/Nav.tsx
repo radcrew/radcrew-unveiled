@@ -39,17 +39,17 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
   };
 
   return (
+    // Padding sits on the nav, outside `max-w-7xl`, matching every section so
+    // nav content lines up with page content at any width. These were nested
+    // the other way round, and the logo used a negative margin to compensate,
+    // which put it flush against the viewport edge below 1280px.
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
+      className={`fixed left-0 right-0 top-0 z-50 px-6 transition-all duration-500 lg:px-12 ${
         isScrolled ? "border-b border-primary/20 bg-background/90 py-4 backdrop-blur-xl" : "bg-transparent py-6"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
-        <Link
-          to="/"
-          className="-ml-6 cursor-pointer text-xl font-light uppercase tracking-[0.25em] lg:-ml-12"
-          data-testid="nav-logo"
-        >
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <Link to="/" className="cursor-pointer text-xl font-light uppercase tracking-[0.25em]" data-testid="nav-logo">
           radcrew
         </Link>
         <div className="hidden items-center gap-10 text-sm uppercase tracking-widest md:flex">

@@ -37,7 +37,7 @@ Node, from repo root:
 Python, from `backend/` with the venv active:
 
 - Install: `python -m venv .venv`, activate, then `pip install -r requirements.txt`
-- Test: `python -m pytest` (183 tests; `pytest.ini` pins `testpaths = app/tests`)
+- Test: `python -m pytest` (281 tests; `pytest.ini` pins `testpaths = app/tests`)
 - Syntax check: `python -m compileall -q app`, which is all `yarn build:backend` does
 
 Full per-package matrix, E2E, and single-test syntax: see [CLAUDE.md](./CLAUDE.md#commands).
