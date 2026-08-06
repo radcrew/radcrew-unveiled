@@ -104,6 +104,44 @@ export const placeholderSpotlight = {
   ] satisfies SpotlightMetric[],
 };
 
+/**
+ * Narrative sections for `/work/:slug`, keyed by the project slugs in
+ * `static-data.ts`. The titles, tags and screenshots on those pages are real;
+ * only this framing text is invented, so it is the part to rewrite first.
+ */
+export type CaseStudyNarrative = {
+  challenge: string;
+  approach: string;
+  outcome: string;
+};
+
+export const placeholderCaseStudies: Record<string, CaseStudyNarrative> = {
+  "real-estate-consultant": {
+    challenge:
+      "Buyers were dropping out between search and enquiry. The listing data was there, but nothing in the interface explained why a given property was worth a conversation.",
+    approach:
+      "We put a retrieval layer over the listing and market data so the advisory copy on each property is generated from the same numbers the analysts use, then designed the consultation flow around what a broker actually asks on a first call.",
+    outcome:
+      "Enquiry rates rose and the advisory copy stopped needing manual review, because the model only ever sees data the team already trusts.",
+  },
+  cryptopets: {
+    challenge:
+      "The collection needed to onboard people who had never held a wallet, without hiding the fact that the assets are on-chain.",
+    approach:
+      "Custody and minting were pushed behind a flow that reads like any other sign-up, with the chain surfaced as detail rather than as a prerequisite. Indexing runs off a subgraph so profile and trade views stay responsive as the collection grows.",
+    outcome:
+      "First-time wallet holders completed minting at rates close to returning users, and the trading views held their latency through launch.",
+  },
+  forgeng: {
+    challenge:
+      "Every team was writing its own deployment pipeline, so a service took weeks to reach production and no two behaved the same way in an incident.",
+    approach:
+      "We built templates that generate a service with CI, observability and alerting already wired, then made the platform's own dashboards the default view rather than something each team assembled.",
+    outcome:
+      "New services reach production in days instead of weeks, and on-call engineers see the same shape of dashboard whichever service pages them.",
+  },
+};
+
 export type JournalPost = {
   slug: string;
   title: string;
@@ -111,6 +149,8 @@ export type JournalPost = {
   date: string;
   readingTime: string;
   tag: string;
+  /** Paragraphs rendered on `/journal/:slug`. */
+  body: string[];
 };
 
 export const placeholderJournal: JournalPost[] = [
@@ -122,6 +162,12 @@ export const placeholderJournal: JournalPost[] = [
     date: "2026-07-22",
     readingTime: "8 min",
     tag: "AI Engineering",
+    body: [
+      "Almost every retrieval engagement we are called into starts the same way: the team has stood up a vector database, embedded their corpus, and found that the answers are still wrong. The instinct is to reach for a better embedding model, or a reranker, or a larger context window.",
+      "Usually the problem is upstream of all of that. Most embedding models silently truncate past a few hundred word pieces. If a document is chunked at the file level, everything after roughly the first thousand characters is invisible to retrieval, and no amount of reranking recovers content that was never embedded.",
+      "The cheapest diagnostic is also the least popular: print the chunks. Not the scores, not the rankings, the actual text that was embedded. In most cases the failure is visible within a dozen rows.",
+      "Fix the chunking first. Then, if retrieval is still wrong, the model is worth arguing about.",
+    ],
   },
   {
     slug: "what-a-contract-audit-actually-catches",
@@ -131,6 +177,12 @@ export const placeholderJournal: JournalPost[] = [
     date: "2026-06-30",
     readingTime: "12 min",
     tag: "Web3",
+    body: [
+      "Reentrancy is the finding everyone expects, and it is worth checking. It is also, in our experience, rarely the one that costs the most money.",
+      "The expensive findings are quieter. Accounting drift, where rounding in one direction accumulates across thousands of operations until the pool no longer balances. Upgrade paths that nobody has rehearsed, so the first time the proxy is exercised is during an incident. Access control that is correct in the contract and wrong in the deployment script.",
+      "None of these show up in a happy-path test suite, because the happy path is exactly where they behave. They show up under adversarial sequencing, or after enough volume that a rounding error becomes a balance error.",
+      "We order findings by expected loss rather than by severity label. A medium-severity accounting bug in a contract holding real value outranks a high-severity issue in a path that cannot be reached.",
+    ],
   },
   {
     slug: "the-cost-of-a-cold-start",
@@ -140,5 +192,11 @@ export const placeholderJournal: JournalPost[] = [
     date: "2026-06-11",
     readingTime: "6 min",
     tag: "Platform",
+    body: [
+      "Serverless is sold on the premise that idle capacity is someone else's problem. That holds right up until the first request after a quiet period lands in your latency budget.",
+      "The number that matters is not the average cold start. It is how often a user hits one, which depends on traffic shape rather than on the runtime. A service with steady traffic may never see one; a service with bursty traffic can serve a cold start to a meaningful share of its users while the average stays flat.",
+      "Measure the distribution before designing around it. If cold starts are rare, provisioning warm capacity buys nothing. If they are common, the fix is usually to shrink what runs at startup rather than to keep instances alive.",
+      "In one case the entire cold start was a corpus being re-embedded on every boot. Moving that to a store cut it by an order of magnitude, and no infrastructure changed.",
+    ],
   },
 ];

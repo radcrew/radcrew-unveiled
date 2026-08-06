@@ -8,6 +8,10 @@ import { ChatWidget } from "@components/chat-widget";
 import { BackToTop } from "@components/BackToTop";
 import { ScrollProgress } from "@components/motion/ScrollProgress";
 import Index from "./pages/Index.tsx";
+import WorkIndex from "./pages/WorkIndex.tsx";
+import CaseStudy from "./pages/CaseStudy.tsx";
+import JournalIndex from "./pages/JournalIndex.tsx";
+import JournalPost from "./pages/JournalPost.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +26,10 @@ const App = () => (
         <Routes>
           <Route element={<PageTransitionLayout />}>
             <Route path="/" element={<Index />} />
+            <Route path="/work" element={<WorkIndex />} />
+            <Route path="/work/:slug" element={<CaseStudy />} />
+            <Route path="/journal" element={<JournalIndex />} />
+            <Route path="/journal/:slug" element={<JournalPost />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

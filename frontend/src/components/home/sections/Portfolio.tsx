@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -148,7 +150,16 @@ export const Portfolio = () => {
                   ))}
                 </motion.div>
                 <h3 className="mb-6 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
-                <p className="text-lg font-light leading-relaxed text-muted-foreground md:text-xl">{project.description}</p>
+                <p className="mb-8 text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+                  {project.description}
+                </p>
+                <Link
+                  to={`/work/${project.slug}`}
+                  className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
+                >
+                  Read the case study
+                  <ArrowRight aria-hidden="true" className="h-4 w-4" />
+                </Link>
               </div>
             </motion.div>
           ))}

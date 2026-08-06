@@ -34,17 +34,18 @@ describe("Reveal", () => {
 });
 
 describe("SplitText", () => {
-  it("exposes the full headline to assistive tech even while split into words", () => {
-    render(<SplitText text="We build what is next" />);
-    // The per-word spans are aria-hidden; this match comes from the sr-only copy.
-    expect(screen.getByText("We build what is next")).toBeInTheDocument();
+  it("splits into words without altering the text content", () => {
+    const { container } = render(<SplitText text="We build what is next" />);
+    // Spaces survive as real text nodes, so the heading is not duplicated into
+    // an sr-only copy and the words do not run together.
+    expect(container.textContent).toBe("We build what is next");
     expect(screen.getByText("build")).toBeInTheDocument();
   });
 
-  it("renders one plain string under reduced motion", () => {
+  it("renders one plain string with no per-word elements under reduced motion", () => {
     reduced.value = true;
-    render(<SplitText text="We build what is next" />);
-    expect(screen.getByText("We build what is next")).toBeInTheDocument();
+    const { container } = render(<SplitText text="We build what is next" />);
+    expect(container.textContent).toBe("We build what is next");
     expect(screen.queryByText("build")).not.toBeInTheDocument();
   });
 });

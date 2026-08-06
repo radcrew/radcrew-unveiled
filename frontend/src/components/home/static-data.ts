@@ -28,6 +28,8 @@ import jesusImg from "@/assets/team/jesus-monroig.webp";
 import designImg from "@/assets/team/design.webp";
 
 export type FeaturedProject = {
+  /** URL segment for `/work/:slug`. Must stay unique. */
+  slug: string;
   title: string;
   description: string;
   tags: string[];
@@ -37,6 +39,7 @@ export type FeaturedProject = {
 
 export const featuredProjects: FeaturedProject[] = [
   {
+    slug: "real-estate-consultant",
     title: "Real Estate Consultant",
     description:
       "Client-facing discovery and advisory experience: property search, market context, and guided consultation flows with a polished, trustworthy UI.",
@@ -44,6 +47,7 @@ export const featuredProjects: FeaturedProject[] = [
     tags: ["React", "Next.js", "Product UI", "LLM", "Fastapi", "PostgreSQL", "Prisma", "MicroService", "Github-Actions"],
   },
   {
+    slug: "cryptopets",
     title: "CryptoPets",
     description:
       "Collectible pet experience on-chain: minting, trading, and profile flows with a bright, approachable UI built for mainstream Web3 onboarding.",
@@ -62,6 +66,7 @@ export const featuredProjects: FeaturedProject[] = [
     tags: ["React", "Web3", "NFTs", "GraphQL", "Helius", "Agentic-AI", "grpc", "React-Native", "SubGraph", "Ethereum", "Solana", "HuggingFace", "Zod", "GoLang", "Redis", "PostgreSQL"],
   },
   {
+    slug: "forgeng",
     title: "Forgeng",
     description:
       "Internal platform for developer productivity: CI/CD orchestration, service templates, and observability tooling to accelerate delivery.",
