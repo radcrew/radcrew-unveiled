@@ -107,19 +107,15 @@ export const Portfolio = () => {
               transition={{ duration: 1 }}
               className="group"
             >
-              <div className="mb-10 grid gap-6 md:grid-cols-12 md:items-end">
-                <div className="md:col-span-7">
-                  <h3 className="mb-5 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
-                  <p className="max-w-2xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
-                    {project.description}
-                  </p>
-                </div>
+              <div className="mb-10">
+                <h3 className="mb-5 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
+
                 <motion.div
                   initial="hidden"
                   whileInView="visible"
                   variants={tagContainerVariants}
                   viewport={{ once: true }}
-                  className="flex flex-wrap gap-2 md:col-span-5 md:justify-end"
+                  className="mb-6 flex flex-wrap gap-2"
                 >
                   {project.tags.map((tag) => (
                     <motion.span
@@ -131,6 +127,10 @@ export const Portfolio = () => {
                     </motion.span>
                   ))}
                 </motion.div>
+
+                <p className="max-w-3xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+                  {project.description}
+                </p>
               </div>
 
               {/* Full width beneath the copy, so the screenshots run the measure of
