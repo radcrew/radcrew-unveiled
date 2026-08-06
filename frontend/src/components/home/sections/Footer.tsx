@@ -27,7 +27,7 @@ const footerLinks = [
 ] as const;
 
 const footerLinkClassName =
-  "transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
+  "transition-colors hover:text-primary-on-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
 
 const socialLinkClassName = footerLinkClassName;
 
@@ -75,7 +75,7 @@ export const Footer = () => {
   return (
     <footer
       id="footer"
-      className="relative overflow-hidden border-t-4 border-primary bg-foreground px-6 pb-12 pt-24 text-background antialiased lg:px-12"
+      className="relative overflow-hidden border-t-4 border-primary-on-dark bg-foreground px-6 pb-12 pt-24 text-background antialiased lg:px-12"
     >
       <Grain />
       <div className="relative z-10 mx-auto max-w-7xl">
@@ -122,7 +122,7 @@ export const Footer = () => {
                         <Button
                           type="submit"
                           variant="outline"
-                          className="h-14 rounded-none border-background/20 bg-primary px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
+                          className="h-14 rounded-none border-background/20 bg-primary-on-dark px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
                           disabled={newsletterPending}
                           data-testid="newsletter-submit"
                         >

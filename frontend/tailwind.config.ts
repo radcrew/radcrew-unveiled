@@ -25,6 +25,8 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          /* Use on dark sections only; see the note in index.css. */
+          "on-dark": "hsl(var(--primary-on-dark))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

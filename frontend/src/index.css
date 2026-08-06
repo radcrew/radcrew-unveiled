@@ -16,8 +16,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 7%;
 
-    --primary: 38 60% 55%;
+    /*
+     * Two golds, because no single lightness clears WCAG AA on both grounds:
+     * at 36% it measures 4.95:1 on the cream background but only 3.66:1 on the
+     * dark sections; at 55% those numbers are 2.32:1 and 7.80:1. The light
+     * ground carries most of the site, so it gets the default.
+     */
+    --primary: 38 50% 36%;
     --primary-foreground: 0 0% 100%;
+    /* For gold sitting on `--foreground` (Hero, Spotlight, Testimonial, Footer). */
+    --primary-on-dark: 38 60% 55%;
 
     --secondary: 40 12% 92%;
     --secondary-foreground: 0 0% 7%;
@@ -33,7 +41,7 @@
 
     --border: 38 30% 85%;
     --input: 38 30% 85%;
-    --ring: 38 60% 55%;
+    --ring: 38 50% 36%;
 
     --radius: 0.625rem;
 

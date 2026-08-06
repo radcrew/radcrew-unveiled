@@ -54,8 +54,8 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pb-12 pt-28"
       >
         <motion.p variants={fadeIn} className="mb-8 flex items-center gap-4 md:mb-10">
-          <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary" />
-          <span className="text-xs font-light uppercase tracking-[0.28em] text-primary sm:text-sm">
+          <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary-on-dark" />
+          <span className="text-xs font-light uppercase tracking-[0.28em] text-primary-on-dark sm:text-sm">
             Hire one of us, not a company
           </span>
         </motion.p>
@@ -65,7 +65,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         <h1 className="mb-10 font-serif text-[clamp(3rem,11vw,10rem)] leading-[0.86] tracking-[-0.02em]">
           <SplitText text="We build" />
           <br />
-          <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary" />
+          <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary-on-dark" />
         </h1>
 
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
@@ -129,6 +129,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
                 suffix={suffix}
                 decimals={decimals}
                 className="font-serif text-2xl text-background md:text-5xl"
+                suffixClassName="text-primary-on-dark"
               />
             </dd>
           </motion.div>

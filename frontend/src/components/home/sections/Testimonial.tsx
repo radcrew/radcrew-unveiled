@@ -38,7 +38,7 @@ export const Testimonial = () => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-10 font-serif text-4xl italic text-primary"
+          className="mb-10 font-serif text-4xl italic text-primary-on-dark"
         >
           &quot;
         </motion.div>
@@ -76,7 +76,7 @@ export const Testimonial = () => {
                   aria-label={`Go to testimonial ${idx + 1} of ${testimonials.length}`}
                   aria-current={idx === selectedIndex}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === selectedIndex ? "w-6 bg-primary" : "w-1.5 bg-background/25 hover:bg-primary/60"
+                    idx === selectedIndex ? "w-6 bg-primary-on-dark" : "w-1.5 bg-background/25 hover:bg-primary-on-dark/60"
                   }`}
                 />
               ))}

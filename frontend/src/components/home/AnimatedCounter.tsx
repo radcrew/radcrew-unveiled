@@ -7,12 +7,15 @@ export function AnimatedCounter({
   duration = 2,
   decimals = 0,
   className = "font-serif text-5xl text-foreground md:text-6xl",
+  suffixClassName = "text-primary",
 }: {
   end: number;
   suffix?: string;
   duration?: number;
   decimals?: number;
   className?: string;
+  /** Override on dark sections, where `text-primary` is too dark to read. */
+  suffixClassName?: string;
 }) {
   const reduced = useReducedMotion();
   const [value, setValue] = useState(reduced ? end : 0);
@@ -57,7 +60,7 @@ export function AnimatedCounter({
   return (
     <div ref={nodeRef} className={className}>
       {decimals > 0 ? value.toFixed(decimals) : Math.floor(value)}
-      <span className="ml-1 text-primary">{suffix}</span>
+      <span className={`ml-1 ${suffixClassName}`}>{suffix}</span>
     </div>
   );
 }
