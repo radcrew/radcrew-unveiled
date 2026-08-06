@@ -52,9 +52,9 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
               alt={`${title} — screen ${idx + 1}`}
               loading="lazy"
               decoding="async"
-              // The frame is narrower than the screenshots' 2:1, so ~13% of the
-              // width is cropped. Centred, which trims both edges evenly and
-              // keeps each screenshot's composition balanced in the frame.
+              // The frame is slightly narrower than the screenshots' 2:1, so ~7%
+              // of the width is cropped. Centred, which trims both edges evenly
+              // and keeps each screenshot's composition balanced in the frame.
               className="absolute inset-0 h-full w-full object-cover object-center opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
             />
           </CarouselItem>
@@ -118,7 +118,7 @@ export const Portfolio = () => {
                   whileInView={{ clipPath: "inset(0 0% 0 0)" }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative aspect-[7/4] overflow-hidden border border-border bg-card shadow-sm"
+                  className="relative aspect-[15/8] overflow-hidden border border-border bg-card shadow-sm"
                 >
                   {project.images && project.images.length > 0 ? (
                     <ProjectCarousel title={project.title} images={project.images} />
