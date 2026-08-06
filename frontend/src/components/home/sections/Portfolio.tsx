@@ -53,10 +53,9 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
               loading="lazy"
               decoding="async"
               // The frame is narrower than the screenshots' 2:1, so ~13% of the
-              // width is cropped. Anchored left because these are browser
-              // captures: logos and headings sit on the left edge, and centring
-              // the crop sliced the first character off both.
-              className="absolute inset-0 h-full w-full object-cover object-left opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+              // width is cropped. Centred, which trims both edges evenly and
+              // keeps each screenshot's composition balanced in the frame.
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
             />
           </CarouselItem>
         ))}
