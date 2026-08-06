@@ -1,15 +1,28 @@
-import reImg1 from "@/assets/portfolio/real-estate-consultant/img1.png";
-import reImg2 from "@/assets/portfolio/real-estate-consultant/img2.png";
-import reImg3 from "@/assets/portfolio/real-estate-consultant/img3.png";
-import reImg4 from "@/assets/portfolio/real-estate-consultant/img4.png";
-import reImg5 from "@/assets/portfolio/real-estate-consultant/img5.png";
-import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/img1.png";
-import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/img2.png";
-import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/img3.png";
-import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/img4.png";
-import forImg1 from "@/assets/portfolio/forgeng/img1.png";
-import forImg2 from "@/assets/portfolio/forgeng/img2.png";
-import forImg3 from "@/assets/portfolio/forgeng/img3.png";
+import reImg1 from "@/assets/portfolio/real-estate-consultant/Screenshot_1.png";
+import reImg2 from "@/assets/portfolio/real-estate-consultant/Screenshot_2.png";
+import reImg3 from "@/assets/portfolio/real-estate-consultant/Screenshot_3.png";
+import reImg4 from "@/assets/portfolio/real-estate-consultant/Screenshot_4.png";
+import reImg5 from "@/assets/portfolio/real-estate-consultant/Screenshot_5.png";
+import reImg6 from "@/assets/portfolio/real-estate-consultant/Screenshot_6.png";
+import reImg7 from "@/assets/portfolio/real-estate-consultant/Screenshot_7.png";
+import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/Screenshot_1.png";
+import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/Screenshot_2.png";
+import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/Screenshot_3.png";
+import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/Screenshot_4.png";
+import cryptoPetsImg5 from "@/assets/portfolio/cryptopets/Screenshot_5.png";
+import cryptoPetsImg6 from "@/assets/portfolio/cryptopets/Screenshot_6.png";
+import cryptoPetsImg7 from "@/assets/portfolio/cryptopets/Screenshot_7.png";
+import cryptoPetsImg8 from "@/assets/portfolio/cryptopets/Screenshot_8.png";
+import cryptoPetsImg9 from "@/assets/portfolio/cryptopets/Screenshot_9.png";
+import cryptoPetsImg10 from "@/assets/portfolio/cryptopets/Screenshot_10.png";
+import forImg1 from "@/assets/portfolio/forgeng/Screenshot_1.png";
+import forImg2 from "@/assets/portfolio/forgeng/Screenshot_2.png";
+import forImg3 from "@/assets/portfolio/forgeng/Screenshot_3.png";
+import forImg4 from "@/assets/portfolio/forgeng/Screenshot_4.png";
+import forImg5 from "@/assets/portfolio/forgeng/Screenshot_5.png";
+import forImg6 from "@/assets/portfolio/forgeng/Screenshot_6.png";
+import forImg7 from "@/assets/portfolio/forgeng/Screenshot_7.png";
+import forImg8 from "@/assets/portfolio/forgeng/Screenshot_8.png";
 import ceoImg from "@/assets/team/ceo.png";
 import jesusImg from "@/assets/team/jesus-monroig.png";
 import designImg from "@/assets/team/design.png";
@@ -27,21 +40,32 @@ export const featuredProjects: FeaturedProject[] = [
     title: "Real Estate Consultant",
     description:
       "Client-facing discovery and advisory experience: property search, market context, and guided consultation flows with a polished, trustworthy UI.",
-    images: [reImg1, reImg2, reImg3, reImg4, reImg5],
+    images: [reImg1, reImg2, reImg3, reImg4, reImg5, reImg6, reImg7],
     tags: ["React", "Next.js", "Product UI", "LLM", "Fastapi", "PostgreSQL", "Prisma", "MicroService", "Github-Actions"],
   },
   {
     title: "CryptoPets",
     description:
       "Collectible pet experience on-chain: minting, trading, and profile flows with a bright, approachable UI built for mainstream Web3 onboarding.",
-    images: [cryptoPetsImg1, cryptoPetsImg2, cryptoPetsImg3, cryptoPetsImg4],
+    images: [
+      cryptoPetsImg1,
+      cryptoPetsImg2,
+      cryptoPetsImg3,
+      cryptoPetsImg4,
+      cryptoPetsImg5,
+      cryptoPetsImg6,
+      cryptoPetsImg7,
+      cryptoPetsImg8,
+      cryptoPetsImg9,
+      cryptoPetsImg10,
+    ],
     tags: ["React", "Web3", "NFTs", "GraphQL", "Helius", "Agentic-AI", "grpc", "React-Native", "SubGraph", "Ethereum", "Solana", "HuggingFace", "Zod", "GoLang", "Redis", "PostgreSQL"],
   },
   {
     title: "Forgeng",
     description:
       "Internal platform for developer productivity: CI/CD orchestration, service templates, and observability tooling to accelerate delivery.",
-    images: [forImg1, forImg2, forImg3],
+    images: [forImg1, forImg2, forImg3, forImg4, forImg5, forImg6, forImg7, forImg8],
     tags: ["TypeScript", "Node.js", "Kubernetes", "CI/CD", "Observability", "NestJS", "Passport", "PostgreSQL", "Shadcn-UI", "tailwindcss", "vitest", "NextJS", "Prisma"],
   }
 ];
