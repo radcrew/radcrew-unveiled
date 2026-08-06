@@ -28,6 +28,27 @@ const capabilityCards = [
       "Embedding intelligent capabilities into existing stacks. From custom RAG pipelines to fine-tuned autonomous agents.",
     relatedProject: "Real Estate Consultant",
   },
+  {
+    index: "04",
+    title: "Contract Review & Security",
+    description:
+      "Line-by-line review of the code that holds funds. Accounting drift, upgrade paths, and the failure modes that survive a happy-path test suite.",
+    relatedProject: null,
+  },
+  {
+    index: "05",
+    title: "Data Platforms & Pipelines",
+    description:
+      "Ingestion, transformation, and retrieval that stay predictable under load. Built to be resumed after a failure rather than restarted.",
+    relatedProject: null,
+  },
+  {
+    index: "06",
+    title: "Embedded Engineering",
+    description:
+      "Senior engineers inside your team, on your standups and in your repo. Not a black box that returns a deliverable at the end of a quarter.",
+    relatedProject: null,
+  },
 ] as const;
 
 const cardClassName =
@@ -61,14 +82,16 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
               </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
               <p className="mb-6 font-light leading-relaxed text-muted-foreground">{card.description}</p>
-              <button
-                type="button"
-                onClick={() => onNavigate("portfolio")}
-                className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
-              >
-                See it in {card.relatedProject}
-                <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
-              </button>
+              {card.relatedProject ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigate("portfolio")}
+                  className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
+                >
+                  See it in {card.relatedProject}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
+                </button>
+              ) : null}
             </motion.div>
           ))}
         </div>

@@ -2,12 +2,17 @@ import { useEffect, useState } from "react";
 import { useScroll, useMotionValueEvent } from "framer-motion";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
+import { Clients } from "./sections/Clients";
 import { Stats } from "./sections/Stats";
+import { ProofBand } from "./sections/ProofBand";
 import { Capabilities } from "./sections/Capabilities";
+import { Spotlight } from "./sections/Spotlight";
 import { Process } from "./sections/Process";
 import { Portfolio } from "./sections/Portfolio";
 import { TechStack } from "./sections/TechStack";
+import { Team } from "./sections/Team";
 import { Testimonial } from "./sections/Testimonial";
+import { Journal } from "./sections/Journal";
 import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
@@ -50,12 +55,17 @@ const Landing = () => {
     <div className="min-h-[100dvh] bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary">
       <Nav isScrolled={isScrolled} activeSection={activeSection} onNavigate={scrollTo} />
       <Hero onNavigate={scrollTo} />
+      <Clients />
       <Stats />
+      <ProofBand />
       <Capabilities onNavigate={scrollTo} />
+      <Spotlight />
       <Process />
       <Portfolio />
       <TechStack />
+      <Team />
       <Testimonial />
+      <Journal />
       <Faq />
       <ContactSection />
       <Footer />

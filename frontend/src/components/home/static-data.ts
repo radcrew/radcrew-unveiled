@@ -99,21 +99,20 @@ export const faqs = [
     question: "What makes radcrew different?",
     answer: "Senior talent only. No handoffs to juniors. The people you meet are the people who build. Meticulous execution.",
   },
-];
-
-export type Testimonial = {
-  quote: string;
-  clientName: string;
-  clientRole: string;
-  clientCompany: string;
-};
-
-/** Add more entries here to enable the rotating carousel in Testimonial.tsx. */
-export const testimonials: Testimonial[] = [
   {
-    quote: "An incredible partner that transformed our technical architecture from the ground up.",
-    clientName: "Jordan Lee",
-    clientRole: "CTO",
-    clientCompany: "Series B Fintech",
+    question: "Who actually writes the code?",
+    answer:
+      "The engineers you meet in the first call. We do not staff a pitch with seniors and deliver with juniors, and we do not subcontract work out.",
+  },
+  {
+    question: "Can you work inside our existing codebase and process?",
+    answer:
+      "Yes. Most engagements start in a repo someone else wrote. We join your standups, your review process, and your branching model rather than asking you to adopt ours.",
+  },
+  {
+    question: "What happens if we need to pause or stop?",
+    answer:
+      "You can stop at a sprint boundary. There is no lock-in clause, and everything we have built plus the documentation for it is yours on the way out.",
   },
 ];
+

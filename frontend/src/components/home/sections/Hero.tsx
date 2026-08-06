@@ -3,6 +3,8 @@ import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@components/ui/button";
 import HeroCanvas from "@components/HeroCanvas";
+import { Magnetic } from "@components/motion/Magnetic";
+import { SplitText } from "@components/motion/SplitText";
 import { fadeIn, staggerContainer } from "../motion";
 
 type HeroProps = {
@@ -26,13 +28,11 @@ export const Hero = ({ onNavigate }: HeroProps) => {
 
       <div className="relative z-10 mx-auto w-full max-w-7xl text-center md:text-left">
         <motion.div initial="hidden" whileInView="visible" variants={staggerContainer} viewport={{ once: true }}>
-          <motion.h1
-            variants={fadeIn}
-            className="mb-8 font-serif text-[clamp(3.75rem,13vw+0.75rem,11rem)] leading-[0.9] tracking-tight text-foreground"
-          >
-            We build <br />
-            <span className="font-medium italic text-primary">what&apos;s next.</span>
-          </motion.h1>
+          <h1 className="mb-8 font-serif text-[clamp(3.75rem,13vw+0.75rem,11rem)] leading-[0.9] tracking-tight text-foreground">
+            <SplitText text="We build" />
+            <br />
+            <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary" />
+          </h1>
           <motion.p
             variants={fadeIn}
             className="mx-auto mb-12 max-w-2xl text-xl font-light leading-relaxed text-muted-foreground md:mx-0 md:text-2xl"
@@ -41,23 +41,27 @@ export const Hero = ({ onNavigate }: HeroProps) => {
             us, not a company.
           </motion.p>
           <motion.div variants={fadeIn} className="flex flex-col justify-center gap-6 sm:flex-row md:justify-start">
-            <Button
-              type="button"
-              onClick={() => onNavigate("portfolio")}
-              className="h-auto rounded-none bg-primary px-10 py-7 text-sm font-light uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
-              data-testid="hero-cta-work"
-            >
-              View Selected Work
-            </Button>
-            <Button
-              type="button"
-              onClick={() => onNavigate("contact")}
-              variant="outline"
-              className="h-auto rounded-none border-border px-10 py-7 text-sm font-light uppercase tracking-widest hover:bg-muted hover:!text-primary"
-              data-testid="hero-cta-contact"
-            >
-              Start a Project
-            </Button>
+            <Magnetic>
+              <Button
+                type="button"
+                onClick={() => onNavigate("portfolio")}
+                className="h-auto w-full rounded-none bg-primary px-10 py-7 text-sm font-light uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+                data-testid="hero-cta-work"
+              >
+                View Selected Work
+              </Button>
+            </Magnetic>
+            <Magnetic>
+              <Button
+                type="button"
+                onClick={() => onNavigate("contact")}
+                variant="outline"
+                className="h-auto w-full rounded-none border-border px-10 py-7 text-sm font-light uppercase tracking-widest hover:bg-muted hover:!text-primary"
+                data-testid="hero-cta-contact"
+              >
+                Start a Project
+              </Button>
+            </Magnetic>
           </motion.div>
         </motion.div>
       </div>

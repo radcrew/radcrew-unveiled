@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@components/ui/carousel";
-import { testimonials } from "../static-data";
+import { placeholderTestimonials as testimonials } from "../placeholder-content";
 
 const AUTOPLAY_INTERVAL_MS = 6000;
 
