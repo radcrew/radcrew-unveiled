@@ -40,7 +40,7 @@ const phaseContainerVariants = (delay: number): Variants => ({
 
 export const Process = () => {
   return (
-    <section id="process" className="border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
+    <section id="process" className="bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div initial="hidden" whileInView="visible" variants={fadeIn} viewport={{ once: true }} className="mb-24">
           <h2 className="max-w-4xl font-serif text-5xl leading-tight text-foreground md:text-7xl">

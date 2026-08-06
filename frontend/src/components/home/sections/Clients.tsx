@@ -4,7 +4,7 @@ import { placeholderClients } from "../placeholder-content";
 
 export const Clients = () => {
   return (
-    <section className="border-t border-border bg-background py-20">
+    <section className="bg-background py-20">
       <Reveal className="mb-14 px-6 text-center lg:px-12">
         <p className="text-sm font-light uppercase tracking-widest text-muted-foreground">
           Trusted by teams shipping in production

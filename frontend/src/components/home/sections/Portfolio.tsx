@@ -87,7 +87,7 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
 
 export const Portfolio = () => {
   return (
-    <section id="portfolio" className="border-y border-border bg-muted px-6 py-20 md:py-32 lg:px-12">
+    <section id="portfolio" className="border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
