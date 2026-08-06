@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@components/ui/button";
-import HeroCanvas from "@components/HeroCanvas";
+import HeroBackdrop from "@components/HeroBackdrop";
 import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
@@ -37,11 +37,10 @@ export const Hero = ({ onNavigate }: HeroProps) => {
     // fixed chat launcher in the bottom-right corner.
     <section className="relative flex min-h-[100dvh] items-center overflow-hidden px-6 pb-28 pt-28 md:pb-28 md:pt-32 lg:px-12">
       <div className="absolute inset-0 z-0">
-        <HeroCanvas />
-        {/* The canvas reads as noise behind text at full strength. Fading it from
-            the left gives the headline a clean field while keeping the texture
-            visible on the open right-hand side. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <HeroBackdrop />
+        {/* Fading from the left gives the headline a clean field while keeping
+            the texture visible on the open right-hand side. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/90" />
         <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
       </div>
 
@@ -114,7 +113,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
             <motion.div
               key={label}
               variants={fadeIn}
-              className="flex flex-row-reverse items-baseline gap-2 md:flex-col-reverse md:items-start md:gap-0 md:border-b md:border-primary/10 md:py-5 md:first:pt-0 md:last:border-b-0 md:last:pb-0"
+              className="flex flex-row-reverse items-baseline gap-2 md:flex-col-reverse md:items-start md:gap-0 md:py-4 md:first:pt-0 md:last:pb-0"
             >
               <dt className="text-[0.625rem] font-light uppercase tracking-widest text-muted-foreground md:mt-2 md:text-xs">
                 {label}
