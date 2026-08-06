@@ -51,7 +51,11 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pb-12 pt-28"
+        // Justified to the top, not the bottom: with `justify-end` every pixel of
+        // slack on a tall viewport collected above the eyebrow. The padding is
+        // what clears the fixed nav, and any remaining slack now falls between
+        // the buttons and the band instead.
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-start pb-12 pt-28 md:pt-44"
       >
         <motion.p variants={fadeIn} className="mb-8 flex items-center gap-4 md:mb-10">
           <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary-on-dark" />
