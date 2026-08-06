@@ -12,7 +12,6 @@ const NAV_LINKS = [
   { hash: "services", label: "Services" },
   { hash: "portfolio", label: "Work" },
   { hash: "process", label: "Process" },
-  { hash: "team", label: "Team" },
   { hash: "journal", label: "Journal" },
   { hash: "contact", label: "Contact" },
 ] as const;

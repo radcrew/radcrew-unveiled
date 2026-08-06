@@ -23,9 +23,6 @@ import forImg5 from "@/assets/portfolio/forgeng/Screenshot_5.webp";
 import forImg6 from "@/assets/portfolio/forgeng/Screenshot_6.webp";
 import forImg7 from "@/assets/portfolio/forgeng/Screenshot_7.webp";
 import forImg8 from "@/assets/portfolio/forgeng/Screenshot_8.webp";
-import ceoImg from "@/assets/team/ceo.webp";
-import jesusImg from "@/assets/team/jesus-monroig.webp";
-import designImg from "@/assets/team/design.webp";
 
 export type FeaturedProject = {
   /** URL segment for `/work/:slug`. Must stay unique. */
@@ -73,12 +70,6 @@ export const featuredProjects: FeaturedProject[] = [
     images: [forImg1, forImg2, forImg3, forImg4, forImg5, forImg6, forImg7, forImg8],
     tags: ["TypeScript", "Node.js", "Kubernetes", "CI/CD", "Observability", "NestJS", "Passport", "PostgreSQL", "Shadcn-UI", "tailwindcss", "vitest", "NextJS", "Prisma"],
   }
-];
-
-export const teamMembers = [
-  { name: "Hector Rosado", role: "CEO & Founder", image: ceoImg },
-  { name: "Jesus Monroig", role: "Full Stack | Web3 Engineer", image: jesusImg },
-  { name: "Jorge Benitez", role: "Full Stack | AI Engineer", image: designImg },
 ];
 
 export const faqs = [

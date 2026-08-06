@@ -10,14 +10,13 @@ import { Spotlight } from "./sections/Spotlight";
 import { Process } from "./sections/Process";
 import { Portfolio } from "./sections/Portfolio";
 import { TechStack } from "./sections/TechStack";
-import { Team } from "./sections/Team";
 import { Testimonial } from "./sections/Testimonial";
 import { Journal } from "./sections/Journal";
 import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
 
-const NAV_SECTION_IDS = ["services", "portfolio", "process", "team", "journal"];
+const NAV_SECTION_IDS = ["services", "portfolio", "process", "journal"];
 
 const Landing = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -63,7 +62,6 @@ const Landing = () => {
       <Process />
       <Portfolio />
       <TechStack />
-      <Team />
       <Testimonial />
       <Journal />
       <Faq />

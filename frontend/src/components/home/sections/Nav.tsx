@@ -15,7 +15,6 @@ const navLinks = [
   { id: "services", label: "Services" },
   { id: "portfolio", label: "Work" },
   { id: "process", label: "Process" },
-  { id: "team", label: "Team" },
   { id: "journal", label: "Journal" },
 ] as const;
 
