@@ -50,7 +50,7 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
               alt={`${title} — screen ${idx + 1}`}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 h-full w-full object-fill opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+              className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
             />
           </CarouselItem>
         ))}
@@ -113,7 +113,7 @@ export const Portfolio = () => {
                   whileInView={{ clipPath: "inset(0 0% 0 0)" }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative aspect-[4/3] overflow-hidden border border-border bg-background shadow-sm md:aspect-[16/10]"
+                  className="relative aspect-[2/1] overflow-hidden border border-border bg-background shadow-sm"
                 >
                   {project.images && project.images.length > 0 ? (
                     <ProjectCarousel title={project.title} images={project.images} />
