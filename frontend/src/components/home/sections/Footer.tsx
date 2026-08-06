@@ -122,7 +122,8 @@ export const Footer = () => {
                         <Button
                           type="submit"
                           variant="outline"
-                          className="h-14 rounded-none border-background/20 bg-primary-on-dark px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
+                          // Ink on champagne, not cream: cream on this gold is 2.0:1.
+                          className="h-14 rounded-none border-transparent bg-primary-on-dark px-8 text-sm font-light uppercase tracking-widest text-foreground transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
                           disabled={newsletterPending}
                           data-testid="newsletter-submit"
                         >

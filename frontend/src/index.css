@@ -6,15 +6,22 @@
 
 @layer base {
   :root {
-    /* RadCrew luxury landing (aligned with Code-UI-Upgrade agency-website) */
-    --background: 60 22% 98%;
-    --foreground: 0 0% 7%;
+    /*
+     * One warm family. Previously the ground was warm cream but the ink and the
+     * secondary text were pure neutral grey (0% saturation), which is what made
+     * the light sections read flat: cold type on warm paper never resolves.
+     * Every neutral below now carries a little of the same warmth as the paper.
+     */
+    --background: 40 30% 95.5%;   /* warm paper, not near-white */
+    --foreground: 26 14% 9%;      /* warm ink, not neutral black */
 
-    --card: 40 20% 96%;
-    --card-foreground: 0 0% 7%;
+    /* Lighter than the ground on purpose, so raised surfaces actually lift.
+       Cards previously used --background and were invisible against it. */
+    --card: 44 50% 99%;
+    --card-foreground: 26 14% 9%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover: 44 50% 99%;
+    --popover-foreground: 26 14% 9%;
 
     /*
      * Two golds, because no single lightness clears WCAG AA on both grounds:
@@ -22,26 +29,26 @@
      * dark sections; at 55% those numbers are 2.32:1 and 7.80:1. The light
      * ground carries most of the site, so it gets the default.
      */
-    --primary: 38 50% 36%;
+    --primary: 36 62% 36%;
     --primary-foreground: 0 0% 100%;
     /* For gold sitting on `--foreground` (Hero, Spotlight, Testimonial, Footer). */
-    --primary-on-dark: 38 60% 55%;
+    --primary-on-dark: 38 62% 58%;
 
-    --secondary: 40 12% 92%;
-    --secondary-foreground: 0 0% 7%;
+    --secondary: 38 22% 90%;
+    --secondary-foreground: 26 14% 9%;
 
-    --muted: 40 20% 96%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 38 24% 91%;        /* recessed surface, a real step below the paper */
+    --muted-foreground: 28 12% 34%;
 
-    --accent: 38 45% 45%;
+    --accent: 34 55% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 38 30% 85%;
-    --input: 38 30% 85%;
-    --ring: 38 50% 36%;
+    --border: 34 20% 78%;       /* defined enough to draw a real hairline */
+    --input: 34 20% 78%;
+    --ring: 36 62% 36%;
 
     --radius: 0.625rem;
 

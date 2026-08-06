@@ -51,8 +51,11 @@ const capabilityCards = [
   },
 ] as const;
 
+// `bg-card` sits a step lighter than the paper ground, so the cards read as
+// raised surfaces. They previously used `bg-background`, the same colour as the
+// section behind them, and were defined only by their hairline border.
 const cardClassName =
-  "group border border-primary/20 bg-background p-10 transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5";
+  "group border border-border bg-card p-10 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
 
 export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (

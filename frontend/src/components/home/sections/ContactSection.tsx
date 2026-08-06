@@ -122,7 +122,7 @@ export const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.15 }}
-          className="border border-border bg-muted p-8 shadow-sm md:p-12"
+          className="border border-border bg-card p-8 shadow-sm md:p-12"
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
