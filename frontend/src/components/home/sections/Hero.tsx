@@ -3,6 +3,7 @@ import { Button } from "@components/ui/button";
 import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
+import { Grain } from "../Grain";
 import { fadeIn, staggerContainer } from "../motion";
 
 type HeroProps = {
@@ -20,13 +21,6 @@ const trackRecord = [
   { end: 5, suffix: "", decimals: 0, label: "Years building" },
   { end: 99.9, suffix: "%", decimals: 1, label: "Uptime SLA" },
 ] as const;
-
-/**
- * Film grain. A flat dark field reads as cheap; a little tooth makes it read as
- * printed. Static SVG noise rather than a canvas, so it costs nothing per frame.
- */
-const GRAIN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 export const Hero = ({ onNavigate }: HeroProps) => {
   return (
@@ -48,7 +42,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
               "radial-gradient(120% 90% at 12% 28%, hsl(38 60% 55% / 0.16) 0%, hsl(38 60% 55% / 0.05) 34%, transparent 68%)",
           }}
         />
-        <div className="absolute inset-0 opacity-[0.13] mix-blend-overlay" style={{ backgroundImage: GRAIN }} />
+        <Grain />
         {/* Settles the foot of the section into the band and the page below it. */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-foreground to-transparent" />
       </div>

@@ -1,13 +1,15 @@
 import { Parallax } from "@components/motion/Parallax";
 import { Reveal } from "@components/motion/Reveal";
 import { placeholderSpotlight } from "../placeholder-content";
+import { Grain } from "../Grain";
 
 export const Spotlight = () => {
   const { client, title, summary, metrics } = placeholderSpotlight;
 
   return (
-    <section className="relative overflow-hidden border-t border-border bg-foreground px-6 py-20 text-background md:py-32 lg:px-12">
-      <div className="mx-auto grid max-w-7xl gap-16 md:grid-cols-12">
+    <section className="relative overflow-hidden bg-foreground px-6 py-20 text-background antialiased md:py-32 lg:px-12">
+      <Grain />
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-16 md:grid-cols-12">
         <div className="md:col-span-6">
           <Reveal>
             <p className="mb-8 text-sm font-light uppercase tracking-widest text-background/50">

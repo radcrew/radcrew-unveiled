@@ -10,6 +10,7 @@ import { Input } from "@components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 import { scrollSectionIntoView } from "@/lib/scroll-to-section";
+import { Grain } from "../Grain";
 
 const newsletterSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -72,8 +73,12 @@ export const Footer = () => {
   }
 
   return (
-    <footer id="footer" className="border-t-4 border-primary bg-foreground px-6 pb-12 pt-24 text-background lg:px-12">
-      <div className="mx-auto max-w-7xl">
+    <footer
+      id="footer"
+      className="relative overflow-hidden border-t-4 border-primary bg-foreground px-6 pb-12 pt-24 text-background antialiased lg:px-12"
+    >
+      <Grain />
+      <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mb-24 grid gap-16 md:grid-cols-3">
           <div>
             <div className="mb-8 text-3xl font-light uppercase tracking-[0.25em]">radcrew</div>
