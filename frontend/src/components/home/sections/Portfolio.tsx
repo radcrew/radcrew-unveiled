@@ -52,7 +52,11 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
               alt={`${title} — screen ${idx + 1}`}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+              // The frame is narrower than the screenshots' 2:1, so ~13% of the
+              // width is cropped. Anchored left because these are browser
+              // captures: logos and headings sit on the left edge, and centring
+              // the crop sliced the first character off both.
+              className="absolute inset-0 h-full w-full object-cover object-left opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
             />
           </CarouselItem>
         ))}
@@ -115,7 +119,7 @@ export const Portfolio = () => {
                   whileInView={{ clipPath: "inset(0 0% 0 0)" }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative aspect-[2/1] overflow-hidden border border-border bg-background shadow-sm"
+                  className="relative aspect-[7/4] overflow-hidden border border-border bg-card shadow-sm"
                 >
                   {project.images && project.images.length > 0 ? (
                     <ProjectCarousel title={project.title} images={project.images} />
@@ -137,13 +141,13 @@ export const Portfolio = () => {
                   whileInView="visible"
                   variants={tagContainerVariants}
                   viewport={{ once: true }}
-                  className="mb-8 flex flex-wrap gap-3"
+                  className="mb-8 flex flex-wrap gap-2"
                 >
                   {project.tags.map((tag) => (
                     <motion.span
                       key={tag}
                       variants={tagVariants}
-                      className="border border-primary/30 px-4 py-2 text-xs font-light uppercase tracking-widest text-primary"
+                      className="border border-primary/30 px-3 py-1.5 text-[0.6875rem] font-light uppercase tracking-wider text-primary"
                     >
                       {tag}
                     </motion.span>
