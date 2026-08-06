@@ -3,7 +3,6 @@ import { useScroll, useMotionValueEvent } from "framer-motion";
 import { Nav } from "./sections/Nav";
 import { Hero } from "./sections/Hero";
 import { Clients } from "./sections/Clients";
-import { Stats } from "./sections/Stats";
 import { ProofBand } from "./sections/ProofBand";
 import { Capabilities } from "./sections/Capabilities";
 import { Spotlight } from "./sections/Spotlight";
@@ -55,7 +54,6 @@ const Landing = () => {
       <Nav isScrolled={isScrolled} activeSection={activeSection} onNavigate={scrollTo} />
       <Hero onNavigate={scrollTo} />
       <Clients />
-      <Stats />
       <ProofBand />
       <Capabilities onNavigate={scrollTo} />
       <Spotlight />
