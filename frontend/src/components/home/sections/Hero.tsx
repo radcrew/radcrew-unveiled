@@ -51,9 +51,9 @@ export const Hero = ({ onNavigate }: HeroProps) => {
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pb-10 pt-24"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-end pb-12 pt-28"
       >
-        <motion.p variants={fadeIn} className="mb-10 flex items-center gap-4">
+        <motion.p variants={fadeIn} className="mb-8 flex items-center gap-4 md:mb-10">
           <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary" />
           <span className="text-xs font-light uppercase tracking-[0.28em] text-primary sm:text-sm">
             Hire one of us, not a company
@@ -62,7 +62,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
 
         {/* Full width rather than a column, so the display face can run to the
             measure of the page. This is where the section spends its boldness. */}
-        <h1 className="mb-8 font-serif text-[clamp(3.25rem,16vw,13.5rem)] leading-[0.82] tracking-[-0.03em]">
+        <h1 className="mb-10 font-serif text-[clamp(3rem,11vw,10rem)] leading-[0.86] tracking-[-0.02em]">
           <SplitText text="We build" />
           <br />
           <SplitText text="what's next." delay={0.12} className="font-medium italic text-primary" />
