@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Button } from "@components/ui/button";
-import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
 import { Grain } from "../Grain";
@@ -88,33 +87,33 @@ export const Hero = ({ onNavigate }: HeroProps) => {
           </motion.p>
 
           <motion.div variants={fadeIn} className="flex shrink-0 flex-col gap-4 sm:flex-row">
-            <Magnetic>
-              {/* Cream on dark is the highest-contrast pairing available here, and
-                  it reads as the primary action without relying on the gold. */}
-              <Button
-                type="button"
-                onClick={() => onNavigate("portfolio")}
-                // Height is set rather than derived from padding: the outline
-                // variant next to this one carries a 1px border and this one
-                // does not, which made the pair 76px and 78px tall, aligned at
-                // the top and out by 2px at the bottom.
-                className="h-14 w-full rounded-full bg-background px-10 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90"
-                data-testid="hero-cta-work"
-              >
-                View Selected Work
-              </Button>
-            </Magnetic>
-            <Magnetic>
-              <Button
-                type="button"
-                onClick={() => onNavigate("contact")}
-                variant="outline"
-                className="h-14 w-full rounded-full border-background/30 bg-transparent px-10 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground"
-                data-testid="hero-cta-contact"
-              >
-                Start a Project
-              </Button>
-            </Magnetic>
+            {/* Cream on dark is the highest-contrast pairing available here, and
+                it reads as the primary action without relying on the gold. */}
+            <Button
+              type="button"
+              onClick={() => onNavigate("portfolio")}
+              // Height is set rather than derived from padding: the outline
+              // variant next to this one carries a 1px border and this one does
+              // not, which made the pair 76px and 78px tall, aligned at the top
+              // and out by 2px at the bottom.
+              //
+              // `sm:w-auto` matters now that these are direct flex children: the
+              // wrapper they used to sit in sized itself to their content, so
+              // `w-full` alone would stretch each to the full row.
+              className="h-14 w-full rounded-full bg-background px-10 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90 sm:w-auto"
+              data-testid="hero-cta-work"
+            >
+              View Selected Work
+            </Button>
+            <Button
+              type="button"
+              onClick={() => onNavigate("contact")}
+              variant="outline"
+              className="h-14 w-full rounded-full border-background/30 bg-transparent px-10 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground sm:w-auto"
+              data-testid="hero-cta-contact"
+            >
+              Start a Project
+            </Button>
           </motion.div>
         </div>
       </motion.div>
