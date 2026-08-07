@@ -4,11 +4,15 @@ import { Menu, X } from "lucide-react";
 import { RadButton } from "@components/ui/rad-button";
 import { scrollSectionIntoView } from "@/lib/scroll-to-section";
 
+/**
+ * Section ids must exist on `Landing`; `how-we-work` was dropped when that
+ * section was removed and pointed at nothing until this was corrected.
+ */
 const NAV_LINKS = [
   { hash: "services", label: "Services" },
-  { hash: "how-we-work", label: "How we work" },
-  { hash: "portfolio", label: "Portfolio" },
-  { hash: "team", label: "Team" },
+  { hash: "portfolio", label: "Work" },
+  { hash: "process", label: "Process" },
+  { hash: "journal", label: "Journal" },
   { hash: "contact", label: "Contact" },
 ] as const;
 
@@ -24,12 +28,15 @@ function SectionNavLink({
   onNavigate?: () => void;
 }) {
   const to = `/#${hash}`;
+  // Matches the landing nav's treatment so inner routes do not read as a
+  // different site.
+  const className = "text-sm uppercase tracking-widest transition-colors hover:text-primary";
 
   if (pathname === "/") {
     return (
       <a
         href={`#${hash}`}
-        className="nav-link"
+        className={className}
         onClick={(e) => {
           e.preventDefault();
           scrollSectionIntoView(hash);
@@ -43,7 +50,7 @@ function SectionNavLink({
   }
 
   return (
-    <Link to={to} className="nav-link" onClick={() => onNavigate?.()}>
+    <Link to={to} className={className} onClick={() => onNavigate?.()}>
       {label}
     </Link>
   );
@@ -56,11 +63,11 @@ const Navbar = () => {
   return (
     <nav className="nav-shell">
       <div className="nav-inner">
-        <Link to="/" className="text-xl font-bold tracking-tight">
-          Rad<span className="text-accent">Crew</span>
+        <Link to="/" className="text-xl font-light uppercase tracking-[0.25em]">
+          radcrew
         </Link>
 
-        <div className="hidden gap-8 text-sm font-medium md:flex">
+        <div className="hidden gap-8 md:flex">
           {NAV_LINKS.map(({ hash, label }) => (
             <SectionNavLink key={hash} hash={hash} label={label} pathname={pathname} />
           ))}
@@ -79,7 +86,7 @@ const Navbar = () => {
       </div>
 
       {open && (
-        <div className="section-padding flex flex-col gap-4 border-t border-border bg-background py-4 text-sm font-medium md:hidden">
+        <div className="section-padding flex flex-col gap-4 border-t border-border bg-background py-4 md:hidden">
           {NAV_LINKS.map(({ hash, label }) => (
             <SectionNavLink
               key={hash}

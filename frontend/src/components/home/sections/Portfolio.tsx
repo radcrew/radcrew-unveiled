@@ -85,7 +85,7 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
 
 export const Portfolio = () => {
   return (
-    <section id="portfolio" className="border-y border-border bg-muted px-6 py-20 md:py-32 lg:px-12">
+    <section id="portfolio" className="border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -98,58 +98,63 @@ export const Portfolio = () => {
         </motion.div>
 
         <div className="space-y-32">
-          {featuredProjects.map((project, i) => (
+          {featuredProjects.map((project) => (
             <motion.div
               key={project.title}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 1 }}
-              className="group grid items-center gap-12 md:grid-cols-12"
+              className="group"
             >
-              <div className={`md:col-span-7 ${i % 2 !== 0 ? "md:order-last" : ""}`}>
-                <motion.div
-                  initial={{ clipPath: "inset(0 100% 0 0)" }}
-                  whileInView={{ clipPath: "inset(0 0% 0 0)" }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-                  className="relative aspect-[2/1] overflow-hidden border border-border bg-background shadow-sm"
-                >
-                  {project.images && project.images.length > 0 ? (
-                    <ProjectCarousel title={project.title} images={project.images} />
-                  ) : project.image ? (
-                    <img
-                      src={project.image}
-                      alt={project.title}
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
-                    />
-                  ) : null}
-                  <div className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply bg-primary/5 transition-colors duration-700 group-hover:bg-transparent" />
-                </motion.div>
-              </div>
-              <div className={`flex flex-col justify-center md:col-span-5 ${i % 2 !== 0 ? "md:pr-12" : "md:pl-12"}`}>
+              <div className="mb-10">
+                <h3 className="mb-5 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
+
                 <motion.div
                   initial="hidden"
                   whileInView="visible"
                   variants={tagContainerVariants}
                   viewport={{ once: true }}
-                  className="mb-8 flex flex-wrap gap-3"
+                  className="mb-6 flex flex-wrap gap-2"
                 >
                   {project.tags.map((tag) => (
                     <motion.span
                       key={tag}
                       variants={tagVariants}
-                      className="border border-primary/30 px-4 py-2 text-xs font-light uppercase tracking-widest text-primary"
+                      className="border border-primary/30 px-3 py-1.5 text-[0.6875rem] font-light uppercase tracking-wider text-primary"
                     >
                       {tag}
                     </motion.span>
                   ))}
                 </motion.div>
-                <h3 className="mb-6 font-serif text-4xl leading-tight text-foreground md:text-5xl">{project.title}</h3>
-                <p className="text-lg font-light leading-relaxed text-muted-foreground md:text-xl">{project.description}</p>
+
+                <p className="max-w-3xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl">
+                  {project.description}
+                </p>
               </div>
+
+              {/* Full width beneath the copy, so the screenshots run the measure of
+                  the page and sit at their native 2:1 with nothing cropped. */}
+              <motion.div
+                initial={{ clipPath: "inset(0 100% 0 0)" }}
+                whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                className="relative aspect-[2/1] overflow-hidden border border-border bg-card shadow-sm"
+              >
+                {project.images && project.images.length > 0 ? (
+                  <ProjectCarousel title={project.title} images={project.images} />
+                ) : project.image ? (
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                ) : null}
+                <div className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply bg-primary/5 transition-colors duration-700 group-hover:bg-transparent" />
+              </motion.div>
             </motion.div>
           ))}
         </div>

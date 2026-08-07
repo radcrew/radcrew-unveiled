@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@components/ui/carousel";
-import { testimonials } from "../static-data";
+import { placeholderTestimonials as testimonials } from "../placeholder-content";
+import { Grain } from "../Grain";
 
 const AUTOPLAY_INTERVAL_MS = 6000;
 
@@ -26,14 +27,18 @@ export const Testimonial = () => {
   }, [api]);
 
   return (
-    <section className="relative overflow-hidden border-t border-border bg-muted px-6 py-20 md:py-32 lg:px-12">
-      <div className="mx-auto max-w-4xl text-center">
+    // Second of the four dark anchors (Hero, Spotlight, here, Footer). A quote
+    // carries better on the dark ground, and this sits at the midpoint of the
+    // long light run between the Spotlight and the Footer.
+    <section className="relative overflow-hidden bg-foreground px-6 py-20 text-background antialiased md:py-32 lg:px-12">
+      <Grain />
+      <div className="relative z-10 mx-auto max-w-4xl text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="mb-10 font-serif text-4xl italic text-primary"
+          className="mb-10 font-serif text-4xl italic text-primary-on-dark"
         >
           &quot;
         </motion.div>
@@ -48,11 +53,11 @@ export const Testimonial = () => {
             <CarouselContent>
               {testimonials.map((item) => (
                 <CarouselItem key={item.clientName}>
-                  <h3 className="mb-12 font-serif text-3xl leading-snug text-foreground md:text-5xl">{item.quote}</h3>
+                  <h3 className="mb-12 font-serif text-3xl leading-snug text-background md:text-5xl">{item.quote}</h3>
                   <div className="font-sans text-sm font-light uppercase tracking-widest">
-                    <span className="font-medium text-foreground">{item.clientName}</span>
-                    <span className="mx-2 text-muted-foreground">—</span>
-                    <span className="text-muted-foreground">
+                    <span className="font-medium text-background">{item.clientName}</span>
+                    <span className="mx-2 text-background/50">—</span>
+                    <span className="text-background/60">
                       {item.clientRole}, {item.clientCompany}
                     </span>
                   </div>
@@ -71,7 +76,7 @@ export const Testimonial = () => {
                   aria-label={`Go to testimonial ${idx + 1} of ${testimonials.length}`}
                   aria-current={idx === selectedIndex}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    idx === selectedIndex ? "w-6 bg-primary" : "w-1.5 bg-foreground/20 hover:bg-primary/60"
+                    idx === selectedIndex ? "w-6 bg-primary-on-dark" : "w-1.5 bg-background/25 hover:bg-primary-on-dark/60"
                   }`}
                 />
               ))}

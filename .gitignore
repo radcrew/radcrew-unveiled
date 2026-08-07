@@ -32,6 +32,10 @@ playwright-report
 
 .claude/
 
+# Agent skills installed via `npx skills add`
+.agents/
+skills-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

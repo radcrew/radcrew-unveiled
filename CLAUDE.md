@@ -59,7 +59,7 @@ pip install -r requirements.txt
 | `backend` | *(none)* | `cd backend && python -m pytest` | `python -m compileall -q app` (syntax check only) | `python -m pytest app/tests/test_retrieval.py -k "name"` |
 | `training` | *(none)* | *(no suite)* | n/a | n/a |
 
-Current baseline: frontend 20 Vitest tests, 4 Playwright tests, backend 281 pytest tests (plus 1 skipped without `DATABASE_URL` and 16 deselected `quality` cases), ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
+Current baseline: frontend 33 Vitest tests, 9 Playwright tests, backend 281 pytest tests (plus 1 skipped without `DATABASE_URL` and 16 deselected `quality` cases), ESLint 0 errors with 9 pre-existing `react-refresh/only-export-components` warnings in `components/ui/`. `yarn lint` has no `--max-warnings 0`, so those warnings do not fail CI.
 
 Do not run a hoisted binary straight from the root (`yarn vitest run <path>`). It resolves, because Yarn 1 hoists everything into the root `node_modules/.bin`, but it runs with the root as CWD and never loads `frontend/vitest.config.ts`, so there is no jsdom environment and no setup file. Pure-function tests still pass, which is what makes it dangerous. Always go through `yarn workspace frontend ...`.
 
@@ -80,7 +80,9 @@ Two backend suites are excluded from that default run, both because they need so
 | `backend` | FastAPI, Uvicorn, LangGraph, NeMo Guardrails, huggingface_hub | `POST /chat` (SSE) and `/health` |
 | `training` | Python, QLoRA/TRL | Offline `message` to `is_feedback` classifier, not imported at runtime |
 
-Frontend content comes from two places: hardcoded copy in `frontend/src/components/home/static-data.ts`, and Contentful for team member profiles (`src/lib/contentful.ts`, `src/hooks/useTeamMembers.ts`). Contact and newsletter forms submit through Web3Forms. Contentful is frontend-only despite what `frontend/README.md` claims; see Stale docs.
+Frontend content is all hardcoded, in two files. `frontend/src/components/home/static-data.ts` holds real copy; `frontend/src/components/home/placeholder-content.ts` holds invented placeholder copy (clients, testimonials, case-study metrics, journal posts) and is the file to replace when real content arrives. Contact and newsletter forms submit through Web3Forms.
+
+Contentful was removed when the team section was dropped: it backed team member profiles only, and the section that rendered them is gone. There is no CMS in this project now.
 
 ### Request flow (`POST /chat`)
 

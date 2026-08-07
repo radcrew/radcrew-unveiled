@@ -8,12 +8,17 @@ def test_static_documents_match_expected_ids_and_titles():
     expected_ids = {
         "hero",
         "services",
+        "services-specialist",
         "how-we-work",
         "stats",
         "portfolio",
         "tech-stack",
         "testimonial",
+        "clients",
+        "case-study-spotlight",
+        "journal",
         "faq",
+        "faq-working-together",
         "contact",
     }
     assert expected_ids <= set(by_id)
@@ -26,7 +31,9 @@ def test_static_documents_cover_site_content():
     text = " ".join(d.text for d in get_static_site_documents()).lower()
     # Content that previously lived only on the frontend (static-data.ts).
     assert "cryptopets" in text  # portfolio
+    assert "forgeng" in text  # portfolio
     assert "2 weeks" in text  # FAQ: how quickly can you start
     assert "solana" in text  # capabilities / tech stack
-    assert "jordan lee" in text  # testimonial
+    assert "embedded engineering" in text  # capabilities
+    assert "northwind capital" in text  # testimonials / case study spotlight
     assert "github.com/radcrew" in text  # social/official links

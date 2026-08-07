@@ -1,6 +1,6 @@
 # RadCrew Unveiled — Frontend
 
-Vite + React site. It consumes Contentful for content and talks to the FAQ chatbot API for chat.
+Vite + React site. Content is hardcoded in `src/components/home/`, and it talks to the FAQ chatbot API for chat.
 
 ## Prerequisites
 
@@ -22,12 +22,11 @@ Copy [`.env.example`](.env.example) to `.env` in this directory and set values a
 
 These are embedded in the browser bundle at build time. Do not put secrets you must hide from users in `VITE_*` variables.
 
-- `VITE_CONTENTFUL_SPACE_ID`: Contentful space id (Content Delivery API)
-- `VITE_CONTENTFUL_DELIVERY_TOKEN`: Content Delivery API token ([Contentful](https://www.contentful.com/) → Space → Settings → API keys → Content delivery / preview tokens)
-- `VITE_CONTENTFUL_ENVIRONMENT`: environment name (optional; default in the SDK is often `master`)
 - `VITE_CHATBOT_API_BASE_URL`: base URL for the chat API (default `http://localhost:8787`)
+- `VITE_WEB3FORMS_ACCESS_KEY`: [Web3Forms](https://web3forms.com) key for the contact and newsletter forms
 
-Contentful is used by the frontend only. The backend builds its knowledge base from static site copy and optional GitHub Markdown, and has no Contentful integration.
+The Contentful integration was removed along with the team section; all site copy is now in
+`src/components/home/static-data.ts` and `src/components/home/placeholder-content.ts`.
 
 ## Development
 

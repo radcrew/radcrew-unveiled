@@ -28,14 +28,38 @@ const capabilityCards = [
       "Embedding intelligent capabilities into existing stacks. From custom RAG pipelines to fine-tuned autonomous agents.",
     relatedProject: "Real Estate Consultant",
   },
+  {
+    index: "04",
+    title: "Contract Review & Security",
+    description:
+      "Line-by-line review of the code that holds funds. Accounting drift, upgrade paths, and the failure modes that survive a happy-path test suite.",
+    relatedProject: null,
+  },
+  {
+    index: "05",
+    title: "Data Platforms & Pipelines",
+    description:
+      "Ingestion, transformation, and retrieval that stay predictable under load. Built to be resumed after a failure rather than restarted.",
+    relatedProject: null,
+  },
+  {
+    index: "06",
+    title: "Embedded Engineering",
+    description:
+      "Senior engineers inside your team, on your standups and in your repo. Not a black box that returns a deliverable at the end of a quarter.",
+    relatedProject: null,
+  },
 ] as const;
 
+// `bg-card` sits a step lighter than the paper ground, so the cards read as
+// raised surfaces. They previously used `bg-background`, the same colour as the
+// section behind them, and were defined only by their hairline border.
 const cardClassName =
-  "group border border-primary/20 bg-background p-10 transition-all duration-500 hover:-translate-y-2 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5";
+  "group border border-border bg-card p-10 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
 
 export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (
-    <section id="services" className="relative bg-muted px-6 py-20 md:py-32 lg:px-12">
+    <section id="services" className="relative border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
@@ -61,14 +85,16 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
               </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
               <p className="mb-6 font-light leading-relaxed text-muted-foreground">{card.description}</p>
-              <button
-                type="button"
-                onClick={() => onNavigate("portfolio")}
-                className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
-              >
-                See it in {card.relatedProject}
-                <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
-              </button>
+              {card.relatedProject ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigate("portfolio")}
+                  className="inline-flex items-center gap-2 text-sm font-light uppercase tracking-widest text-primary transition-colors hover:text-foreground"
+                >
+                  See it in {card.relatedProject}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
+                </button>
+              ) : null}
             </motion.div>
           ))}
         </div>

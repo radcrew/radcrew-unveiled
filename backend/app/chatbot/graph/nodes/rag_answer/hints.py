@@ -36,6 +36,10 @@ HINT_CATALOG: dict[str, tuple[str, ...]] = {
         "Can you add AI to an existing product?",
         "Do you do smart contract work?",
     ),
+    "services-specialist": (
+        "Do you audit smart contracts?",
+        "Can you join our existing team?",
+    ),
     "how-we-work": (
         "What happens after launch?",
         "How do you run a build phase?",
@@ -56,9 +60,25 @@ HINT_CATALOG: dict[str, tuple[str, ...]] = {
         "What kind of clients do you work with?",
         "What makes RadCrew different?",
     ),
+    "clients": (
+        "What kind of clients do you work with?",
+        "What makes RadCrew different?",
+    ),
+    "case-study-spotlight": (
+        "What results have you delivered?",
+        "How long does a project take?",
+    ),
+    "journal": (
+        "What do you write about?",
+        "Tell me about your AI work.",
+    ),
     "faq": (
         "How quickly can you start?",
         "Do you offer post-launch support?",
+    ),
+    "faq-working-together": (
+        "Can you work in our existing codebase?",
+        "What happens if we need to stop?",
     ),
     "contact": (
         "How do I start a project?",

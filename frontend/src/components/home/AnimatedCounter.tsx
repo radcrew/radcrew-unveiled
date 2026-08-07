@@ -1,17 +1,24 @@
 import { useEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 
 export function AnimatedCounter({
   end,
   suffix = "",
   duration = 2,
   decimals = 0,
+  className = "font-serif text-5xl text-foreground md:text-6xl",
+  suffixClassName = "text-primary",
 }: {
   end: number;
   suffix?: string;
   duration?: number;
   decimals?: number;
+  className?: string;
+  /** Override on dark sections, where `text-primary` is too dark to read. */
+  suffixClassName?: string;
 }) {
-  const [value, setValue] = useState(0);
+  const reduced = useReducedMotion();
+  const [value, setValue] = useState(reduced ? end : 0);
   const nodeRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
 
@@ -30,7 +37,9 @@ export function AnimatedCounter({
   }, []);
 
   useEffect(() => {
-    if (!inView) return;
+    // Counting up is the animation here, so reduced motion means showing the
+    // final number rather than tweening to it.
+    if (!inView || reduced) return;
     let startTime: number | null = null;
     let animationFrameId = 0;
 
@@ -46,12 +55,12 @@ export function AnimatedCounter({
 
     animationFrameId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [end, duration, inView]);
+  }, [end, duration, inView, reduced]);
 
   return (
-    <div ref={nodeRef} className="font-serif text-5xl text-foreground md:text-6xl">
+    <div ref={nodeRef} className={className}>
       {decimals > 0 ? value.toFixed(decimals) : Math.floor(value)}
-      <span className="ml-1 text-primary">{suffix}</span>
+      <span className={`ml-1 ${suffixClassName}`}>{suffix}</span>
     </div>
   );
 }

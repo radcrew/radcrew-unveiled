@@ -15,6 +15,7 @@ const navLinks = [
   { id: "services", label: "Services" },
   { id: "portfolio", label: "Work" },
   { id: "process", label: "Process" },
+  { id: "journal", label: "Journal" },
 ] as const;
 
 const focusRingClassName =
@@ -38,17 +39,20 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
   };
 
   return (
+    // Padding sits on the nav, outside `max-w-7xl`, matching every section so
+    // nav content lines up with page content at any width. These were nested
+    // the other way round, and the logo used a negative margin to compensate,
+    // which put it flush against the viewport edge below 1280px.
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
-        isScrolled ? "border-b border-primary/20 bg-background/90 py-4 backdrop-blur-xl" : "bg-transparent py-6"
+      className={`fixed left-0 right-0 top-0 z-50 px-6 transition-all duration-500 lg:px-12 ${
+        isScrolled
+          ? "border-b border-primary/20 bg-background/90 py-4 text-foreground backdrop-blur-xl"
+          : // Unscrolled, the bar sits over the dark hero, so it inverts.
+            "bg-transparent py-6 text-background"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12">
-        <Link
-          to="/"
-          className="-ml-6 cursor-pointer text-xl font-light uppercase tracking-[0.25em] lg:-ml-12"
-          data-testid="nav-logo"
-        >
+      <div className="mx-auto flex max-w-7xl items-center justify-between">
+        <Link to="/" className="cursor-pointer text-xl font-light uppercase tracking-[0.25em]" data-testid="nav-logo">
           radcrew
         </Link>
         <div className="hidden items-center gap-10 text-sm uppercase tracking-widest md:flex">
@@ -69,7 +73,11 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
             type="button"
             onClick={() => onNavigate("contact")}
             variant="outline"
-            className="h-auto rounded-none border-primary px-8 py-5 font-light uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
+            className={`h-auto rounded-none px-8 py-5 font-light uppercase tracking-widest transition-colors ${
+              isScrolled
+                ? "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                : "border-background/40 bg-transparent text-background hover:bg-background hover:!text-foreground"
+            }`}
             data-testid="nav-contact"
           >
             Get in Touch
@@ -80,7 +88,7 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
           <SheetTrigger asChild>
             <button
               type="button"
-              className={`text-foreground md:hidden ${focusRingClassName}`}
+              className={`md:hidden ${focusRingClassName}`}
               aria-label="Open menu"
               data-testid="nav-mobile-trigger"
             >

@@ -10,6 +10,7 @@ import { Input } from "@components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 import { scrollSectionIntoView } from "@/lib/scroll-to-section";
+import { Grain } from "../Grain";
 
 const newsletterSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -21,11 +22,12 @@ const footerLinks = [
   { id: "services", label: "Services" },
   { id: "portfolio", label: "Work" },
   { id: "process", label: "Process" },
+  { id: "journal", label: "Journal" },
   { id: "contact", label: "Contact" },
 ] as const;
 
 const footerLinkClassName =
-  "transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
+  "transition-colors hover:text-primary-on-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-foreground";
 
 const socialLinkClassName = footerLinkClassName;
 
@@ -71,8 +73,12 @@ export const Footer = () => {
   }
 
   return (
-    <footer id="footer" className="border-t-4 border-primary bg-foreground px-6 pb-12 pt-24 text-background lg:px-12">
-      <div className="mx-auto max-w-7xl">
+    <footer
+      id="footer"
+      className="relative overflow-hidden border-t-4 border-primary-on-dark bg-foreground px-6 pb-12 pt-24 text-background antialiased lg:px-12"
+    >
+      <Grain />
+      <div className="relative z-10 mx-auto max-w-7xl">
         <div className="mb-24 grid gap-16 md:grid-cols-3">
           <div>
             <div className="mb-8 text-3xl font-light uppercase tracking-[0.25em]">radcrew</div>
@@ -116,7 +122,8 @@ export const Footer = () => {
                         <Button
                           type="submit"
                           variant="outline"
-                          className="h-14 rounded-none border-background/20 bg-primary px-8 text-sm font-light uppercase tracking-widest text-background transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
+                          // Ink on champagne, not cream: cream on this gold is 2.0:1.
+                          className="h-14 rounded-none border-transparent bg-primary-on-dark px-8 text-sm font-light uppercase tracking-widest text-foreground transition-all hover:bg-background hover:text-foreground focus-visible:ring-offset-foreground"
                           disabled={newsletterPending}
                           data-testid="newsletter-submit"
                         >

@@ -84,7 +84,7 @@ const iconVariants: Variants = {
 
 export const TechStack = () => {
   return (
-    <section className="bg-background px-6 py-24 lg:px-12">
+    <section className="border-t border-border bg-background px-6 py-24 lg:px-12">
       <div className="mx-auto max-w-7xl text-center">
         <div className="mb-12 text-sm font-light uppercase tracking-widest text-muted-foreground">
           Technologies We Master

@@ -1,31 +1,28 @@
-import reImg1 from "@/assets/portfolio/real-estate-consultant/Screenshot_1.png";
-import reImg2 from "@/assets/portfolio/real-estate-consultant/Screenshot_2.png";
-import reImg3 from "@/assets/portfolio/real-estate-consultant/Screenshot_3.png";
-import reImg4 from "@/assets/portfolio/real-estate-consultant/Screenshot_4.png";
-import reImg5 from "@/assets/portfolio/real-estate-consultant/Screenshot_5.png";
-import reImg6 from "@/assets/portfolio/real-estate-consultant/Screenshot_6.png";
-import reImg7 from "@/assets/portfolio/real-estate-consultant/Screenshot_7.png";
-import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/Screenshot_1.png";
-import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/Screenshot_2.png";
-import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/Screenshot_3.png";
-import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/Screenshot_4.png";
-import cryptoPetsImg5 from "@/assets/portfolio/cryptopets/Screenshot_5.png";
-import cryptoPetsImg6 from "@/assets/portfolio/cryptopets/Screenshot_6.png";
-import cryptoPetsImg7 from "@/assets/portfolio/cryptopets/Screenshot_7.png";
-import cryptoPetsImg8 from "@/assets/portfolio/cryptopets/Screenshot_8.png";
-import cryptoPetsImg9 from "@/assets/portfolio/cryptopets/Screenshot_9.png";
-import cryptoPetsImg10 from "@/assets/portfolio/cryptopets/Screenshot_10.png";
-import forImg1 from "@/assets/portfolio/forgeng/Screenshot_1.png";
-import forImg2 from "@/assets/portfolio/forgeng/Screenshot_2.png";
-import forImg3 from "@/assets/portfolio/forgeng/Screenshot_3.png";
-import forImg4 from "@/assets/portfolio/forgeng/Screenshot_4.png";
-import forImg5 from "@/assets/portfolio/forgeng/Screenshot_5.png";
-import forImg6 from "@/assets/portfolio/forgeng/Screenshot_6.png";
-import forImg7 from "@/assets/portfolio/forgeng/Screenshot_7.png";
-import forImg8 from "@/assets/portfolio/forgeng/Screenshot_8.png";
-import ceoImg from "@/assets/team/ceo.png";
-import jesusImg from "@/assets/team/jesus-monroig.png";
-import designImg from "@/assets/team/design.png";
+import reImg1 from "@/assets/portfolio/real-estate-consultant/Screenshot_1.webp";
+import reImg2 from "@/assets/portfolio/real-estate-consultant/Screenshot_2.webp";
+import reImg3 from "@/assets/portfolio/real-estate-consultant/Screenshot_3.webp";
+import reImg4 from "@/assets/portfolio/real-estate-consultant/Screenshot_4.webp";
+import reImg5 from "@/assets/portfolio/real-estate-consultant/Screenshot_5.webp";
+import reImg6 from "@/assets/portfolio/real-estate-consultant/Screenshot_6.webp";
+import reImg7 from "@/assets/portfolio/real-estate-consultant/Screenshot_7.webp";
+import cryptoPetsImg1 from "@/assets/portfolio/cryptopets/Screenshot_1.webp";
+import cryptoPetsImg2 from "@/assets/portfolio/cryptopets/Screenshot_2.webp";
+import cryptoPetsImg3 from "@/assets/portfolio/cryptopets/Screenshot_3.webp";
+import cryptoPetsImg4 from "@/assets/portfolio/cryptopets/Screenshot_4.webp";
+import cryptoPetsImg5 from "@/assets/portfolio/cryptopets/Screenshot_5.webp";
+import cryptoPetsImg6 from "@/assets/portfolio/cryptopets/Screenshot_6.webp";
+import cryptoPetsImg7 from "@/assets/portfolio/cryptopets/Screenshot_7.webp";
+import cryptoPetsImg8 from "@/assets/portfolio/cryptopets/Screenshot_8.webp";
+import cryptoPetsImg9 from "@/assets/portfolio/cryptopets/Screenshot_9.webp";
+import cryptoPetsImg10 from "@/assets/portfolio/cryptopets/Screenshot_10.webp";
+import forImg1 from "@/assets/portfolio/forgeng/Screenshot_1.webp";
+import forImg2 from "@/assets/portfolio/forgeng/Screenshot_2.webp";
+import forImg3 from "@/assets/portfolio/forgeng/Screenshot_3.webp";
+import forImg4 from "@/assets/portfolio/forgeng/Screenshot_4.webp";
+import forImg5 from "@/assets/portfolio/forgeng/Screenshot_5.webp";
+import forImg6 from "@/assets/portfolio/forgeng/Screenshot_6.webp";
+import forImg7 from "@/assets/portfolio/forgeng/Screenshot_7.webp";
+import forImg8 from "@/assets/portfolio/forgeng/Screenshot_8.webp";
 
 export type FeaturedProject = {
   title: string;
@@ -70,12 +67,6 @@ export const featuredProjects: FeaturedProject[] = [
   }
 ];
 
-export const teamMembers = [
-  { name: "Hector Rosado", role: "CEO & Founder", image: ceoImg },
-  { name: "Jesus Monroig", role: "Full Stack | Web3 Engineer", image: jesusImg },
-  { name: "Jorge Benitez", role: "Full Stack | AI Engineer", image: designImg },
-];
-
 export const faqs = [
   {
     question: "What size projects do you take on?",
@@ -99,21 +90,20 @@ export const faqs = [
     question: "What makes radcrew different?",
     answer: "Senior talent only. No handoffs to juniors. The people you meet are the people who build. Meticulous execution.",
   },
-];
-
-export type Testimonial = {
-  quote: string;
-  clientName: string;
-  clientRole: string;
-  clientCompany: string;
-};
-
-/** Add more entries here to enable the rotating carousel in Testimonial.tsx. */
-export const testimonials: Testimonial[] = [
   {
-    quote: "An incredible partner that transformed our technical architecture from the ground up.",
-    clientName: "Jordan Lee",
-    clientRole: "CTO",
-    clientCompany: "Series B Fintech",
+    question: "Who actually writes the code?",
+    answer:
+      "The engineers you meet in the first call. We do not staff a pitch with seniors and deliver with juniors, and we do not subcontract work out.",
+  },
+  {
+    question: "Can you work inside our existing codebase and process?",
+    answer:
+      "Yes. Most engagements start in a repo someone else wrote. We join your standups, your review process, and your branching model rather than asking you to adopt ours.",
+  },
+  {
+    question: "What happens if we need to pause or stop?",
+    answer:
+      "You can stop at a sprint boundary. There is no lock-in clause, and everything we have built plus the documentation for it is yours on the way out.",
   },
 ];
+
