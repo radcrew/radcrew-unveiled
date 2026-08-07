@@ -94,7 +94,11 @@ export const Hero = ({ onNavigate }: HeroProps) => {
               <Button
                 type="button"
                 onClick={() => onNavigate("portfolio")}
-                className="h-auto w-full rounded-none bg-background px-10 py-6 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90 md:py-7"
+                // Height is set rather than derived from padding: the outline
+                // variant next to this one carries a 1px border and this one
+                // does not, which made the pair 76px and 78px tall, aligned at
+                // the top and out by 2px at the bottom.
+                className="h-14 w-full rounded-full bg-background px-10 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90"
                 data-testid="hero-cta-work"
               >
                 View Selected Work
@@ -105,7 +109,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
                 type="button"
                 onClick={() => onNavigate("contact")}
                 variant="outline"
-                className="h-auto w-full rounded-none border-background/30 bg-transparent px-10 py-6 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground md:py-7"
+                className="h-14 w-full rounded-full border-background/30 bg-transparent px-10 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground"
                 data-testid="hero-cta-contact"
               >
                 Start a Project
