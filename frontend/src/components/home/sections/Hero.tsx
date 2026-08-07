@@ -67,6 +67,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
           <span className="text-xs font-light uppercase tracking-[0.28em] text-primary-on-dark sm:text-sm">
             Hire one of us, not a company
           </span>
+          <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary-on-dark" />
         </motion.p>
 
         {/* Full width rather than a column, so the display face can run to the

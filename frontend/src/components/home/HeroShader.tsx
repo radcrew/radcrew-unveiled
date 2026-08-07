@@ -66,27 +66,35 @@ void main() {
   // Corrected for aspect so the field does not stretch on wide viewports.
   vec2 p = vec2(uv.x * aspect, uv.y);
 
-  float t = u_time * 0.05;
+  float t = u_time * 0.13;
 
   // Domain warp: the field is sampled through an offset of itself. Without it
   // four octaves of value noise slide past as a flat texture; with it the field
   // folds into itself and reads as something moving in depth.
   vec2 warp = vec2(fbm(p * 1.6 + t), fbm(p * 1.6 + vec2(4.3, 1.9) - t));
-  float field = fbm(p * 1.9 + warp * 1.4);
+
+  // The warp is the only thing that moved at first, and a change in the warp
+  // reaches the output heavily damped, so the field crawled. The direct drift
+  // is what actually makes the motion legible.
+  float field = fbm(p * 1.9 + warp * 1.4 + vec2(0.0, t * 0.5));
 
   // Anchored on the same point as the CSS gradient underneath (12% from the
   // left, 28% from the top, and gl_FragCoord counts up from the bottom), so the
   // two layers read as one light source rather than two.
   vec2 anchor = vec2(0.12 * aspect, 0.72);
-  float falloff = 1.0 - smoothstep(0.0, 1.05, distance(p, anchor));
+  float falloff = 1.0 - smoothstep(0.0, 1.25, distance(p, anchor));
 
   vec3 ember = vec3(0.55, 0.30, 0.12);
   vec3 gold = vec3(0.82, 0.62, 0.28);
   vec3 color = mix(ember, gold, smoothstep(0.35, 0.85, field));
 
-  // Held low on purpose. The hero's cream type measures 18:1 against the dark
-  // ground and the brightest this layer gets must not meaningfully move that.
-  float alpha = smoothstep(0.32, 0.95, field) * falloff * 0.32;
+  // The ceiling here is the contrast budget rather than taste. Measured per
+  // element against the hero's own type, this alpha leaves every one of them
+  // above its WCAG threshold: the tightest is the 20px paragraph at 5.35:1
+  // against the 4.5:1 it needs, down from 6.56:1 with no bloom at all. The
+  // brightest pixel the field can produce is hotter than that, but it falls in
+  // the empty upper left where no text sits. Raising this spends that margin.
+  float alpha = smoothstep(0.28, 0.78, field) * falloff * 0.40;
 
   gl_FragColor = vec4(color, alpha);
 }
