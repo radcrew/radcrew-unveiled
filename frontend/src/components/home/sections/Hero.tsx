@@ -4,6 +4,7 @@ import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
 import { Grain } from "../Grain";
+import { HeroShader } from "../HeroShader";
 import { fadeIn, staggerContainer } from "../motion";
 
 type HeroProps = {
@@ -34,7 +35,8 @@ export const Hero = ({ onNavigate }: HeroProps) => {
     <section className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-foreground px-6 text-background antialiased lg:px-12">
       <div aria-hidden="true" className="absolute inset-0 z-0">
         {/* Warm bloom behind the headline, so the type sits in light rather than
-            on a flat rectangle. */}
+            on a flat rectangle. Also the fallback the shader above it composites
+            over, and all that is left when WebGL is unavailable. */}
         <div
           className="absolute inset-0"
           style={{
@@ -42,6 +44,9 @@ export const Hero = ({ onNavigate }: HeroProps) => {
               "radial-gradient(120% 90% at 12% 28%, hsl(38 60% 55% / 0.16) 0%, hsl(38 60% 55% / 0.05) 34%, transparent 68%)",
           }}
         />
+        <HeroShader />
+        {/* Above the shader, so the grain sits on the moving field the same way
+            it sits on every other dark surface. */}
         <Grain />
         {/* Settles the foot of the section into the band and the page below it. */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-foreground to-transparent" />
