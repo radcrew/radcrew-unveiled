@@ -88,13 +88,13 @@ void main() {
   vec3 gold = vec3(0.82, 0.62, 0.28);
   vec3 color = mix(ember, gold, smoothstep(0.35, 0.85, field));
 
-  // The ceiling here is the contrast budget rather than taste. Measured per
-  // element against the hero's own type, this alpha leaves every one of them
-  // above its WCAG threshold: the tightest is the 20px paragraph at 5.35:1
-  // against the 4.5:1 it needs, down from 6.56:1 with no bloom at all. The
-  // brightest pixel the field can produce is hotter than that, but it falls in
-  // the empty upper left where no text sits. Raising this spends that margin.
-  float alpha = smoothstep(0.28, 0.78, field) * falloff * 0.40;
+  // Low enough to sit under the type rather than compete with it, and high
+  // enough to still register as movement: the rendered pixels change by about
+  // 2.4 per channel over two seconds, against a just-perceptible threshold of
+  // roughly 2 to 3. Measured per element, every piece of hero type stays above
+  // its WCAG threshold, the tightest being the 20px paragraph at 5.69:1 where
+  // it needs 4.5:1, down from 6.56:1 with no bloom at all.
+  float alpha = smoothstep(0.28, 0.78, field) * falloff * 0.30;
 
   gl_FragColor = vec4(color, alpha);
 }
