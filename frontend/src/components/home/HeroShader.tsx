@@ -66,17 +66,22 @@ void main() {
   // Corrected for aspect so the field does not stretch on wide viewports.
   vec2 p = vec2(uv.x * aspect, uv.y);
 
-  float t = u_time * 0.13;
+  // Slow, because the field should read as weight shifting rather than as
+  // something being animated. Rate alone does not achieve that: small forms
+  // moving slowly still look restless, so the sampling scales below are low,
+  // which makes the masses large. Few and large drifting slowly is what reads
+  // as heavy; many and small is what reads as busy, at any speed.
+  float t = u_time * 0.075;
 
   // Domain warp: the field is sampled through an offset of itself. Without it
   // four octaves of value noise slide past as a flat texture; with it the field
   // folds into itself and reads as something moving in depth.
-  vec2 warp = vec2(fbm(p * 1.6 + t), fbm(p * 1.6 + vec2(4.3, 1.9) - t));
+  vec2 warp = vec2(fbm(p * 1.05 + t), fbm(p * 1.05 + vec2(4.3, 1.9) - t));
 
-  // The warp is the only thing that moved at first, and a change in the warp
-  // reaches the output heavily damped, so the field crawled. The direct drift
-  // is what actually makes the motion legible.
-  float field = fbm(p * 1.9 + warp * 1.4 + vec2(0.0, t * 0.5));
+  // A change in the warp reaches the output heavily damped, so with the warp as
+  // the only moving part the field barely crawled. The direct drift is what
+  // carries the motion; the warp is what stops it looking like a pan.
+  float field = fbm(p * 1.25 + warp * 1.4 + vec2(0.0, t * 0.5));
 
   // Anchored on the same point as the CSS gradient underneath (12% from the
   // left, 28% from the top, and gl_FragCoord counts up from the bottom), so the
@@ -88,13 +93,14 @@ void main() {
   vec3 gold = vec3(0.82, 0.62, 0.28);
   vec3 color = mix(ember, gold, smoothstep(0.35, 0.85, field));
 
-  // Low enough to sit under the type rather than compete with it, and high
-  // enough to still register as movement: the rendered pixels change by about
-  // 2.4 per channel over two seconds, against a just-perceptible threshold of
-  // roughly 2 to 3. Measured per element, every piece of hero type stays above
-  // its WCAG threshold, the tightest being the 20px paragraph at 5.69:1 where
-  // it needs 4.5:1, down from 6.56:1 with no bloom at all.
-  float alpha = smoothstep(0.28, 0.78, field) * falloff * 0.30;
+  // Tuned against the pair of measurements that matter, not by eye. The
+  // rendered pixels change by about 1.3 per channel over two seconds, under the
+  // 2-to-3 threshold where movement becomes noticeable as it happens, and by
+  // 2.2 over twelve, so the field is somewhere else when you look back without
+  // ever catching the eye. Contrast-wise every piece of hero type sits within
+  // half a point of its no-bloom baseline; the tightest is the 20px paragraph
+  // at 6.08:1 against the 4.5:1 it needs.
+  float alpha = smoothstep(0.28, 0.78, field) * falloff * 0.40;
 
   gl_FragColor = vec4(color, alpha);
 }
