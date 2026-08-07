@@ -22,7 +22,10 @@ export const Parallax = ({ children, distance = 80, className }: ParallaxProps) 
   if (reduced) return <div className={className}>{children}</div>;
 
   return (
-    <div ref={ref} className={className}>
+    // `relative` is required, not cosmetic: `useScroll` measures this element's
+    // offset and warns on every page load that the result is unreliable while it
+    // is statically positioned.
+    <div ref={ref} className={`relative ${className ?? ""}`}>
       <motion.div style={{ y }}>{children}</motion.div>
     </div>
   );
