@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { fadeIn, staggerContainer } from "../motion";
+import { maskWipe, riseIn, staggerContainer } from "../motion";
 
 type CapabilitiesProps = {
   onNavigate: (sectionId: string) => void;
@@ -64,22 +64,29 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
         <motion.div
           initial="hidden"
           whileInView="visible"
-          variants={fadeIn}
-          viewport={{ once: true, margin: "-100px" }}
+          variants={maskWipe}
+          // No `margin` here, unlike every other viewport trigger in this
+          // file's history: a negative viewport margin stops the `clipPath`
+          // keyframes firing at all, and the heading stays fully clipped and
+          // invisible. `fadeIn` was unaffected, which is why the margin
+          // survived until this section took the wipe.
+          viewport={{ once: true }}
         >
           <h2 className="mb-20 border-b border-border pb-8 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
         </motion.div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        {/* The stagger belongs on the grid, not on each card. It was previously
+            set on every card individually, where it had no variant children to
+            stagger and so amounted to a plain fade six times over. */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          variants={staggerContainer}
+          viewport={{ once: true }}
+          className="grid gap-8 md:grid-cols-3"
+        >
           {capabilityCards.map((card) => (
-            <motion.div
-              key={card.index}
-              initial="hidden"
-              whileInView="visible"
-              variants={staggerContainer}
-              viewport={{ once: true }}
-              className={cardClassName}
-            >
+            <motion.div key={card.index} variants={riseIn} className={cardClassName}>
               <div className="mb-8 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
                 {card.index}
               </div>
@@ -97,7 +104,7 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
               ) : null}
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

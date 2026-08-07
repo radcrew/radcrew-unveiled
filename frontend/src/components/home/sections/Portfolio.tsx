@@ -10,7 +10,7 @@ import {
 } from "@components/ui/carousel";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { featuredProjects, type FeaturedProject } from "../static-data";
-import { fadeIn } from "../motion";
+import { maskWipe } from "../motion";
 
 const tagContainerVariants: Variants = {
   hidden: {},
@@ -301,7 +301,7 @@ export const Portfolio = () => {
       <motion.div
         initial="hidden"
         whileInView="visible"
-        variants={fadeIn}
+        variants={maskWipe}
         viewport={{ once: true }}
         className="mx-auto mb-24 flex max-w-7xl flex-col items-baseline justify-between gap-8 border-b border-border px-6 pb-8 md:flex-row lg:px-12"
       >
