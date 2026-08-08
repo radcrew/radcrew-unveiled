@@ -309,7 +309,11 @@ export const Portfolio = () => {
         whileInView="visible"
         variants={maskWipe}
         viewport={{ once: true }}
-        className="mx-auto mb-24 flex max-w-7xl flex-col items-baseline justify-between gap-8 border-b border-border px-6 pb-8 md:flex-row lg:px-12"
+        // Tighter than the other section headings on purpose: what follows is a
+        // pinned region whose first card is already centred in the viewport, so
+        // the heading's own bottom margin stacks on top of that empty band
+        // rather than sitting next to content the way it does elsewhere.
+        className="mx-auto mb-10 flex max-w-7xl flex-col items-baseline justify-between gap-8 border-b border-border px-6 pb-8 md:flex-row lg:px-12"
       >
         <h2 className="font-serif text-5xl text-foreground md:text-7xl">Selected Work</h2>
       </motion.div>
