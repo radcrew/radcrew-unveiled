@@ -55,7 +55,7 @@ const capabilityCards = [
 // raised surfaces. They previously used `bg-background`, the same colour as the
 // section behind them, and were defined only by their hairline border.
 const cardClassName =
-  "group border border-border bg-card p-10 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
+  "group border border-border bg-card p-8 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
 
 export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (
@@ -81,7 +81,7 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
           // survived until this section took the wipe.
           viewport={{ once: true }}
         >
-          <h2 className="mb-20 border-b border-border pb-8 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
+          <h2 className="mb-10 border-b border-border pb-6 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
         </motion.div>
 
         {/* The stagger belongs on the grid, not on each card. It was previously
@@ -92,15 +92,15 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
           whileInView="visible"
           variants={staggerContainer}
           viewport={{ once: true }}
-          className="grid gap-8 md:grid-cols-3"
+          className="grid gap-6 md:grid-cols-3"
         >
           {capabilityCards.map((card) => (
             <motion.div key={card.index} variants={riseIn} className={cardClassName}>
-              <div className="mb-8 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
+              <div className="mb-6 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
                 {card.index}
               </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
-              <p className="mb-6 font-light leading-relaxed text-muted-foreground">{card.description}</p>
+              <p className="mb-4 font-light leading-relaxed text-muted-foreground">{card.description}</p>
               {card.relatedProject ? (
                 <button
                   type="button"
