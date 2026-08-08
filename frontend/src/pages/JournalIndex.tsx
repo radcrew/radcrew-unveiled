@@ -5,7 +5,7 @@ import { SplitText } from "@components/motion/SplitText";
 import { placeholderJournal } from "@components/home/placeholder-content";
 import { formatPostDate } from "@/lib/format-date";
 
-const JournalIndex = () => {
+export const JournalIndex = () => {
   return (
     <main className="min-h-[100dvh] bg-background px-6 pb-32 pt-40 lg:px-12">
       <div className="mx-auto max-w-4xl">
@@ -53,5 +53,3 @@ const JournalIndex = () => {
     </main>
   );
 };
-
-export default JournalIndex;

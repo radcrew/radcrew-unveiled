@@ -14,10 +14,11 @@ import { Journal } from "./sections/Journal";
 import { Faq } from "./sections/Faq";
 import { ContactSection } from "./sections/ContactSection";
 import { Footer } from "./sections/Footer";
+import { scrollSectionIntoView } from "@/lib/scroll-to-section";
 
 const NAV_SECTION_IDS = ["services", "portfolio", "process", "journal"];
 
-const Landing = () => {
+export const Landing = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isNavHidden, setIsNavHidden] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -57,18 +58,13 @@ const Landing = () => {
     return () => observer.disconnect();
   }, []);
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <div className="min-h-[100dvh] bg-background font-sans text-foreground selection:bg-primary/30 selection:text-primary">
-      <Nav isScrolled={isScrolled} isHidden={isNavHidden} activeSection={activeSection} onNavigate={scrollTo} />
-      <Hero onNavigate={scrollTo} />
+      <Nav isScrolled={isScrolled} isHidden={isNavHidden} activeSection={activeSection} onNavigate={scrollSectionIntoView} />
+      <Hero onNavigate={scrollSectionIntoView} />
       <Clients />
       <ProofBand />
-      <Capabilities onNavigate={scrollTo} />
+      <Capabilities onNavigate={scrollSectionIntoView} />
       <Spotlight />
       <Process />
       <Portfolio />
@@ -81,5 +77,3 @@ const Landing = () => {
     </div>
   );
 };
-
-export default Landing;

@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/use-toast";
 import { getWeb3FormsAccessKey, submitWeb3Form } from "@/lib/web3forms-submit";
 
 const contactSchema = z.object({
