@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@components/ui/accordion";
 import { faqs } from "../static-data";
-import { fadeIn, staggerContainer } from "../motion";
+import { maskWipe, riseIn, staggerContainer } from "../motion";
 
 export const Faq = () => {
   return (
@@ -15,7 +15,7 @@ export const Faq = () => {
         <motion.h2
           initial="hidden"
           whileInView="visible"
-          variants={fadeIn}
+          variants={maskWipe}
           viewport={{ once: true }}
           className="mb-16 text-center font-serif text-5xl text-foreground md:text-7xl"
         >
@@ -25,7 +25,7 @@ export const Faq = () => {
         <motion.div initial="hidden" whileInView="visible" variants={staggerContainer} viewport={{ once: true }}>
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((faq, i) => (
-              <motion.div key={faq.question} variants={fadeIn}>
+              <motion.div key={faq.question} variants={riseIn}>
                 <AccordionItem value={`item-${i}`} className="border-border">
                   <AccordionTrigger className="py-6 text-left font-serif text-lg font-medium hover:text-primary hover:no-underline md:text-xl">
                     {faq.question}

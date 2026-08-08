@@ -61,7 +61,13 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    --site-header-height: 5rem;
+    /*
+     * The floating nav's occupied height plus breathing room, not just its
+     * height. `scroll-padding-top` reads this, so at exactly the bar's own
+     * 5rem every anchored section landed with its top border flush under a
+     * translucent pill. The extra 1.5rem is what puts a visible gap there.
+     */
+    --site-header-height: 6.5rem;
   }
 }
 

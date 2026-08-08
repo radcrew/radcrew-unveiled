@@ -6,7 +6,9 @@ import { formatPostDate } from "@/lib/format-date";
 
 export const Journal = () => {
   return (
-    <section id="journal" className="bg-background px-6 py-20 md:py-32 lg:px-12">
+    // Negative scroll margin matched to this section's own top padding, so the
+    // anchor lands on the heading rather than on the padding above it.
+    <section id="journal" className="-scroll-mt-20 bg-background px-6 py-20 md:-scroll-mt-32 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-20 flex flex-col items-baseline justify-between gap-6 border-b border-border pb-8 md:flex-row">
           <h2 className="font-serif text-5xl text-foreground md:text-7xl">Journal</h2>

@@ -3,9 +3,9 @@ import { ArrowLeft } from "lucide-react";
 import { Reveal } from "@components/motion/Reveal";
 import { placeholderJournal } from "@components/home/placeholder-content";
 import { formatPostDate } from "@/lib/format-date";
-import NotFound from "./NotFound";
+import { NotFound } from "./NotFound";
 
-const JournalPost = () => {
+export const JournalPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const post = placeholderJournal.find((p) => p.slug === slug);
 
@@ -46,5 +46,3 @@ const JournalPost = () => {
     </main>
   );
 };
-
-export default JournalPost;

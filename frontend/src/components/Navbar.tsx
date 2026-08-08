@@ -56,7 +56,7 @@ function SectionNavLink({
   );
 }
 
-const Navbar = () => {
+export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
 
@@ -101,5 +101,3 @@ const Navbar = () => {
     </nav>
   );
 };
-
-export default Navbar;

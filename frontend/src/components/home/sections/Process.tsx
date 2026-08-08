@@ -1,5 +1,5 @@
 import { motion, type Variants } from "framer-motion";
-import { fadeIn } from "../motion";
+import { maskWipe, riseIn } from "../motion";
 
 const phases = [
   {
@@ -28,11 +28,6 @@ const phases = [
   },
 ] as const;
 
-const phaseItemVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
-
 const phaseContainerVariants = (delay: number): Variants => ({
   hidden: {},
   visible: { transition: { delayChildren: delay, staggerChildren: 0.12 } },
@@ -40,9 +35,11 @@ const phaseContainerVariants = (delay: number): Variants => ({
 
 export const Process = () => {
   return (
-    <section id="process" className="bg-background px-6 py-20 md:py-32 lg:px-12">
+    // Negative scroll margin matched to this section's own top padding, so the
+    // anchor lands on the heading rather than on the padding above it.
+    <section id="process" className="-scroll-mt-20 bg-background px-6 py-20 md:-scroll-mt-32 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
-        <motion.div initial="hidden" whileInView="visible" variants={fadeIn} viewport={{ once: true }} className="mb-24">
+        <motion.div initial="hidden" whileInView="visible" variants={maskWipe} viewport={{ once: true }} className="mb-24">
           <h2 className="max-w-4xl font-serif text-5xl leading-tight text-foreground md:text-7xl">
             From first call to production—and after.
           </h2>
@@ -76,21 +73,21 @@ export const Process = () => {
               variants={phaseContainerVariants(i * 0.15)}
               className="relative"
             >
-              <motion.div variants={phaseItemVariants} className="mb-6 font-serif text-4xl italic text-primary">
+              <motion.div variants={riseIn} className="mb-6 font-serif text-4xl italic text-primary">
                 {phase.num}
               </motion.div>
-              <motion.h4 variants={phaseItemVariants} className="mb-4 font-serif text-2xl text-foreground">
+              <motion.h4 variants={riseIn} className="mb-4 font-serif text-2xl text-foreground">
                 {phase.title}
               </motion.h4>
               {/* Reserves three lines so the deliverable lists share a baseline
                   across columns whose descriptions wrap to different heights. */}
               <motion.p
-                variants={phaseItemVariants}
+                variants={riseIn}
                 className="mb-6 font-light leading-relaxed text-muted-foreground md:min-h-[4.875rem]"
               >
                 {phase.desc}
               </motion.p>
-              <motion.ul variants={phaseItemVariants} className="space-y-2">
+              <motion.ul variants={riseIn} className="space-y-2">
                 {phase.deliverables.map((item) => (
                   <li key={item} className="flex gap-3 text-sm font-light text-muted-foreground">
                     <span aria-hidden="true" className="text-primary">

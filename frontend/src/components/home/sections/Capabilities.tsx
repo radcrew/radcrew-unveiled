@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { fadeIn, staggerContainer } from "../motion";
+import { maskWipe, riseIn, staggerContainer } from "../motion";
 
 type CapabilitiesProps = {
   onNavigate: (sectionId: string) => void;
@@ -55,36 +55,52 @@ const capabilityCards = [
 // raised surfaces. They previously used `bg-background`, the same colour as the
 // section behind them, and were defined only by their hairline border.
 const cardClassName =
-  "group border border-border bg-card p-10 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
+  "group border border-border bg-card p-8 shadow-[0_1px_2px_rgba(26,23,20,0.04)] transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10";
 
 export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (
-    <section id="services" className="relative border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
+    // The negative scroll margin cancels this section's own top padding for
+    // anchor navigation only. Without it the anchor lands on the padding box,
+    // so clicking Services put 128px of empty space under the nav, pushed the
+    // heading 153px down, and left a sliver of the previous section showing
+    // above it. Matched to `py-20 md:py-32` at both breakpoints, which lands
+    // the heading at the same height the pinned Work section uses.
+    <section
+      id="services"
+      className="relative -scroll-mt-20 border-t border-border bg-background px-6 py-20 md:-scroll-mt-32 md:py-32 lg:px-12"
+    >
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"
           whileInView="visible"
-          variants={fadeIn}
-          viewport={{ once: true, margin: "-100px" }}
+          variants={maskWipe}
+          // No `margin` here, unlike every other viewport trigger in this
+          // file's history: a negative viewport margin stops the `clipPath`
+          // keyframes firing at all, and the heading stays fully clipped and
+          // invisible. `fadeIn` was unaffected, which is why the margin
+          // survived until this section took the wipe.
+          viewport={{ once: true }}
         >
-          <h2 className="mb-20 border-b border-border pb-8 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
+          <h2 className="mb-10 border-b border-border pb-6 font-serif text-5xl text-foreground md:text-7xl">Capabilities</h2>
         </motion.div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        {/* The stagger belongs on the grid, not on each card. It was previously
+            set on every card individually, where it had no variant children to
+            stagger and so amounted to a plain fade six times over. */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          variants={staggerContainer}
+          viewport={{ once: true }}
+          className="grid gap-6 md:grid-cols-3"
+        >
           {capabilityCards.map((card) => (
-            <motion.div
-              key={card.index}
-              initial="hidden"
-              whileInView="visible"
-              variants={staggerContainer}
-              viewport={{ once: true }}
-              className={cardClassName}
-            >
-              <div className="mb-8 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
+            <motion.div key={card.index} variants={riseIn} className={cardClassName}>
+              <div className="mb-6 font-serif text-3xl italic text-primary transition-transform duration-500 group-hover:translate-x-2">
                 {card.index}
               </div>
               <h3 className="mb-4 font-serif text-3xl text-foreground">{card.title}</h3>
-              <p className="mb-6 font-light leading-relaxed text-muted-foreground">{card.description}</p>
+              <p className="mb-4 font-light leading-relaxed text-muted-foreground">{card.description}</p>
               {card.relatedProject ? (
                 <button
                   type="button"
@@ -97,7 +113,7 @@ export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
               ) : null}
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -4,7 +4,7 @@ import { RadButton } from "@components/ui/rad-button";
 import { CardDescription, CardFooter, CardHeader, CardTitle } from "@components/ui/card";
 import { RadCard } from "@components/ui/rad-card";
 
-const NotFound = () => {
+export const NotFound = () => {
   const location = useLocation();
 
   useEffect(() => {
@@ -27,5 +27,3 @@ const NotFound = () => {
     </div>
   );
 };
-
-export default NotFound;

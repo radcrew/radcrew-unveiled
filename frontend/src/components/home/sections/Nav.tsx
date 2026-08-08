@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@components/ui/sheet";
@@ -7,6 +8,7 @@ import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay
 
 type NavProps = {
   isScrolled: boolean;
+  isHidden: boolean;
   activeSection: string;
   onNavigate: (sectionId: string) => void;
 };
@@ -21,9 +23,10 @@ const navLinks = [
 const focusRingClassName =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
+export const Nav = ({ isScrolled, isHidden, activeSection, onNavigate }: NavProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigatingRef = useRef(false);
+  const reduced = useReducedMotion();
 
   useCloseOnOtherOverlayOpen("nav", () => setMobileOpen(false));
 
@@ -38,42 +41,87 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
     onNavigate(id);
   };
 
+  // The indicator is one element that moves between links rather than a colour
+  // swap per link, so the eye follows it across the bar. Reduced motion keeps
+  // the move but drops the travel, which is the part that reads as animation.
+  const indicatorTransition = reduced
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 380, damping: 32 };
+
   return (
-    // Padding sits on the nav, outside `max-w-7xl`, matching every section so
-    // nav content lines up with page content at any width. These were nested
-    // the other way round, and the logo used a negative margin to compensate,
-    // which put it flush against the viewport edge below 1280px.
+    // The bar floats clear of the viewport edge instead of sitting flush to it,
+    // so the page scrolls visibly *under* glass rather than behind an opaque
+    // strip. The outer element keeps the old horizontal padding, and the pill
+    // inside it is capped at `max-w-7xl`, so the pill's edges land on the same
+    // measure as every section below. Total occupied height is the 16px offset
+    // plus the ~64px pill, which is the 5rem `--site-header-height` that
+    // `scroll-padding-top` already assumes; leave both in step.
+    // Hidden by translating clear of the top edge rather than by unmounting, so
+    // the bar keeps its layout box and slides back rather than reappearing. It
+    // stays put while the mobile sheet is open, since that sheet is anchored to
+    // it, and `focus-within` overrides the hide so tabbing into the bar cannot
+    // move focus to something off-screen.
     <nav
-      className={`fixed left-0 right-0 top-0 z-50 px-6 transition-all duration-500 lg:px-12 ${
-        isScrolled
-          ? "border-b border-primary/20 bg-background/90 py-4 text-foreground backdrop-blur-xl"
-          : // Unscrolled, the bar sits over the dark hero, so it inverts.
-            "bg-transparent py-6 text-background"
-      }`}
+      className={`fixed left-0 right-0 z-50 px-4 transition-all duration-500 focus-within:translate-y-0 lg:px-8 ${
+        isScrolled ? "top-2" : "top-4"
+      } ${isHidden && !mobileOpen ? "-translate-y-[calc(100%+1.5rem)]" : "translate-y-0"}`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between">
-        <Link to="/" className="cursor-pointer text-xl font-light uppercase tracking-[0.25em]" data-testid="nav-logo">
+      <div
+        className={`mx-auto flex max-w-7xl items-center justify-between gap-6 rounded-full border px-5 py-3 backdrop-blur-xl transition-colors duration-500 ${
+          isScrolled
+            ? // Over the cream body. The inset highlight is what separates glass
+              // from a plain translucent panel: it fakes the lit top edge.
+              "border-border/70 bg-background/70 text-foreground shadow-[0_10px_36px_-16px_hsl(26_14%_9%/0.32),inset_0_1px_0_hsl(0_0%_100%/0.8)]"
+            : // Over the dark hero, tinted the other way so the type stays cream.
+              "border-background/20 bg-background/10 text-background shadow-[inset_0_1px_0_hsl(0_0%_100%/0.22)]"
+        }`}
+      >
+        <Link
+          to="/"
+          className={`cursor-pointer pl-1 text-lg font-light uppercase tracking-[0.25em] ${focusRingClassName}`}
+          data-testid="nav-logo"
+        >
           radcrew
         </Link>
-        <div className="hidden items-center gap-10 text-sm uppercase tracking-widest md:flex">
-          {navLinks.map((link) => (
-            <button
-              key={link.id}
-              type="button"
-              onClick={() => onNavigate(link.id)}
-              className={`transition-colors hover:text-primary ${focusRingClassName} ${
-                activeSection === link.id ? "text-primary" : ""
-              }`}
-              data-testid={`nav-${link.id}`}
-            >
-              {link.label}
-            </button>
-          ))}
+
+        <div className="hidden items-center gap-1 text-xs uppercase tracking-widest md:flex">
+          {navLinks.map((link) => {
+            const isActive = activeSection === link.id;
+            return (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => onNavigate(link.id)}
+                className={`relative rounded-full px-4 py-2 transition-colors ${focusRingClassName} ${
+                  isActive
+                    ? isScrolled
+                      ? "text-primary"
+                      : "text-primary-on-dark"
+                    : isScrolled
+                      ? "text-muted-foreground hover:text-foreground"
+                      : "text-background/70 hover:text-background"
+                }`}
+                data-testid={`nav-${link.id}`}
+              >
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-active-pill"
+                    aria-hidden="true"
+                    transition={indicatorTransition}
+                    className={`absolute inset-0 rounded-full ${
+                      isScrolled ? "bg-primary/10" : "bg-background/15"
+                    }`}
+                  />
+                )}
+                <span className="relative">{link.label}</span>
+              </button>
+            );
+          })}
           <Button
             type="button"
             onClick={() => onNavigate("contact")}
             variant="outline"
-            className={`h-auto rounded-none px-8 py-5 font-light uppercase tracking-widest transition-colors ${
+            className={`ml-2 h-auto rounded-full px-6 py-2.5 text-xs font-light uppercase tracking-widest transition-colors ${
               isScrolled
                 ? "border-primary text-primary hover:bg-primary hover:text-primary-foreground"
                 : "border-background/40 bg-transparent text-background hover:bg-background hover:!text-foreground"
@@ -88,7 +136,7 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
           <SheetTrigger asChild>
             <button
               type="button"
-              className={`md:hidden ${focusRingClassName}`}
+              className={`rounded-full p-1 md:hidden ${focusRingClassName}`}
               aria-label="Open menu"
               data-testid="nav-mobile-trigger"
             >
@@ -115,7 +163,9 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
                   key={link.id}
                   type="button"
                   onClick={() => handleMobileNavigate(link.id)}
-                  className={`text-left transition-colors hover:text-primary ${focusRingClassName}`}
+                  className={`text-left transition-colors hover:text-primary ${focusRingClassName} ${
+                    activeSection === link.id ? "text-primary" : ""
+                  }`}
                   data-testid={`nav-mobile-${link.id}`}
                 >
                   {link.label}
@@ -125,7 +175,7 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
                 type="button"
                 onClick={() => handleMobileNavigate("contact")}
                 variant="outline"
-                className="h-auto w-full rounded-none border-primary px-8 py-5 font-light uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
+                className="h-auto w-full rounded-full border-primary px-8 py-5 font-light uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground"
                 data-testid="nav-mobile-contact"
               >
                 Get in Touch

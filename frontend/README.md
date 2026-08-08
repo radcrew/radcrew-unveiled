@@ -25,8 +25,9 @@ These are embedded in the browser bundle at build time. Do not put secrets you m
 - `VITE_CHATBOT_API_BASE_URL`: base URL for the chat API (default `http://localhost:8787`)
 - `VITE_WEB3FORMS_ACCESS_KEY`: [Web3Forms](https://web3forms.com) key for the contact and newsletter forms
 
-The Contentful integration was removed along with the team section; all site copy is now in
-`src/components/home/static-data.ts` and `src/components/home/placeholder-content.ts`.
+The Contentful integration was removed along with the team section. Copy shared between sections
+lives in `src/components/home/static-data.ts` and `src/components/home/placeholder-content.ts`;
+copy used by a single section is declared in that section's own file.
 
 ## Development
 

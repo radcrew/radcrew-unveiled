@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 import { Button } from "@components/ui/button";
-import { Magnetic } from "@components/motion/Magnetic";
 import { SplitText } from "@components/motion/SplitText";
 import { AnimatedCounter } from "../AnimatedCounter";
 import { Grain } from "../Grain";
+import { HeroShader } from "../HeroShader";
 import { fadeIn, staggerContainer } from "../motion";
 
 type HeroProps = {
@@ -34,7 +34,8 @@ export const Hero = ({ onNavigate }: HeroProps) => {
     <section className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-foreground px-6 text-background antialiased lg:px-12">
       <div aria-hidden="true" className="absolute inset-0 z-0">
         {/* Warm bloom behind the headline, so the type sits in light rather than
-            on a flat rectangle. */}
+            on a flat rectangle. Also the fallback the shader above it composites
+            over, and all that is left when WebGL is unavailable. */}
         <div
           className="absolute inset-0"
           style={{
@@ -42,6 +43,9 @@ export const Hero = ({ onNavigate }: HeroProps) => {
               "radial-gradient(120% 90% at 12% 28%, hsl(38 60% 55% / 0.16) 0%, hsl(38 60% 55% / 0.05) 34%, transparent 68%)",
           }}
         />
+        <HeroShader />
+        {/* Above the shader, so the grain sits on the moving field the same way
+            it sits on every other dark surface. */}
         <Grain />
         {/* Settles the foot of the section into the band and the page below it. */}
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-foreground to-transparent" />
@@ -62,6 +66,7 @@ export const Hero = ({ onNavigate }: HeroProps) => {
           <span className="text-xs font-light uppercase tracking-[0.28em] text-primary-on-dark sm:text-sm">
             Hire one of us, not a company
           </span>
+          <span aria-hidden="true" className="h-px w-12 shrink-0 bg-primary-on-dark" />
         </motion.p>
 
         {/* Full width rather than a column, so the display face can run to the
@@ -82,29 +87,33 @@ export const Hero = ({ onNavigate }: HeroProps) => {
           </motion.p>
 
           <motion.div variants={fadeIn} className="flex shrink-0 flex-col gap-4 sm:flex-row">
-            <Magnetic>
-              {/* Cream on dark is the highest-contrast pairing available here, and
-                  it reads as the primary action without relying on the gold. */}
-              <Button
-                type="button"
-                onClick={() => onNavigate("portfolio")}
-                className="h-auto w-full rounded-none bg-background px-10 py-6 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90 md:py-7"
-                data-testid="hero-cta-work"
-              >
-                View Selected Work
-              </Button>
-            </Magnetic>
-            <Magnetic>
-              <Button
-                type="button"
-                onClick={() => onNavigate("contact")}
-                variant="outline"
-                className="h-auto w-full rounded-none border-background/30 bg-transparent px-10 py-6 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground md:py-7"
-                data-testid="hero-cta-contact"
-              >
-                Start a Project
-              </Button>
-            </Magnetic>
+            {/* Cream on dark is the highest-contrast pairing available here, and
+                it reads as the primary action without relying on the gold. */}
+            <Button
+              type="button"
+              onClick={() => onNavigate("portfolio")}
+              // Height is set rather than derived from padding: the outline
+              // variant next to this one carries a 1px border and this one does
+              // not, which made the pair 76px and 78px tall, aligned at the top
+              // and out by 2px at the bottom.
+              //
+              // `sm:w-auto` matters now that these are direct flex children: the
+              // wrapper they used to sit in sized itself to their content, so
+              // `w-full` alone would stretch each to the full row.
+              className="h-14 w-full rounded-full bg-background px-10 text-sm font-light uppercase tracking-widest text-foreground hover:bg-background/90 sm:w-auto"
+              data-testid="hero-cta-work"
+            >
+              View Selected Work
+            </Button>
+            <Button
+              type="button"
+              onClick={() => onNavigate("contact")}
+              variant="outline"
+              className="h-14 w-full rounded-full border-background/30 bg-transparent px-10 text-sm font-light uppercase tracking-widest text-background hover:bg-background hover:!text-foreground sm:w-auto"
+              data-testid="hero-cta-contact"
+            >
+              Start a Project
+            </Button>
           </motion.div>
         </div>
       </motion.div>

@@ -7,14 +7,14 @@ import { TooltipProvider } from "@components/ui/tooltip";
 import { ChatWidget } from "@components/chat-widget";
 import { BackToTop } from "@components/BackToTop";
 import { ScrollProgress } from "@components/motion/ScrollProgress";
-import Index from "./pages/Index.tsx";
-import JournalIndex from "./pages/JournalIndex.tsx";
-import JournalPost from "./pages/JournalPost.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { Index } from "./pages/Index.tsx";
+import { JournalIndex } from "./pages/JournalIndex.tsx";
+import { JournalPost } from "./pages/JournalPost.tsx";
+import { NotFound } from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+export const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -35,5 +35,3 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
-export default App;
