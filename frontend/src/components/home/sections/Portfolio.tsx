@@ -173,7 +173,10 @@ const PinnedCard = ({ project, index, count, progress }: PinnedCardProps) => {
   return (
     <motion.article
       style={{ rotateY, scale, width: `${CARD_VW}vw` }}
-      className="group flex h-[74vh] shrink-0 flex-col overflow-hidden border border-border bg-card shadow-sm"
+      // `h-full` rather than a fixed `74vh`: the card now shares the pinned
+      // screen with the heading, so its height is whatever the track is given
+      // once the heading and padding are taken out.
+      className="group flex h-full shrink-0 flex-col overflow-hidden border border-border bg-card shadow-sm"
     >
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <ProjectMedia project={project} />
@@ -195,6 +198,23 @@ const PinnedCard = ({ project, index, count, progress }: PinnedCardProps) => {
 };
 
 /**
+ * Shared so the pinned and stacked layouts cannot drift apart. The pinned one
+ * renders it *inside* the sticky child rather than above it, which is what lets
+ * a single screen hold the heading and a whole card at once.
+ */
+const SectionHeading = ({ className = "" }: { className?: string }) => (
+  <motion.div
+    initial="hidden"
+    whileInView="visible"
+    variants={maskWipe}
+    viewport={{ once: true }}
+    className={`mx-auto flex w-full max-w-7xl flex-col items-baseline justify-between gap-8 border-b border-border px-6 pb-8 md:flex-row lg:px-12 ${className}`}
+  >
+    <h2 className="font-serif text-5xl text-foreground md:text-7xl">Selected Work</h2>
+  </motion.div>
+);
+
+/**
  * The pinned variant. The outer element is tall; the inner one sticks to the top
  * of the viewport for the whole of that height, and the track inside it is
  * translated horizontally by how far through the tall element the page has
@@ -214,29 +234,34 @@ const PinnedProjects = () => {
     <div ref={pinRef} className="relative" style={{ height: `${featuredProjects.length * 100}vh` }}>
       <div
         // Padded by the header height rather than centred on the raw viewport:
-        // the nav is fixed and translucent, so a card centred on the full height
-        // slides under it and shows through. At 1280x620 that left 16px of
-        // clearance. Centring inside the padded box scales the gap with the
-        // viewport instead of letting it collapse on short screens.
-        className="sticky top-0 flex h-[100dvh] items-center overflow-hidden pt-[var(--site-header-height)]"
+        // the nav is fixed and translucent, so content centred on the full
+        // height slides under it and shows through.
+        className="sticky top-0 flex h-[100dvh] flex-col overflow-hidden pb-10 pt-[var(--site-header-height)]"
         // Without a perspective on an ancestor, `rotateY` is an affine squash
         // rather than a rotation in depth.
         style={{ perspective: "1600px" }}
       >
-        <motion.div
-          style={{ x, gap: `${GAP_VW}vw`, paddingLeft: `${SIDE_VW}vw`, paddingRight: `${SIDE_VW}vw` }}
-          className="flex items-center"
-        >
-          {featuredProjects.map((project, index) => (
-            <PinnedCard
-              key={project.title}
-              project={project}
-              index={index}
-              count={featuredProjects.length}
-              progress={scrollYProgress}
-            />
-          ))}
-        </motion.div>
+        <SectionHeading className="shrink-0" />
+
+        {/* `min-h-0` so this can actually shrink: a flex child defaults to
+            min-height auto and would otherwise refuse to go below its content,
+            pushing the track past the bottom of the pinned viewport. */}
+        <div className="flex min-h-0 flex-1 items-center pt-10">
+          <motion.div
+            style={{ x, gap: `${GAP_VW}vw`, paddingLeft: `${SIDE_VW}vw`, paddingRight: `${SIDE_VW}vw` }}
+            className="flex h-full items-center"
+          >
+            {featuredProjects.map((project, index) => (
+              <PinnedCard
+                key={project.title}
+                project={project}
+                index={index}
+                count={featuredProjects.length}
+                progress={scrollYProgress}
+              />
+            ))}
+          </motion.div>
+        </div>
       </div>
     </div>
   );
@@ -302,23 +327,28 @@ export const Portfolio = () => {
   // least two of them to divide.
   const pinned = !isMobile && !reduced && featuredProjects.length > 1;
 
+  if (pinned) {
+    return (
+      <section
+        id="portfolio"
+        className="border-t border-border bg-background"
+        // Negative, to cancel `scroll-padding-top` for this section alone.
+        // Everywhere else that padding is what stops a section landing under the
+        // nav. Here it stopped the landing 6.5rem short of the point where the
+        // sticky child pins, and until it pins the first card sits half below
+        // the fold. The sticky child carries the same measurement as its own top
+        // padding, so the nav is still cleared once the track is engaged.
+        style={{ scrollMarginTop: "calc(-1 * var(--site-header-height))" }}
+      >
+        <PinnedProjects />
+      </section>
+    );
+  }
+
   return (
     <section id="portfolio" className="border-t border-border bg-background py-20 md:py-32">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        variants={maskWipe}
-        viewport={{ once: true }}
-        // Tighter than the other section headings on purpose: what follows is a
-        // pinned region whose first card is already centred in the viewport, so
-        // the heading's own bottom margin stacks on top of that empty band
-        // rather than sitting next to content the way it does elsewhere.
-        className="mx-auto mb-10 flex max-w-7xl flex-col items-baseline justify-between gap-8 border-b border-border px-6 pb-8 md:flex-row lg:px-12"
-      >
-        <h2 className="font-serif text-5xl text-foreground md:text-7xl">Selected Work</h2>
-      </motion.div>
-
-      {pinned ? <PinnedProjects /> : <StackedProjects />}
+      <SectionHeading className="mb-10" />
+      <StackedProjects />
     </section>
   );
 };
