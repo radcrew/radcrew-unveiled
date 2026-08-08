@@ -65,7 +65,7 @@ const ProjectCarousel = ({ title, images }: ProjectCarouselProps) => {
               alt={`${title} — screen ${idx + 1}`}
               loading="lazy"
               decoding="async"
-              className="absolute inset-0 h-full w-full object-cover opacity-90 transition-opacity duration-1000 group-hover:opacity-100"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </CarouselItem>
         ))}
@@ -109,7 +109,7 @@ const ProjectMedia = ({ project }: { project: FeaturedProject }) => {
         alt={project.title}
         loading="lazy"
         decoding="async"
-        className="h-full w-full object-cover opacity-90 transition-transform duration-1000 group-hover:scale-105 group-hover:opacity-100"
+        className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
       />
     );
   }
@@ -165,16 +165,18 @@ const PinnedCard = ({ project, index, count, progress }: PinnedCardProps) => {
   // side and is square to it only as it passes through.
   const rotateY = useCentreRamp(progress, centre, spread, [14, 0, -14]);
   const scale = useCentreRamp(progress, centre, spread, [0.9, 1, 0.9]);
-  const opacity = useCentreRamp(progress, centre, spread, [0.45, 1, 0.45]);
 
+  // Depth is carried by the turn and the scale alone. There was an opacity ramp
+  // here too, fading off-centre cards to 0.45, which compounded with the image's
+  // own dimming to hold the screenshots near half strength and made them read as
+  // disabled rather than as further away.
   return (
     <motion.article
-      style={{ rotateY, scale, opacity, width: `${CARD_VW}vw` }}
+      style={{ rotateY, scale, width: `${CARD_VW}vw` }}
       className="group flex h-[74vh] shrink-0 flex-col overflow-hidden border border-border bg-card shadow-sm"
     >
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <ProjectMedia project={project} />
-        <div className="pointer-events-none absolute inset-0 z-10 bg-primary/5 mix-blend-multiply transition-colors duration-700 group-hover:bg-transparent" />
       </div>
 
       <div className="shrink-0 border-t border-border p-6 md:p-8">
@@ -211,7 +213,12 @@ const PinnedProjects = () => {
     // positioned.
     <div ref={pinRef} className="relative" style={{ height: `${featuredProjects.length * 100}vh` }}>
       <div
-        className="sticky top-0 flex h-[100dvh] items-center overflow-hidden"
+        // Padded by the header height rather than centred on the raw viewport:
+        // the nav is fixed and translucent, so a card centred on the full height
+        // slides under it and shows through. At 1280x620 that left 16px of
+        // clearance. Centring inside the padded box scales the gap with the
+        // viewport instead of letting it collapse on short screens.
+        className="sticky top-0 flex h-[100dvh] items-center overflow-hidden pt-[var(--site-header-height)]"
         // Without a perspective on an ancestor, `rotateY` is an affine squash
         // rather than a rotation in depth.
         style={{ perspective: "1600px" }}
@@ -282,8 +289,7 @@ const StackedProjects = () => (
           className="relative aspect-[2/1] overflow-hidden border border-border bg-card shadow-sm"
         >
           <ProjectMedia project={project} />
-          <div className="pointer-events-none absolute inset-0 z-10 bg-primary/5 mix-blend-multiply transition-colors duration-700 group-hover:bg-transparent" />
-        </motion.div>
+          </motion.div>
       </motion.div>
     ))}
   </div>

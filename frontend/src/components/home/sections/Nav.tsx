@@ -8,6 +8,7 @@ import { announceOverlayOpened, useCloseOnOtherOverlayOpen } from "@/lib/overlay
 
 type NavProps = {
   isScrolled: boolean;
+  isHidden: boolean;
   activeSection: string;
   onNavigate: (sectionId: string) => void;
 };
@@ -22,7 +23,7 @@ const navLinks = [
 const focusRingClassName =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
+export const Nav = ({ isScrolled, isHidden, activeSection, onNavigate }: NavProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigatingRef = useRef(false);
   const reduced = useReducedMotion();
@@ -55,10 +56,15 @@ export const Nav = ({ isScrolled, activeSection, onNavigate }: NavProps) => {
     // measure as every section below. Total occupied height is the 16px offset
     // plus the ~64px pill, which is the 5rem `--site-header-height` that
     // `scroll-padding-top` already assumes; leave both in step.
+    // Hidden by translating clear of the top edge rather than by unmounting, so
+    // the bar keeps its layout box and slides back rather than reappearing. It
+    // stays put while the mobile sheet is open, since that sheet is anchored to
+    // it, and `focus-within` overrides the hide so tabbing into the bar cannot
+    // move focus to something off-screen.
     <nav
-      className={`fixed left-0 right-0 z-50 px-4 transition-all duration-500 lg:px-8 ${
+      className={`fixed left-0 right-0 z-50 px-4 transition-all duration-500 focus-within:translate-y-0 lg:px-8 ${
         isScrolled ? "top-2" : "top-4"
-      }`}
+      } ${isHidden && !mobileOpen ? "-translate-y-[calc(100%+1.5rem)]" : "translate-y-0"}`}
     >
       <div
         className={`mx-auto flex max-w-7xl items-center justify-between gap-6 rounded-full border px-5 py-3 backdrop-blur-xl transition-colors duration-500 ${
