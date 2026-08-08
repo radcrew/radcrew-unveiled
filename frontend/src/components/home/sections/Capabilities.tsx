@@ -59,7 +59,16 @@ const cardClassName =
 
 export const Capabilities = ({ onNavigate }: CapabilitiesProps) => {
   return (
-    <section id="services" className="relative border-t border-border bg-background px-6 py-20 md:py-32 lg:px-12">
+    // The negative scroll margin cancels this section's own top padding for
+    // anchor navigation only. Without it the anchor lands on the padding box,
+    // so clicking Services put 128px of empty space under the nav, pushed the
+    // heading 153px down, and left a sliver of the previous section showing
+    // above it. Matched to `py-20 md:py-32` at both breakpoints, which lands
+    // the heading at the same height the pinned Work section uses.
+    <section
+      id="services"
+      className="relative -scroll-mt-20 border-t border-border bg-background px-6 py-20 md:-scroll-mt-32 md:py-32 lg:px-12"
+    >
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial="hidden"

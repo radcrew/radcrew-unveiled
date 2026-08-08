@@ -35,7 +35,9 @@ const phaseContainerVariants = (delay: number): Variants => ({
 
 export const Process = () => {
   return (
-    <section id="process" className="bg-background px-6 py-20 md:py-32 lg:px-12">
+    // Negative scroll margin matched to this section's own top padding, so the
+    // anchor lands on the heading rather than on the padding above it.
+    <section id="process" className="-scroll-mt-20 bg-background px-6 py-20 md:-scroll-mt-32 md:py-32 lg:px-12">
       <div className="mx-auto max-w-7xl">
         <motion.div initial="hidden" whileInView="visible" variants={maskWipe} viewport={{ once: true }} className="mb-24">
           <h2 className="max-w-4xl font-serif text-5xl leading-tight text-foreground md:text-7xl">
